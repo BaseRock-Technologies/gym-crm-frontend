@@ -28,6 +28,18 @@ export default {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
   			},
+  			tertriary: {
+  				DEFAULT: 'hsl(var(--tertriary))',
+  				foreground: 'hsl(var(--tertriary-foreground))'
+  			},
+  			"helper-primary": {
+  				DEFAULT: 'hsl(var(--helper-primary))',
+  				foreground: 'hsl(var(--helper-primary-foreground))'
+  			},
+  			"helper-secondary": {
+  				DEFAULT: 'hsl(var(--helper-secondary))',
+  				foreground: 'hsl(var(--helper-secondary-foreground))'
+  			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
