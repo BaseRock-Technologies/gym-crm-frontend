@@ -10,6 +10,8 @@ import Image from "next/image";
 
 import bannerImage from "@/public/assets/images/login-banner.jpg";
 import { useRouter } from "next/navigation";
+import { post } from "@/lib/helper/steroid";
+import { backendApiPath } from "@/env";
 
 export default function SignInForm() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -55,9 +57,14 @@ export default function SignInForm() {
 
     // If no errors, proceed with form submission
     if (!usernameError && !passwordError) {
-      console.log("Form submitted with:", { userName, password });
-      router.push("/dashboard");
-      resetErrorStates();
+      const data = { userName, password };
+      console.log("Form submitted with:", data);
+      const res = await post(data, "auth/signin");
+      console.log(res);
+      if (res && res.status === "success") {
+        resetErrorStates();
+        router.push("/dashboard");
+      }
     }
   };
 
