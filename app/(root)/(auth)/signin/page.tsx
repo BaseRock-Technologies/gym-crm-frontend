@@ -11,7 +11,8 @@ import Image from "next/image";
 import bannerImage from "@/public/assets/images/login-banner.jpg";
 import { useRouter } from "next/navigation";
 import { post } from "@/lib/helper/steroid";
-import { backendApiPath } from "@/env";
+import { SigninResponse } from "@/lib/helper/interface";
+import { useAuth } from "@/lib/context/authContext";
 
 export default function SignInForm() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -23,6 +24,8 @@ export default function SignInForm() {
   const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const router = useRouter();
+
+  const { setUser } = useAuth();
 
   // Reset error states
   const resetErrorStates = () => {
@@ -58,11 +61,11 @@ export default function SignInForm() {
     // If no errors, proceed with form submission
     if (!usernameError && !passwordError) {
       const data = { userName, password };
-      console.log("Form submitted with:", data);
-      const res = await post(data, "auth/signin");
-      console.log(res);
+      const res: SigninResponse = await post(data, "auth/signin");
+
       if (res && res.status === "success") {
         resetErrorStates();
+        setUser({ ...data, token: res.token });
         router.push("/dashboard");
       }
     }
