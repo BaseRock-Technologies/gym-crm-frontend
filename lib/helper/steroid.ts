@@ -1,29 +1,28 @@
 import { backendApiPath } from "@/env";
+import Cookies from "js-cookie";
+import { showToast } from "./toast";
+
 
 type customObject = { [key: string]: any };
 
 
-const getSession = (key: string): string | null => localStorage.getItem(key);
-
-const setSession = (key: string, value: string) => localStorage.setItem(key, value);
-
 const authTokenAppend = (data: customObject) => {
-  const token = getSession('authtoken');
+  const userData = Cookies.get('user');
   const newData = { ...data };
-
-  if (!('authtoken' in newData) && token) {
-    newData.authtoken = token;
-  } else if ('authtoken' in newData) {
-    setSession('authtoken', newData.authtoken);
+  if (userData) {
+    const { authToken } = JSON.parse(userData)
+    if (!('authtoken' in newData) && authToken) {
+      newData.authToken = authToken;
+    } 
+    return newData;
   }
-
-  return newData;
+  // newData.authToken = null;
+  return data;
 };
 
 const post = async (postData: customObject, apiPath: string, validateResponse: boolean = true) => {
   try {
       const jsonData = authTokenAppend(postData);
-      console.log(backendApiPath);
 
       const response = await fetch(`${backendApiPath}/${apiPath}`, {
           method: 'POST',
@@ -35,7 +34,7 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
 
       if (!response.ok) {
           if (response.status === 401) {
-              localStorage.clear();
+              Cookies.remove('user');
               setTimeout(() => {
                   window.location.href = "/signin";
               }, 6000);
@@ -46,9 +45,9 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
 
       const responseData = await response.json();
 
-      if (validateResponse && responseData.message === 'access_denied') {
-          localStorage.clear();
-          throw new Error('Access denied');
+      if (validateResponse && responseData.status === 'unauthorized') {
+          Cookies.remove('user');
+          showToast("error", "Access Denied");
       }
 
       return responseData;
@@ -59,7 +58,5 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
 
 
 export {
-  getSession,
-  setSession,
   post,
 }

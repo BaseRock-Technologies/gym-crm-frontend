@@ -18,6 +18,7 @@ helper-secondary - #4F3187
 @layer base {
   :root {
     --background: 0 0% 3.9%;
+    --backgroundOverlay: 0, 0, 0;
     --foreground: 261 50% 13%;
 
     --card: 0 0% 3.9%;
