@@ -66,7 +66,7 @@ const CalendarInput = forwardRef<CalendarInputRef, CalendarInputProps>(
             <Button
               variant={"outline"}
               className={cn(
-                "w-full pl-3 text-left font-normal hover:bg-transparent",
+                "w-full pl-3 text-left font-normal hover:bg-background/60",
                 !date && "text-muted-foreground",
                 buttonClassName
               )}

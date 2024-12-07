@@ -23,7 +23,7 @@ export default function RootLayout({
         <body className={"font-mono antialiased"}>
           <SidebarProvider>
             <AppSidebar />
-            <main className="overflow-hidden">
+            <main className="overflow-hidden bg-backgroundSupport">
               <BreadCrumbs />
               {children}
               <ToastContainer limit={3} stacked />
