@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import BreadCrumbs from "@/components/BreadCrumbs";
 
 export const metadata: Metadata = {
   title: "Gym Management",
@@ -19,14 +20,11 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="en">
-        <body
-          // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          className={"font-mono antialiased"}
-        >
+        <body className={"font-mono antialiased"}>
           <SidebarProvider>
             <AppSidebar />
-            <main>
-              <SidebarTrigger />
+            <main className="overflow-hidden">
+              <BreadCrumbs />
               {children}
               <ToastContainer limit={3} stacked />
             </main>
