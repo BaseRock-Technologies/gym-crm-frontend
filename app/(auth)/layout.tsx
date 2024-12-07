@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
+import "@/app/globals.css";
 import { AuthProvider } from "@/lib/context/authContext";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
 
 export const metadata: Metadata = {
   title: "Gym Management",
@@ -23,13 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <AuthProvider>
-      <html lang="en">
+      <html lang="en" className="overflow-hidden">
         <body
           // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           className={"font-mono antialiased"}
         >
           {children}
-          <ToastContainer limit={3} stacked />
+          <ToastContainer />
         </body>
       </html>
     </AuthProvider>

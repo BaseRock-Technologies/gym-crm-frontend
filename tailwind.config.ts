@@ -11,7 +11,7 @@ export default {
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
-			backgroudOverlay: 'rgba(var(--backgroundOverlay), 0.5)',
+  			backgroudOverlay: 'rgba(var(--backgroundOverlay), 0.5)',
   			foreground: 'hsl(var(--foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
@@ -33,11 +33,11 @@ export default {
   				DEFAULT: 'hsl(var(--tertriary))',
   				foreground: 'hsl(var(--tertriary-foreground))'
   			},
-  			"helper-primary": {
+  			'helper-primary': {
   				DEFAULT: 'hsl(var(--helper-primary))',
   				foreground: 'hsl(var(--helper-primary-foreground))'
   			},
-  			"helper-secondary": {
+  			'helper-secondary': {
   				DEFAULT: 'hsl(var(--helper-secondary))',
   				foreground: 'hsl(var(--helper-secondary-foreground))'
   			},
@@ -62,6 +62,16 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar-background))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				primary: 'hsl(var(--sidebar-primary))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+  				border: 'hsl(var(--sidebar-border))',
+  				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
   		borderRadius: {
