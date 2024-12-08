@@ -3,9 +3,9 @@ import "@/app/globals.css";
 import { AuthProvider } from "@/lib/context/authContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/ReactToastify.min.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import BreadCrumbs from "@/components/BreadCrumbs";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/common/app-sidebar";
+import BreadCrumbs from "@/components/common/BreadCrumbs";
 
 export const metadata: Metadata = {
   title: "Gym Management",
@@ -23,10 +23,12 @@ export default function RootLayout({
         <body className={"font-mono antialiased"}>
           <SidebarProvider>
             <AppSidebar />
-            <main className="overflow-hidden bg-backgroundSupport">
+            <main className="relative w-full max-h-screen overflow-hidden bg-backgroundSupport">
               <BreadCrumbs />
-              {children}
-              <ToastContainer limit={3} stacked />
+              <div className="relative pt-12 w-full h-full">
+                {children}
+                <ToastContainer limit={3} stacked />
+              </div>
             </main>
           </SidebarProvider>
         </body>

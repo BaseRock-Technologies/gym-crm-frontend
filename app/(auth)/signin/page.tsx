@@ -5,25 +5,22 @@ import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 
 import bannerImage from "@/public/assets/images/login-banner.jpg";
 import { useRouter } from "next/navigation";
 import { post } from "@/lib/helper/steroid";
-import { SigninResponse } from "@/lib/helper/interface";
+import { SigninResponse } from "@/types/response";
 import { useAuth } from "@/lib/context/authContext";
 import Cookies from "js-cookie";
 import { showToast } from "@/lib/helper/toast";
-import Spinner from "@/components/Images/Spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function SignInForm() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-
-  const [rememberMe, setRememberMe] = useState(false);
 
   const userNameRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
@@ -100,7 +97,7 @@ export default function SignInForm() {
   return (
     <div className="relative">
       {loading && (
-        <div className="absolute top-0 left-0 w-full min-h-screen z-50 bg-backgroudOverlay flex justify-center items-center">
+        <div className="absolute  top-0 left-0 w-full min-h-screen z-50 bg-backgroudOverlay flex justify-center items-center">
           <Spinner />
         </div>
       )}
@@ -156,21 +153,6 @@ export default function SignInForm() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) =>
-                      setRememberMe(checked as boolean)
-                    }
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm text-gray-500 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remember for 30 days
-                  </label>
-                </div>
                 <Link
                   href="/forgot-password"
                   className="text-sm text-helper-primary"

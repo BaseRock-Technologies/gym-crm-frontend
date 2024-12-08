@@ -30,7 +30,7 @@ import {
   CollapsibleTrigger,
   Collapsible,
   CollapsibleContent,
-} from "./ui/collapsible";
+} from "../ui/collapsible";
 import { useAuth } from "@/lib/context/authContext";
 
 // Menu items.
@@ -153,7 +153,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <User2 /> {!loading && user.userName}
+              <User2 /> {!loading && user && user.userName}
               <CircleArrowOutUpRight className="relative flex justify-center items-center w-6 h-6 ml-auto text-primary" />
             </SidebarMenuButton>
           </SidebarMenuItem>

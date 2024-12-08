@@ -1,195 +1,94 @@
 "use client";
+import WithAuth from "@/lib/helper/withAuth";
 
-import { useRef } from "react";
-import { StatCard } from "@/components/StatCard";
-import { Button } from "@/components/ui/button";
-import CalendarInput, { CalendarInputRef } from "@/components/CalendarInput";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import QuickManage from "@/components/dashboard/QuickManage";
+import Temp from "@/components/dashboard/Temp";
 
-import {
-  Activity,
-  Users,
-  Coins,
-  DollarSign,
-  MessageSquare,
-  Radio,
-  MessageCircle,
-  Users2,
-  Dumbbell,
-  UserCheck,
-  UserCog,
-  UsersRound,
-} from "lucide-react";
-import { QuickNavCard } from "@/components/QuickNavCard";
-
-export default function DashboardPage() {
-  const calendarFromRef = useRef<CalendarInputRef>(null);
-  const calendarToRef = useRef<CalendarInputRef>(null);
-
+const DashboardPage = () => {
   return (
-    <div className="flex-1 p-8 space-y-6">
-      <div>
-        <div className="flex items-center justify-between">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold text-primary">
-            <Activity className="h-6 w-6 text-primary" />
-            Summary Statistics
-          </h1>
-          <div className="flex justify-end gap-4">
-            <CalendarInput
-              label="from"
-              ref={calendarFromRef}
-              placeholder="from"
-              defaultToToday={true}
-            />
-            <CalendarInput
-              label="to"
-              ref={calendarToRef}
-              placeholder="to"
-              defaultToToday={true}
-            />
-            <div className="relative flex justify-center items-end">
-              <Button className="bg-primary hover:bg-primary/90 outline-none border-none">
-                APPLY
-              </Button>
-            </div>
-          </div>
+    <div className="relative w-full h-full space-y-12 px-2 py-8">
+      <Tabs
+        defaultValue="follow-ups"
+        className="relative w-full h-full overflow-hidden"
+      >
+        <div className="relative w-full">
+          <TabsList className="relative w-full flex justify-start items-center gap-5 overflow-x-auto scrollbar-none">
+            <TabsTrigger value="quick-manage">Quick Manage</TabsTrigger>
+            <TabsTrigger value="follow-ups">Follow-Ups</TabsTrigger>
+            <TabsTrigger value="pending-inquiries">
+              Pending Inquiries
+            </TabsTrigger>
+            <TabsTrigger value="pending-payments">Pending Payments</TabsTrigger>
+            <TabsTrigger value="upcoming-renewals">
+              Upcoming Renewals
+            </TabsTrigger>
+            <TabsTrigger value="inconsistant-clients">
+              Inconsistant Clients
+            </TabsTrigger>
+            <TabsTrigger value="birthdays">Birthdays</TabsTrigger>
+            <TabsTrigger value="anniversary">Anniversary</TabsTrigger>
+            <TabsTrigger value="today-schedule">Today's Schedule</TabsTrigger>
+          </TabsList>
+          <div className="absolute bottom-0 w-full h-[2px] bg-gray-100 z-0"></div>
         </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <StatCard
-          title="New clients"
-          value="0"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <StatCard
-          title="Total collection"
-          value="0"
-          icon={Coins}
-          iconColor="text-purple-500"
-          bgColor="bg-purple-100"
-        />
-        <StatCard
-          title="Total Expenses"
-          value="0"
-          icon={DollarSign}
-          iconColor="text-pink-500"
-          bgColor="bg-pink-100"
-        />
-        <StatCard
-          title="Total PT Collection"
-          value="0"
-          icon={Coins}
-          iconColor="text-yellow-500"
-          bgColor="bg-yellow-100"
-        />
-        <StatCard
-          title="Profit/Loss"
-          value="0.00"
-          icon={DollarSign}
-          iconColor="text-red-500"
-          bgColor="bg-red-100"
-        />
-        <StatCard
-          title="Pending Inquiry(s)"
-          value="0"
-          icon={MessageSquare}
-          iconColor="text-orange-500"
-          bgColor="bg-orange-100"
-        />
-        <StatCard
-          title="Active clients"
-          value="191"
-          icon={Radio}
-          iconColor="text-emerald-500"
-          bgColor="bg-emerald-100"
-        />
-        <StatCard
-          title="Inactive clients"
-          value="106"
-          icon={MessageCircle}
-          iconColor="text-blue-500"
-          bgColor="bg-blue-100"
-        />
-        <StatCard
-          title="Booked PT Sessions"
-          value="0"
-          icon={Dumbbell}
-          iconColor="text-cyan-500"
-          bgColor="bg-cyan-100"
-        />
-        <StatCard
-          title="Follow-ups"
-          value="0"
-          icon={UserCheck}
-          iconColor="text-rose-500"
-          bgColor="bg-rose-100"
-        />
-        <StatCard
-          title="Today Present Client"
-          value="0"
-          icon={UserCog}
-          iconColor="text-indigo-500"
-          bgColor="bg-indigo-100"
-        />
-        <StatCard
-          title="Booked Group Class"
-          value="0"
-          icon={UsersRound}
-          iconColor="text-violet-500"
-          bgColor="bg-violet-100"
-        />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-        <QuickNavCard
-          title="New clients"
-          icon={Users}
-          iconColor="text-green-500"
-          bgColor="bg-green-100"
-        />
-      </div>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="quick-manage"
+        >
+          <QuickManage />
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="follow-ups"
+        >
+          <Temp />
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="pending-inquiries"
+        >
+          Pending Inquiries
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="pending-payments"
+        >
+          Pending Payments
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="upcoming-renewals"
+        >
+          Upcoming Renewals
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="inconsistant-clients"
+        >
+          Inconsistant Clients
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="birthdays"
+        >
+          Birthdays
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="anniversary"
+        >
+          Anniversary
+        </TabsContent>
+        <TabsContent
+          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          value="today-schedule"
+        >
+          Todays Schedule
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default WithAuth(DashboardPage);
