@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Dumbbell } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -15,6 +14,8 @@ import { useAuth } from "@/lib/context/authContext";
 import Cookies from "js-cookie";
 import { showToast } from "@/lib/helper/toast";
 import { Spinner } from "@/components/ui/spinner";
+import { InputWithError } from "@/components/ui/inputWithError";
+import SpinnerTick from "@/components/Images/SpinnerTick";
 
 export default function SignInForm() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export default function SignInForm() {
     <div className="relative">
       {loading && (
         <div className="absolute  top-0 left-0 w-full min-h-screen z-50 bg-backgroudOverlay flex justify-center items-center">
-          <Spinner />
+          <SpinnerTick />
         </div>
       )}
       <div className="relative w-full min-h-screen flex bg-gray-50">
@@ -134,7 +135,7 @@ export default function SignInForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
-                <Input
+                <InputWithError
                   name="username"
                   type="text"
                   placeholder="Username"
@@ -142,7 +143,7 @@ export default function SignInForm() {
                   errorMessage={usernameError}
                   ref={userNameRef}
                 />
-                <Input
+                <InputWithError
                   name="password"
                   type="password"
                   placeholder="Password"
@@ -152,12 +153,12 @@ export default function SignInForm() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-end">
                 <Link
                   href="/forgot-password"
                   className="text-sm text-helper-primary"
                 >
-                  Forgot password?
+                  Forgot password
                 </Link>
               </div>
 

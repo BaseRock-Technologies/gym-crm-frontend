@@ -1,6 +1,4 @@
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,6 +7,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FilterConfig } from "../types/table";
+import { AnimatedSearchInput } from "@/components/common/animatedSearchInput";
+import { DatePickerWithRange } from "./ui/date-range-picker";
 
 interface TableFiltersProps {
   filters: FilterConfig[];
@@ -21,7 +21,7 @@ export function TableFilters({
   filters,
   onFilterChange,
   onBulkAction,
-  searchableColumns,
+  searchableColumns = [],
 }: TableFiltersProps) {
   return (
     <div className="relative w-full flex justify-center items-center gap-4 ">
@@ -47,19 +47,18 @@ export function TableFilters({
             );
           case "search":
             return (
-              <div
+              <AnimatedSearchInput
                 key={filter.id}
-                className="flex w-full max-w-sm items-center space-x-2"
-              >
-                <Input
-                  placeholder={`Search ${
-                    searchableColumns ? searchableColumns.join(", ") : ""
-                  }...`}
-                  onChange={(e) => onFilterChange(filter.id, e.target.value)}
-                  className="h-9 bg-white"
-                  icon={Search}
-                />
-              </div>
+                searchableColumns={searchableColumns}
+                onSearch={(value) => onFilterChange(filter.id, value)}
+              />
+            );
+          case "date-range":
+            return (
+              <DatePickerWithRange
+                key={filter.id}
+                onValueChange={(value) => onFilterChange(filter.id, value)}
+              />
             );
           default:
             return null;

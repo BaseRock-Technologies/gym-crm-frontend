@@ -21,7 +21,7 @@ export function TableActions({ actions, row }: TableActionsProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="secondary"
-          className="h-8 w-24 bg-pink-500 hover:bg-pink-600 text-white"
+          className="h-8 w-24 bg-helper-secondary text-white"
         >
           ACTION
         </Button>

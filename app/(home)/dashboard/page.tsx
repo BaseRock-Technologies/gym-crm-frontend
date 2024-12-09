@@ -7,7 +7,7 @@ import Temp from "@/components/dashboard/Temp";
 
 const DashboardPage = () => {
   return (
-    <div className="relative w-full h-full space-y-12 px-2 py-8">
+    <div className="relative w-full h-full space-y-12 px-2 pt-8">
       <Tabs
         defaultValue="follow-ups"
         className="relative w-full h-full overflow-hidden"

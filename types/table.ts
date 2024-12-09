@@ -28,10 +28,14 @@ export interface BulkActionConfig {
 }
 
 export interface FilterConfig {
-  id: string
-  label: string
-  type: 'select' | 'date' | 'search'
-  options?: { label: string; value: string }[]
+  id: string;
+  label: string;
+  type: "select" | "search" | "date" | "date-range";
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+  options?: { label: string; value: string }[];
 }
 
 export interface TableState {

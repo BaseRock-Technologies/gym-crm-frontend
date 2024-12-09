@@ -62,14 +62,8 @@ export function DataTable({
   };
 
   return (
-    <div className="w-full relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
-          <Spinner />
-        </div>
-      )}
-
-      <div className="flex items-center py-4 px-4 gap-4">
+    <div className="w-full relative px-4">
+      <div className="flex items-center py-4 gap-4">
         <Select
           value={tableState.pageSize.toString()}
           onValueChange={(value) => {
@@ -79,7 +73,7 @@ export function DataTable({
             });
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Show entries" />
           </SelectTrigger>
           <SelectContent>
@@ -101,15 +95,12 @@ export function DataTable({
         />
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
                 <Checkbox
-                  checked={
-                    Object.values(selected).every(Boolean) && data.length > 0
-                  }
                   onCheckedChange={(checked: boolean) =>
                     handleSelectAll(checked)
                   }
@@ -122,67 +113,97 @@ export function DataTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
-              <TableRow
-                key={row.id}
-                onClick={() => handleSelectRow(row.id)}
-                className="cursor-pointer"
-              >
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selected[row.id] || false}
-                    onCheckedChange={() => handleSelectRow(row.id)}
-                  />
-                </TableCell>
-                {config.columns.map((column) => (
-                  <TableCell key={column.id}>
-                    {column.cell ? column.cell(row) : row[column.accessorKey]}
-                  </TableCell>
-                ))}
-                {config.actions && (
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <TableActions actions={config.actions} row={row} />
-                  </TableCell>
+            {!isLoading && (
+              <>
+                {data.length > 0 ? (
+                  data.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => handleSelectRow(row.id)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selected[row.id] || false}
+                          onCheckedChange={() => handleSelectRow(row.id)}
+                        />
+                      </TableCell>
+                      {config.columns.map((column) => (
+                        <TableCell key={column.id}>
+                          {column.cell
+                            ? column.cell(row)
+                            : row[column.accessorKey]}
+                        </TableCell>
+                      ))}
+                      {config.actions && (
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableActions actions={config.actions} row={row} />
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={
+                        config.columns.length + 1 + (config.actions ? 1 : 0)
+                      }
+                      className="h-24 text-center"
+                    >
+                      No data available
+                    </TableCell>
+                  </TableRow>
                 )}
-              </TableRow>
-            ))}
+              </>
+            )}
           </TableBody>
         </Table>
+        {isLoading && (
+          <div className="absolute min-h-96 inset-0 flex items-center justify-center z-50">
+            <Spinner />
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-between px-4 py-4">
-        <div className="text-sm text-muted-foreground">
-          Showing {(tableState.page - 1) * tableState.pageSize + 1} to{" "}
-          {Math.min(tableState.page * tableState.pageSize, total)} of {total}{" "}
-          entries
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="invert"
-            size="sm"
-            onClick={() => {
-              onStateChange({
-                page: tableState.page - 1,
-              });
-            }}
-            disabled={tableState.page === 1}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="invert"
-            size="sm"
-            onClick={() => {
-              onStateChange({
-                page: tableState.page + 1,
-              });
-            }}
-            disabled={tableState.page * tableState.pageSize >= total}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      {!isLoading && (
+        <>
+          {total > 0 && (
+            <div className="flex items-center justify-between  py-4">
+              <div className="text-sm text-primary">
+                Showing {(tableState.page - 1) * tableState.pageSize + 1} to{" "}
+                {Math.min(tableState.page * tableState.pageSize, total)} of{" "}
+                {total} entries
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="invert"
+                  size="sm"
+                  onClick={() => {
+                    onStateChange({
+                      page: tableState.page - 1,
+                    });
+                  }}
+                  disabled={tableState.page === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="invert"
+                  size="sm"
+                  onClick={() => {
+                    onStateChange({
+                      page: tableState.page + 1,
+                    });
+                  }}
+                  disabled={tableState.page * tableState.pageSize >= total}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

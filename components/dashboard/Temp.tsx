@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
+import { addDays } from "date-fns";
 
 // Example data and table configuration (unchanged)
 const mockData = Array.from({ length: 50 }, (_, i) => ({
@@ -71,13 +72,22 @@ const tableConfig: TableConfig = {
       label: "Search",
       type: "search",
     },
+    {
+      id: "date-range",
+      label: "Pick a date",
+      type: "date-range",
+      dateRange: {
+        from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        to: new Date(),
+      },
+    },
   ],
   searchableColumns: ["name", "contact", "representative"], // Specify which columns are searchable
 };
 
 export default function Page() {
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-5">
       <DataTableWrapper config={tableConfig} initialData={mockData} />
     </div>
   );
