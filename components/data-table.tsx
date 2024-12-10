@@ -124,7 +124,7 @@ export function DataTable({
               {config.columns.map((column) => (
                 <TableHead key={column.id}>{column.header}</TableHead>
               ))}
-              {config.actions && <TableHead>Actions</TableHead>}
+              {config.actions && <TableHead>Action</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>

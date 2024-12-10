@@ -1,12 +1,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  useState,
-  useDeferredValue,
-  useCallback,
-  useTransition,
-  useEffect,
-} from "react";
+import { useState, useDeferredValue, useCallback, useTransition } from "react";
 
 interface AnimatedSearchInputProps {
   searchableColumns: string[];

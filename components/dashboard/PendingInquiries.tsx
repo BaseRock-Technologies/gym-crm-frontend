@@ -1,40 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
-import { addDays } from "date-fns";
-import { Plus, Send } from "lucide-react";
+import { Send } from "lucide-react";
 
 // Example data and table configuration (unchanged)
-const mockData = Array.from({ length: 50 }, (_, i) => ({
-  id: i + 1,
-  name: `Client ${i + 1}`,
-  type: "Regular",
-  contact: `+1234567${i.toString().padStart(4, "0")}`,
-  followupDate: "2024-12-08",
-  representative: "Admin",
-  status: "Active",
-}));
+// const mockData = Array.from({ length: 50 }, (_, i) => ({
+//   id: i + 1,
+//   name: `Client ${i + 1}`,
+//   type: "Regular",
+//   contact: `+1234567${i.toString().padStart(4, "0")}`,
+//   followupDate: "2024-12-08",
+//   representative: "Admin",
+//   status: "Active",
+// }));
+const mockData: any[] = [];
 
 const tableConfig: TableConfig = {
   columns: [
-    { id: "type", header: "Type", accessorKey: "type" },
     { id: "name", header: "Name", accessorKey: "name" },
-    { id: "contact", header: "Contact", accessorKey: "contact" },
+    { id: "number", header: "Number", accessorKey: "number" },
+    { id: "for", header: "For", accessorKey: "for" },
     {
-      id: "followupDate",
-      header: "Followup date",
-      accessorKey: "followupDate",
+      id: "nextFollowUp",
+      header: "Next Follow-up",
+      accessorKey: "nextFollowUp",
     },
     { id: "representative", header: "Rep.", accessorKey: "representative" },
+    { id: "status", header: "Status", accessorKey: "status" },
   ],
   actions: [
-    {
-      id: "add-followup",
-      label: "Add Followup",
-      onClick: (row) => console.log("Add Followup", row),
-    },
     {
       id: "sms",
       label: "SMS",
@@ -57,9 +52,12 @@ const tableConfig: TableConfig = {
       label: "Select Type",
       type: "select",
       options: [
-        { label: "All types", value: "all" },
-        { label: "Regular", value: "regular" },
-        { label: "Premium", value: "premium" },
+        { label: "All", value: "all" },
+        { label: "Hot", value: "hot" },
+        { label: "Warm", value: "warm" },
+        { label: "Cold", value: "cold" },
+        { label: "Expected Amount", value: "expected-amount" },
+        { label: "Successfull Followup", value: "successfull-followup" },
       ],
     },
     {
@@ -71,6 +69,11 @@ const tableConfig: TableConfig = {
         to: new Date(),
       },
     },
+    {
+      id: "search",
+      label: "Search",
+      type: "search",
+    },
   ],
   bulkActions: [
     {
@@ -80,17 +83,11 @@ const tableConfig: TableConfig = {
       btnVariant: "default",
       onClick: (value) => console.log("SMS", value),
     },
-    {
-      id: "follow-up",
-      label: "Create Followup",
-      icon: Plus,
-      btnVariant: "default",
-      onClick: (value) => console.log("Followup", value),
-    },
   ],
+  searchableColumns: ["name", "number"],
 };
 
-export default function Page() {
+export default function PendingInquiries() {
   return (
     <div className="container mx-auto py-5">
       <DataTableWrapper config={tableConfig} initialData={mockData} />

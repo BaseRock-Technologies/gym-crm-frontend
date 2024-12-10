@@ -3,7 +3,13 @@ import WithAuth from "@/lib/helper/withAuth";
 
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import QuickManage from "@/components/dashboard/QuickManage";
-import Temp from "@/components/dashboard/Temp";
+import FollowUp from "@/components/dashboard/FollowUp";
+import PendingInquiries from "@/components/dashboard/PendingInquiries";
+import PendingPayments from "@/components/dashboard/PendingPayments";
+import UpcomingRenewals from "@/components/dashboard/UpcomingRenewals";
+import InconsistentClients from "@/components/dashboard/InconsistentClients";
+import Birthdays from "@/components/dashboard/Birthdays";
+import Anniversary from "@/components/dashboard/Anniversary";
 
 const DashboardPage = () => {
   return (
@@ -42,43 +48,43 @@ const DashboardPage = () => {
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="follow-ups"
         >
-          <Temp />
+          <FollowUp />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="pending-inquiries"
         >
-          Pending Inquiries
+          <PendingInquiries />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="pending-payments"
         >
-          Pending Payments
+          <PendingPayments />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="upcoming-renewals"
         >
-          Upcoming Renewals
+          <UpcomingRenewals />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="inconsistant-clients"
         >
-          Inconsistant Clients
+          <InconsistentClients />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="birthdays"
         >
-          Birthdays
+          <Birthdays />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
           value="anniversary"
         >
-          Anniversary
+          <Anniversary />
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
