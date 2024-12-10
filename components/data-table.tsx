@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TableFilters } from "./table-filters";
 import { TableActions } from "./table-actions";
-import { TableConfig, TableState } from "../types/table";
+import { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
 
 interface DataTableProps {
@@ -55,9 +55,23 @@ export function DataTable({
     }));
   };
 
-  const handleBulkAction = () => {
+  const handleBulkAction = (type: BulkActions) => {
     const selectedRows = data.filter((row) => selected[row.id]);
     // Handle bulk actions
+    switch (type) {
+      case "SMS":
+        console.log("sms");
+        break;
+      case "email":
+        console.log("email");
+      case "follow-up":
+        console.log("follow-up");
+      case "whatsapp":
+        console.log("whatsapp");
+        break;
+      default:
+        break;
+    }
     console.log("Selected rows:", selectedRows);
   };
 
@@ -73,7 +87,7 @@ export function DataTable({
             });
           }}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
             <SelectValue placeholder="Show entries" />
           </SelectTrigger>
           <SelectContent>
@@ -84,6 +98,7 @@ export function DataTable({
         </Select>
         <TableFilters
           filters={config.filters || []}
+          ctaActions={config.bulkActions || []}
           onFilterChange={(filterId, value) => {
             onStateChange({
               filters: { ...tableState.filters, [filterId]: value },

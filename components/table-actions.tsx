@@ -19,10 +19,7 @@ export function TableActions({ actions, row }: TableActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="secondary"
-          className="h-8 w-24 bg-helper-secondary text-white"
-        >
+        <Button variant="default" className="h-8 w-24">
           ACTION
         </Button>
       </DropdownMenuTrigger>

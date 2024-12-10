@@ -6,19 +6,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterConfig } from "../types/table";
+import { BulkActionConfig, BulkActions, FilterConfig } from "../types/table";
 import { AnimatedSearchInput } from "@/components/common/animatedSearchInput";
 import { DatePickerWithRange } from "./ui/date-range-picker";
 
 interface TableFiltersProps {
   filters: FilterConfig[];
+  ctaActions: BulkActionConfig[];
   onFilterChange: (filterId: string, value: any) => void;
-  onBulkAction: () => void;
+  onBulkAction: (type: BulkActions) => void;
   searchableColumns?: string[];
 }
 
 export function TableFilters({
   filters,
+  ctaActions,
   onFilterChange,
   onBulkAction,
   searchableColumns = [],
@@ -33,7 +35,7 @@ export function TableFilters({
                 key={filter.id}
                 onValueChange={(value) => onFilterChange(filter.id, value)}
               >
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
                   <SelectValue placeholder={filter.label} />
                 </SelectTrigger>
                 <SelectContent>
@@ -64,13 +66,19 @@ export function TableFilters({
             return null;
         }
       })}
-      <Button
-        variant="default"
-        className="ml-auto bg-green-600 hover:bg-green-700"
-        onClick={onBulkAction}
-      >
-        BULK SMS
-      </Button>
+      <div className="relative flex gap-4 justify-center items-center ml-auto">
+        {ctaActions.map((btn: BulkActionConfig) => (
+          <Button
+            key={btn.id}
+            variant={btn.btnVariant}
+            className="ml-auto"
+            onClick={() => onBulkAction(btn.id)}
+          >
+            {btn.icon && <btn.icon className="w-6 h-6 text-white" />}
+            {btn.label}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }

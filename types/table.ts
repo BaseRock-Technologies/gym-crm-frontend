@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react"
+
 export interface TableConfig {
   columns: ColumnDef[]
   actions?: ActionConfig[]
@@ -22,10 +24,15 @@ export interface ActionConfig {
 }
 
 export interface BulkActionConfig {
-  id: string
+  id: BulkActions
   label: string
+  icon?: LucideIcon
+  btnVariant: BulkActionsBtnVariant,
   onClick: (selectedRows: any[]) => void
 }
+
+export type BulkActions = "SMS" | "follow-up" | "whatsapp" | "email";
+export type BulkActionsBtnVariant = "default" | "whatsapp" | "secondary" | "email";
 
 export interface FilterConfig {
   id: string;

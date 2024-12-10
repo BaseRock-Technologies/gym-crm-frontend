@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { addDays } from "date-fns";
+import { Plus, Send } from "lucide-react";
 
 // Example data and table configuration (unchanged)
 const mockData = Array.from({ length: 50 }, (_, i) => ({
@@ -18,8 +19,8 @@ const mockData = Array.from({ length: 50 }, (_, i) => ({
 
 const tableConfig: TableConfig = {
   columns: [
-    { id: "name", header: "Name", accessorKey: "name" },
     { id: "type", header: "Type", accessorKey: "type" },
+    { id: "name", header: "Name", accessorKey: "name" },
     { id: "contact", header: "Contact", accessorKey: "contact" },
     {
       id: "followupDate",
@@ -27,23 +28,17 @@ const tableConfig: TableConfig = {
       accessorKey: "followupDate",
     },
     { id: "representative", header: "Rep.", accessorKey: "representative" },
-    { id: "status", header: "Status", accessorKey: "status" },
   ],
   actions: [
     {
-      id: "view",
-      label: "View bill",
-      onClick: (row) => console.log("View bill", row),
+      id: "add-followup",
+      label: "Add Followup",
+      onClick: (row) => console.log("Add Followup", row),
     },
     {
-      id: "renew",
-      label: "Renew bill",
-      onClick: (row) => console.log("Renew bill", row),
-    },
-    {
-      id: "freeze",
-      label: "Freeze membership",
-      onClick: (row) => console.log("Freeze membership", row),
+      id: "sms",
+      label: "SMS",
+      onClick: (row) => console.log("SMS", row),
     },
   ],
   filters: [
@@ -68,11 +63,6 @@ const tableConfig: TableConfig = {
       ],
     },
     {
-      id: "search",
-      label: "Search",
-      type: "search",
-    },
-    {
       id: "date-range",
       label: "Pick a date",
       type: "date-range",
@@ -82,7 +72,22 @@ const tableConfig: TableConfig = {
       },
     },
   ],
-  searchableColumns: ["name", "contact", "representative"], // Specify which columns are searchable
+  bulkActions: [
+    {
+      id: "SMS",
+      label: "Bulk SMS",
+      icon: Send,
+      btnVariant: "default",
+      onClick: (value) => console.log("SMS", value),
+    },
+    {
+      id: "follow-up",
+      label: "Create Followup",
+      icon: Plus,
+      btnVariant: "default",
+      onClick: (value) => console.log("Followup", value),
+    },
+  ],
 };
 
 export default function Page() {
