@@ -85,13 +85,13 @@ const formConfig: FormConfig = {
       name: "price",
       label: "Price",
       type: "decimal",
-      required: true,
       placeholder: "0.00",
     },
     {
       name: "discount",
       label: "Discount (%)",
       type: "decimal",
+      required: true,
       placeholder: "0.00",
     },
     {
@@ -113,12 +113,14 @@ const formConfig: FormConfig = {
       type: "select",
       allowAddCustomOption: true,
       addCustomOptionForm: ServiceSelectCustomAddOptionForm,
+      primaryFieldValue: "package-name",
     },
     {
       name: "trainer",
       label: "Select Trainer",
       type: "multi-select",
       placeholder: "Select Trainer",
+      required: true,
       multiSelectOptions: [
         {
           label: "Pro",

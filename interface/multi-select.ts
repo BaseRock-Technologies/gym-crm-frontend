@@ -88,7 +88,7 @@ interface MultiSelectProps
   asChild?: boolean;
 
   /**
-   * Additional class names to apply custom styles to the multi-select component.
+ * Additional class names to apply custom styles to the multi-select component.
    * Optional, can be used to add custom styles.
    */
   className?: string;

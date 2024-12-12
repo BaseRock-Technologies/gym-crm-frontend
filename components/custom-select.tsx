@@ -56,13 +56,18 @@ export function CustomSelect({
   const [triggerWidth, setTriggerWidth] = React.useState(0);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
+  const [dialogFormValues, setDialogFormVaulues] = React.useState<
+    Record<string, any>
+  >({});
+
   const handleAddCustomOption = () => {
-    if (customValue.trim()) {
-      onAddCustomOption?.(customValue);
-      onChange(customValue);
-      setCustomValue("");
-      setDialogOpen(false);
-    }
+    //   if (customValue.trim()) {
+    //     onAddCustomOption?.(customValue);
+    //     onChange(customValue);
+    //     setCustomValue("");
+    //     setDialogOpen(false);
+    //   }
+    console.log(dialogFormValues);
   };
 
   const selectedOptionLabel = React.useMemo(() => {
@@ -143,10 +148,14 @@ export function CustomSelect({
                           onChange={(e) => setCustomValue(e.target.value)}
                           placeholder="Enter custom value"
                         /> */}
-                        <DynamicForm config={addCustomOptionForm} />
-                        <DialogFooter>
+                        <DynamicForm
+                          submitBtnText="Add"
+                          storeFormValues={setDialogFormVaulues}
+                          config={addCustomOptionForm}
+                        />
+                        {/* <DialogFooter>
                           <Button onClick={handleAddCustomOption}>Add</Button>
-                        </DialogFooter>
+                        </DialogFooter> */}
                       </DialogContent>
                     </Dialog>
                   )}

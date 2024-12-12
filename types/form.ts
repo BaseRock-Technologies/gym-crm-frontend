@@ -41,12 +41,13 @@ export interface FormFieldBase {
 export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; // When true
   addCustomOptionForm: FormConfig; // Required
-
+  primaryFieldValue: string;
 }
 
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   allowAddCustomOption?: false; // Optional or false
   addCustomOptionForm?: never; // Not allowed
+  primaryFieldValue?: never;
 }
 
 export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;

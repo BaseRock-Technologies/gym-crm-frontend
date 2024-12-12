@@ -27,7 +27,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
 
-export function DynamicForm({ config }: { config: FormConfig }) {
+interface DynamicFormProps {
+  config: FormConfig;
+  storeFormValues?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  submitBtnText?: string;
+}
+
+export function DynamicForm({
+  config,
+  storeFormValues,
+  submitBtnText = "Submit",
+}: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, SelectOption[]>
   >({});
@@ -87,7 +97,7 @@ export function DynamicForm({ config }: { config: FormConfig }) {
           fieldSchema = z.preprocess(
             (val) => {
               if (typeof val === "string") {
-                return isNaN(Number(val)) ? undefined : Number(val);
+                return val.trim() === "" ? undefined : Number(val);
               }
               return val;
             },
@@ -96,8 +106,15 @@ export function DynamicForm({ config }: { config: FormConfig }) {
                 required_error: `${field.label} is required`,
                 invalid_type_error: `${field.label} must be a number`,
               })
+              .nullish()
               .superRefine((val, ctx) => {
-                if (field.validation) {
+                if (field.required && (val === undefined || val === null)) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `${field.label} is required`,
+                  });
+                }
+                if (field.validation && val) {
                   const { min, max, positiveValue } = field.validation;
                   if (min !== undefined && val < min) {
                     ctx.addIssue({
@@ -133,66 +150,128 @@ export function DynamicForm({ config }: { config: FormConfig }) {
           break;
         case "time":
           fieldSchema = z
-            .string({
-              required_error: `${field.label} is required`,
-              invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-            })
-            .refine(
-              (val) => {
-                if (!field.required && !val) return true;
-                return /^([1-9]|1[0-2]):00 (AM|PM)$/.test(val);
-              },
-              {
-                message: `Invalid ${field.label.toLowerCase()} format`,
-              }
-            );
-          break;
-        case "checkbox":
-          fieldSchema = z.preprocess(
-            (val) => {
+            .preprocess((val) => {
               if (typeof val === "string") {
-                return val === "true"
-                  ? true
-                  : val === "false"
-                  ? false
-                  : undefined;
+                return val.trim(); // Trim whitespace from the value
               }
               return val;
-            },
-            z.boolean({
-              required_error: `${field.label} is required`,
-              invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-            })
-          );
+            }, z.string())
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val) {
+                const isMatch = /^([1-9]|1[0-2]):00 (AM|PM)$/.test(val);
+                if (isMatch) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid ${field.label}`,
+                  });
+                }
+              }
+            });
+          break;
+        case "checkbox":
+          fieldSchema = z
+            .preprocess(
+              (val) => {
+                if (typeof val === "string") {
+                  return val === "true"
+                    ? true
+                    : val === "false"
+                    ? false
+                    : undefined;
+                }
+                return val;
+              },
+              z.boolean({
+                invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
+              })
+            )
+            .superRefine((val, ctx) => {
+              if (field.required && (val === undefined || val === null)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+            });
           break;
         case "date":
-          fieldSchema = z.preprocess(
-            (val) => {
+          fieldSchema = z
+            .preprocess((val) => {
               if (typeof val === "string") {
                 const date = new Date(val);
                 return isNaN(date.getTime()) ? undefined : date;
               }
               return val;
-            },
-            z.date({
-              required_error: `${field.label} is required`,
-              invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-            })
-          );
+            }, z.date())
+            .superRefine((val, ctx) => {
+              if (field.required && (val === undefined || val === null)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val) {
+                const isMatch = val instanceof Date && !isNaN(val.getTime());
+                if (isMatch) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid ${field.label}`,
+                  });
+                }
+              }
+            });
           break;
         case "select":
-          fieldSchema = z.preprocess(
-            (val) => {
-              if (typeof val !== "string" || val.trim() === "") {
-                return undefined;
+          fieldSchema = z
+            .preprocess((val) => {
+              if (typeof val === "string") {
+                return val.trim(); // Trim whitespace from the value
               }
               return val;
-            },
-            z.string({
-              required_error: `${field.label} is required`,
-              invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-            })
-          );
+            }, z.string())
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val) {
+                const isMatch = /^[a-zA-Z0-9\s]+$/.test(val);
+                if (isMatch) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid ${field.label}`,
+                  });
+                }
+              }
+            });
+          break;
+        case "multi-select":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (!Array.isArray(val) || val.length === 0) {
+                return undefined;
+              }
+              return val.filter(
+                (item) => typeof item === "string" && item.trim() !== ""
+              );
+            }, z.array(z.string()))
+            .superRefine((val, ctx) => {
+              // Check if the field is required and if there are no valid selections
+              if (field.required && (!val || val.length === 0)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+            });
           break;
         case "phone":
           fieldSchema = z.preprocess(
@@ -278,7 +357,6 @@ export function DynamicForm({ config }: { config: FormConfig }) {
           }
         }
       });
-
       return newValues;
     });
   };
@@ -287,6 +365,9 @@ export function DynamicForm({ config }: { config: FormConfig }) {
     console.log("Form submitted with values:", values);
     form.reset();
     setFormValues({});
+    if (storeFormValues && storeFormValues !== undefined) {
+      storeFormValues(values);
+    }
   };
 
   const handleAddCustomOption = (fieldName: string, value: string) => {
@@ -387,6 +468,18 @@ export function DynamicForm({ config }: { config: FormConfig }) {
                     handleFieldChange(field.name, value);
                   }}
                 />
+              ) : field.type === "number" ? (
+                <Input
+                  {...formField}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder={field.placeholder}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    formField.onChange(value);
+                    handleFieldChange(field.name, value);
+                  }}
+                />
               ) : field.type === "phone" ? (
                 <Input
                   {...formField}
@@ -421,10 +514,10 @@ export function DynamicForm({ config }: { config: FormConfig }) {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
+    <Card className="w-full max-w-2xl mx-auto border-none shadow-none">
+      {/* <CardHeader>
         <CardTitle>{config.title}</CardTitle>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -432,7 +525,7 @@ export function DynamicForm({ config }: { config: FormConfig }) {
               {config.fields.map(renderField)}
             </div>
             <Button type="submit" className="w-full">
-              Submit
+              {submitBtnText}
             </Button>
           </form>
         </Form>
