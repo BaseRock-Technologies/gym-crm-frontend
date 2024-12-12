@@ -8,13 +8,14 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SelectOption } from "../types/form";
+import { FormConfig, SelectOption } from "../types/form";
 import {
   Dialog,
   DialogContent,
@@ -24,29 +25,36 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { DynamicForm } from "./dynamic-form";
 
 interface CustomSelectProps {
+  fieldName: string;
   options?: SelectOption[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  allowCustomOption?: boolean;
+  allowAddCustomOption?: boolean;
+  addCustomOptionForm?: FormConfig;
   onAddCustomOption?: (value: string) => void;
   error?: string;
 }
 
 export function CustomSelect({
+  fieldName,
   options = [],
   value,
   onChange,
   placeholder = "Select an option",
-  allowCustomOption,
+  allowAddCustomOption,
+  addCustomOptionForm,
   onAddCustomOption,
   error,
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [customValue, setCustomValue] = React.useState("");
+  const [triggerWidth, setTriggerWidth] = React.useState(0);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleAddCustomOption = () => {
     if (customValue.trim()) {
@@ -62,11 +70,24 @@ export function CustomSelect({
     return selectedOption ? selectedOption.label : value || placeholder;
   }, [options, value, placeholder]);
 
+  const updateTriggerWidth = React.useCallback(() => {
+    if (triggerRef.current) {
+      setTriggerWidth(triggerRef.current.offsetWidth);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    updateTriggerWidth();
+    window.addEventListener("resize", updateTriggerWidth);
+    return () => window.removeEventListener("resize", updateTriggerWidth);
+  }, [updateTriggerWidth]);
+
   return (
     <div className="space-y-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            ref={triggerRef}
             variant="outline"
             role="combobox"
             aria-expanded={open}
@@ -76,60 +97,62 @@ export function CustomSelect({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput
-              placeholder={`Search ${placeholder.toLowerCase()}...`}
-            />
-            <CommandEmpty>
-              {allowCustomOption ? (
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add custom option
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add custom option</DialogTitle>
-                    </DialogHeader>
-                    <Input
-                      value={customValue}
-                      onChange={(e) => setCustomValue(e.target.value)}
-                      placeholder="Enter custom value"
-                    />
-                    <DialogFooter>
-                      <Button onClick={handleAddCustomOption}>Add</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              ) : (
-                "No results found."
-              )}
-            </CommandEmpty>
-            {options.length > 0 && (
+        <PopoverContent className="p-0" style={{ width: `${triggerWidth}px` }}>
+          <Command className="w-full">
+            <CommandInput placeholder="Search an option" />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {options.map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    value={option.value.toString()}
-                    onSelect={() => {
-                      onChange(option.value.toString());
-                      setOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option.label}
-                  </CommandItem>
-                ))}
+                {options.length > 0 &&
+                  options.map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      value={option.value.toString()}
+                      onSelect={() => {
+                        onChange(option.value.toString());
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === option.value ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {option.label}
+                    </CommandItem>
+                  ))}
+                <CommandItem className="px-0 py-0 text-white mt-1">
+                  {allowAddCustomOption && addCustomOptionForm && (
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger className="w-full" asChild>
+                        <Button
+                          variant="command"
+                          className="cursor-pointer w-full justify-start bg-helper-primary"
+                        >
+                          <Plus />
+                          Add option
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add {fieldName} option</DialogTitle>
+                        </DialogHeader>
+                        {/* <Input
+                          value={customValue}
+                          onChange={(e) => setCustomValue(e.target.value)}
+                          placeholder="Enter custom value"
+                        /> */}
+                        <DynamicForm config={addCustomOptionForm} />
+                        <DialogFooter>
+                          <Button onClick={handleAddCustomOption}>Add</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </CommandItem>
               </CommandGroup>
-            )}
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>

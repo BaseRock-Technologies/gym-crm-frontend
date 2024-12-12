@@ -22,6 +22,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         whatsapp: "bg-green-500 text-white shadow hover:bg-green-300",
         email: "bg-red-500 text-white shadow hover:bg-red-300",
+        command:
+          "relative flex cursor-default gap-2 select-none items-center rounded-sm text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-white data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       },
       size: {
         default: "h-9 px-4 py-2",

@@ -1,8 +1,16 @@
-export type FieldType = 'text' | 'select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone';
+import { LucideIcon } from "lucide-react";
+
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone';
 
 export interface SelectOption {
   label: string;
   value: string | number;
+}
+
+export interface MultiSelectOption {
+  label: string;
+  value: string;
+  icon?: React.ReactElement;
 }
 
 export interface FieldDependency {
@@ -10,13 +18,12 @@ export interface FieldDependency {
   formula: string; 
 }
 
-export interface FormField {
+export interface FormFieldBase {
   name: string;
   label: string;
   type: FieldType;
   required?: boolean;
   options?: SelectOption[];
-  allowCustomOption?: boolean;
   placeholder?: string;
   defaultValue?: string | number | boolean;
   dependsOn?: FieldDependency;
@@ -28,7 +35,22 @@ export interface FormField {
     max?: number;
     positiveValue?: boolean;
   };
+  multiSelectOptions?: MultiSelectOption[]; 
 }
+
+export interface FormFieldWithCustomOptions extends FormFieldBase {
+  allowAddCustomOption: true; // When true
+  addCustomOptionForm: FormConfig; // Required
+
+}
+
+export interface FormFieldWithoutCustomOptions extends FormFieldBase {
+  allowAddCustomOption?: false; // Optional or false
+  addCustomOptionForm?: never; // Not allowed
+}
+
+export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;
+
 
 export interface FormConfig {
   id: string;

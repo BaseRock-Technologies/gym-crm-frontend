@@ -25,6 +25,7 @@ import {
   SelectOption,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MultiSelect } from "./multi-select";
 
 export function DynamicForm({ config }: { config: FormConfig }) {
   const [customOptions, setCustomOptions] = React.useState<
@@ -315,6 +316,7 @@ export function DynamicForm({ config }: { config: FormConfig }) {
             <FormControl>
               {field.type === "select" ? (
                 <CustomSelect
+                  fieldName={field.name}
                   options={options}
                   value={formField.value}
                   onChange={(value) => {
@@ -322,10 +324,21 @@ export function DynamicForm({ config }: { config: FormConfig }) {
                     handleFieldChange(field.name, value);
                   }}
                   placeholder={field.placeholder}
-                  allowCustomOption={field.allowCustomOption}
+                  allowAddCustomOption={field.allowAddCustomOption}
+                  addCustomOptionForm={field.addCustomOptionForm}
                   onAddCustomOption={(value) =>
                     handleAddCustomOption(field.name, value)
                   }
+                />
+              ) : field.type === "multi-select" && field.multiSelectOptions ? (
+                <MultiSelect
+                  options={field.multiSelectOptions}
+                  value={formField.value}
+                  onValueChange={(value) => {
+                    formField.onChange(value);
+                    handleFieldChange(field.name, value);
+                  }}
+                  placeholder={field.placeholder}
                 />
               ) : field.type === "textarea" ? (
                 <Textarea
