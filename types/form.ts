@@ -4,7 +4,12 @@ export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea'
 
 export interface SelectOption {
   label: string;
-  value: string | number;
+  value: string;
+}
+
+export interface GroupedSelectOption {
+  group : string;
+  options: SelectOption[];
 }
 
 export interface MultiSelectOption {
@@ -26,7 +31,7 @@ export interface FormFieldBase {
   labelPos?: LabelPostion;
   type: FieldType;
   required?: boolean;
-  options?: SelectOption[];
+  options?: GroupedSelectOption[];
   placeholder?: string;
   defaultValue?: string | number | boolean;
   dependsOn?: FieldDependency;

@@ -43,11 +43,11 @@ const InquiryForCustomAddOptionForm: FormConfig = {
   title: "Create Inquiry For Option",
   fields: [
     {
-      name: "firstName",
-      label: "First Name",
+      name: "packageName",
+      label: "Package Name",
       type: "text",
       required: true,
-      placeholder: "Enter Name",
+      placeholder: "Enter name",
       validation: {
         minLength: 1,
         maxLength: 50,
@@ -106,8 +106,13 @@ const formConfig: FormConfig = {
       name: "gender",
       label: "Gender",
       options: [
-        { label: "Male", value: "male" },
-        { label: "Female", value: "female" },
+        {
+          group: "Gender",
+          options: [
+            { label: "Male", value: "male" },
+            { label: "Female", value: "female" },
+          ],
+        },
       ],
       type: "select",
       required: true,
@@ -141,9 +146,14 @@ const formConfig: FormConfig = {
       name: "status",
       label: "Status",
       options: [
-        { label: "Pending", value: "pending" },
-        { label: "Close", value: "close" },
-        { label: "Converted", value: "converted" },
+        {
+          group: "Status",
+          options: [
+            { label: "Pending", value: "pending" },
+            { label: "Close", value: "close" },
+            { label: "Converted", value: "converted" },
+          ],
+        },
       ],
       type: "select",
       required: true,
@@ -152,7 +162,12 @@ const formConfig: FormConfig = {
     {
       name: "attendedBy",
       label: "Attended By",
-      options: [{ label: "Admin", value: "admin" }],
+      options: [
+        {
+          group: "Attended By",
+          options: [{ label: "Admin", value: "admin" }],
+        },
+      ],
       type: "select",
       allowAddCustomOption: true,
       addCustomOptionForm: AttendedByCustomAddOptionForm,
@@ -162,11 +177,16 @@ const formConfig: FormConfig = {
       name: "convertibility",
       label: "Convertibility",
       options: [
-        { label: "Hot", value: "hot" },
-        { label: "Warm", value: "warm" },
-        { label: "Cold", value: "cold" },
-        { label: "Expected Amount", value: "expected-amount" },
-        { label: "Successfull Followup", value: "successfull-followup" },
+        {
+          group: "Convertibility",
+          options: [
+            { label: "Hot", value: "hot" },
+            { label: "Warm", value: "warm" },
+            { label: "Cold", value: "cold" },
+            { label: "Expected Amount", value: "expected-amount" },
+            { label: "Successfull Followup", value: "successfull-followup" },
+          ],
+        },
       ],
       type: "select",
       required: true,
@@ -176,11 +196,16 @@ const formConfig: FormConfig = {
       name: "sourceOfInquiry",
       label: "Source of Inquiry",
       options: [
-        { label: "Client Ref", value: "client-ref" },
-        { label: "Flyer", value: "flyer" },
-        { label: "Hoarders", value: "hoarders" },
-        { label: "Instagram", value: "instagram" },
-        { label: "Walk-In", value: "walk-in" },
+        {
+          group: "Source of Inquiry",
+          options: [
+            { label: "Client Ref", value: "client-ref" },
+            { label: "Flyer", value: "flyer" },
+            { label: "Hoarders", value: "hoarders" },
+            { label: "Instagram", value: "instagram" },
+            { label: "Walk-In", value: "walk-in" },
+          ],
+        },
       ],
       type: "select",
       required: true,
@@ -193,29 +218,39 @@ const formConfig: FormConfig = {
       name: "inquiryFor",
       label: "Inquiry For",
       options: [
-        { label: "Annual Package", value: "annual-package" },
-        { label: "1m", value: "1m" },
-        { label: "3m", value: "3m" },
-        { label: "6m", value: "6m" },
-        { label: "7m", value: "7m" },
-        { label: "12m", value: "12m" },
-        { label: "13m", value: "13m" },
-        { label: "14m", value: "14m" },
-        { label: "Trial Pack", value: "trial-pack" },
+        {
+          group: "Gym Packages",
+          options: [
+            { label: "Annual Package", value: "annual-package" },
+            { label: "1m", value: "1m" },
+            { label: "3m", value: "3m" },
+            { label: "6m", value: "6m" },
+            { label: "7m", value: "7m" },
+            { label: "12m", value: "12m" },
+            { label: "13m", value: "13m" },
+            { label: "14m", value: "14m" },
+            { label: "Trial Pack", value: "trial-pack" },
+          ],
+        },
 
-        { label: "12 PT Sessions", value: "12-PT-sessions" },
-        { label: "12M+PT", value: "12M+PT" },
-        { label: "1M+PT", value: "1M+PT" },
-        { label: "3M+PT", value: "3M+PT" },
-        { label: "12sec-PT", value: "12sec-PT" },
-        { label: "3M+12PT", value: "3M+12PT" },
+        {
+          group: "PT Packages",
+          options: [
+            { label: "12 PT Sessions", value: "12-PT-sessions" },
+            { label: "12M+PT", value: "12M+PT" },
+            { label: "1M+PT", value: "1M+PT" },
+            { label: "3M+PT", value: "3M+PT" },
+            { label: "12sec-PT", value: "12sec-PT" },
+            { label: "3M+12PT", value: "3M+12PT" },
+          ],
+        },
       ],
       type: "select",
       required: true,
       placeholder: "Select Source",
       allowAddCustomOption: true,
       addCustomOptionForm: InquiryForCustomAddOptionForm,
-      primaryFieldValue: "firstName",
+      primaryFieldValue: "packageName",
     },
     {
       name: "feedback",
@@ -235,7 +270,11 @@ const formConfig: FormConfig = {
 export default function ManageQueries() {
   return (
     <div className="p-6">
-      <DynamicForm config={formConfig} submitBtnText="CREATE INQUIRY" />
+      <DynamicForm
+        id="manage-queries"
+        config={formConfig}
+        submitBtnText="CREATE INQUIRY"
+      />
     </div>
   );
 }

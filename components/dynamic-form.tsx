@@ -22,6 +22,7 @@ import { TimePicker } from "./time-picker";
 import {
   FormConfig,
   FormField as FormFieldType,
+  GroupedSelectOption,
   SelectOption,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,18 +36,20 @@ import {
 import { format } from "date-fns";
 
 interface DynamicFormProps {
+  id: string;
   config: FormConfig;
-  storeFormValues?: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  storeFormValues?: (value: Record<string, any>) => void;
   submitBtnText?: string;
 }
 
 export function DynamicForm({
+  id,
   config,
   storeFormValues,
   submitBtnText = "Submit",
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
-    Record<string, SelectOption[]>
+    Record<string, GroupedSelectOption[]>
   >({});
   const [formValues, setFormValues] = React.useState<Record<string, any>>({});
 
@@ -395,26 +398,55 @@ export function DynamicForm({
   };
 
   const onSubmit = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
-    console.log("Form submitted with values:", values);
+    console.log(`Form ${id} submitted with values:`, values);
     form.reset();
     setFormValues({});
-    if (storeFormValues && storeFormValues !== undefined) {
+    if (storeFormValues) {
       storeFormValues(values);
     }
   };
 
-  const handleAddCustomOption = (fieldName: string, value: string) => {
-    setCustomOptions((prev) => ({
-      ...prev,
-      [fieldName]: [...(prev[fieldName] || []), { label: value, value }],
-    }));
+  const handleAddCustomOption = (
+    fieldName: string,
+    value: string,
+    group: string
+  ) => {
+    setCustomOptions((prev) => {
+      const updatedOptions = { ...prev };
+      if (!updatedOptions[fieldName]) {
+        updatedOptions[fieldName] = [];
+      }
+      const existingGroup = updatedOptions[fieldName].find(
+        (g) => g.group === group
+      );
+      if (existingGroup) {
+        existingGroup.options.push({ label: value, value });
+      } else {
+        updatedOptions[fieldName].push({
+          group,
+          options: [{ label: value, value }],
+        });
+      }
+      return updatedOptions;
+    });
   };
 
   const renderField = (field: FormFieldType) => {
-    const options = [
-      ...(field.options || []),
-      ...(customOptions[field.name] || []),
-    ];
+    let options: GroupedSelectOption[];
+    if (field.type === "select" || field.type === "multi-select") {
+      options = Object.values(
+        [...(field.options || []), ...(customOptions[field.name] || [])].reduce(
+          (acc: Record<string, GroupedSelectOption>, curr) => {
+            if (!acc[curr.group]) {
+              acc[curr.group] = { group: curr.group, options: [] };
+            }
+            acc[curr.group].options.push(...curr.options);
+            return acc;
+          },
+          {} as Record<string, GroupedSelectOption>
+        )
+      );
+    }
 
     return (
       <FormField
@@ -434,6 +466,7 @@ export function DynamicForm({
               {field.type === "select" ? (
                 <CustomSelect
                   fieldName={field.name}
+                  primaryField={field.primaryFieldValue}
                   options={options}
                   value={formField.value}
                   onChange={(value) => {
@@ -443,8 +476,8 @@ export function DynamicForm({
                   placeholder={field.placeholder}
                   allowAddCustomOption={field.allowAddCustomOption}
                   addCustomOptionForm={field.addCustomOptionForm}
-                  onAddCustomOption={(value) =>
-                    handleAddCustomOption(field.name, value)
+                  onAddCustomOption={(value: string, group: string) =>
+                    handleAddCustomOption(field.name, value, group)
                   }
                 />
               ) : field.type === "multi-select" && field.multiSelectOptions ? (
@@ -581,12 +614,16 @@ export function DynamicForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6"
+            id={`form-${id}`}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {config.fields.map(renderField)}
             </div>
             <div className="relative w-full flex justify-end items-center">
-              <Button type="submit" size={"lg"}>
+              <Button type="submit" size={"lg"} form={`form-${id}`}>
                 {submitBtnText}
               </Button>
             </div>
