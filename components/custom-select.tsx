@@ -53,8 +53,8 @@ export function CustomSelect({
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [customValue, setCustomValue] = React.useState("");
-  const [triggerWidth, setTriggerWidth] = React.useState(0);
-  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  const selectTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const [dialogFormValues, setDialogFormVaulues] = React.useState<
     Record<string, any>
@@ -75,34 +75,26 @@ export function CustomSelect({
     return selectedOption ? selectedOption.label : value || placeholder;
   }, [options, value, placeholder]);
 
-  const updateTriggerWidth = React.useCallback(() => {
-    if (triggerRef.current) {
-      setTriggerWidth(triggerRef.current.offsetWidth);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    updateTriggerWidth();
-    window.addEventListener("resize", updateTriggerWidth);
-    return () => window.removeEventListener("resize", updateTriggerWidth);
-  }, [updateTriggerWidth]);
-
   return (
     <div className="space-y-1">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            ref={triggerRef}
+            ref={selectTriggerRef}
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className={cn("w-full justify-between", error && "border-red-500")}
+            className={cn(
+              "w-full justify-between",
+              error && "border-red-500",
+              !value && "text-muted-foreground"
+            )}
           >
             {selectedOptionLabel}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0" style={{ width: `${triggerWidth}px` }}>
+        <PopoverContent className="p-0" containerRef={selectTriggerRef}>
           <Command className="w-full">
             <CommandInput placeholder="Search an option" />
             <CommandList>

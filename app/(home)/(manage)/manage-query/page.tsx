@@ -2,50 +2,56 @@ import { DynamicForm } from "@/components/dynamic-form";
 import { FormConfig } from "@/types/form";
 import { User2 } from "lucide-react";
 
-const ServiceSelectCustomAddOptionForm: FormConfig = {
-  id: "service-select",
-  title: "Create Service Option",
+const AttendedByCustomAddOptionForm: FormConfig = {
+  id: "attendedBy-custom-add",
+  title: "Create Attended By Option",
   fields: [
     {
-      name: "package-name",
-      label: "Package Name",
+      name: "firstName",
+      label: "First Name",
       type: "text",
       required: true,
+      placeholder: "Enter Name",
+      validation: {
+        minLength: 1,
+        maxLength: 50,
+      },
     },
+  ],
+};
+
+const SourceOfInquiryCustomAddOptionForm: FormConfig = {
+  id: "sourceOfInquiry-custom-add",
+  title: "Create Source of Inquiry Option",
+  fields: [
     {
-      name: "price",
-      label: "Price",
-      type: "decimal",
+      name: "firstName",
+      label: "First Name",
+      type: "text",
       required: true,
-      placeholder: "0.00",
+      placeholder: "Enter Name",
+      validation: {
+        minLength: 1,
+        maxLength: 50,
+      },
     },
+  ],
+};
+
+const InquiryForCustomAddOptionForm: FormConfig = {
+  id: "inquiryFor-custom-add",
+  title: "Create Inquiry For Option",
+  fields: [
     {
-      name: "trainer",
-      label: "Select Trainer",
-      type: "multi-select",
-      placeholder: "Select Trainer",
-      multiSelectOptions: [
-        {
-          label: "Pro",
-          value: "pro",
-          icon: <User2 />,
-        },
-        {
-          label: "Premium",
-          value: "premium",
-          icon: <User2 />,
-        },
-        {
-          label: "Base",
-          value: "base",
-          icon: <User2 />,
-        },
-        {
-          label: "Admin",
-          value: "admin",
-          icon: <User2 />,
-        },
-      ],
+      name: "firstName",
+      label: "First Name",
+      type: "text",
+      required: true,
+      placeholder: "Enter Name",
+      validation: {
+        minLength: 1,
+        maxLength: 50,
+      },
     },
   ],
 };
@@ -61,9 +67,15 @@ const formConfig: FormConfig = {
       required: true,
       placeholder: "Enter Name",
       validation: {
-        minLength: 2,
+        minLength: 1,
         maxLength: 50,
       },
+    },
+    {
+      name: "lastName",
+      label: "Last Name",
+      type: "text",
+      placeholder: "Enter Name",
     },
     {
       name: "contactNumber",
@@ -76,73 +88,146 @@ const formConfig: FormConfig = {
       },
     },
     {
-      name: "scheduleTime",
-      label: "Schedule Time",
-      type: "time",
-      required: true,
-    },
-    {
-      name: "price",
-      label: "Price",
-      type: "decimal",
-      placeholder: "0.00",
-    },
-    {
-      name: "discount",
-      label: "Discount (%)",
-      type: "decimal",
-      required: true,
-      placeholder: "0.00",
-    },
-    {
-      name: "finalPrice",
-      label: "Final Price",
-      type: "decimal",
-      dependsOn: {
-        field: "price",
-        formula: "price * (1 - discount / 100)",
+      name: "alternateContact",
+      label: "Alternate Contact",
+      type: "phone",
+      placeholder: "Alternate Contact",
+      validation: {
+        pattern: "^\\d{10}$",
       },
     },
     {
-      name: "service",
-      label: "Service",
-      options: [
-        { label: "pre", value: "pre" },
-        { label: "post", value: "post" },
-      ],
-      type: "select",
-      allowAddCustomOption: true,
-      addCustomOptionForm: ServiceSelectCustomAddOptionForm,
-      primaryFieldValue: "package-name",
+      name: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "Email",
     },
     {
-      name: "trainer",
-      label: "Select Trainer",
-      type: "multi-select",
-      placeholder: "Select Trainer",
-      required: true,
-      multiSelectOptions: [
-        {
-          label: "Pro",
-          value: "pro",
-          icon: <User2 />,
-        },
-        {
-          label: "Premium",
-          value: "premium",
-          icon: <User2 />,
-        },
-        {
-          label: "Base",
-          value: "base",
-          icon: <User2 />,
-        },
-        {
-          label: "Admin",
-          value: "admin",
-          icon: <User2 />,
-        },
+      name: "gender",
+      label: "Gender",
+      options: [
+        { label: "Male", value: "male" },
+        { label: "Female", value: "female" },
       ],
+      type: "select",
+      required: true,
+      placeholder: "Select Gender",
+    },
+    {
+      name: "areaAddress",
+      label: "Area Address",
+      type: "text",
+    },
+    {
+      name: "scheduleFollowUp",
+      label: "Schedule FollowUp",
+      type: "date",
+      required: true,
+      placeholder: "Select Follow Up",
+    },
+    {
+      name: "scheduleFollowUpTime",
+      label: "Schedule FollowUp Time",
+      type: "time",
+      placeholder: "Enter Time",
+    },
+    {
+      name: "assessmentDate",
+      label: "Assessment Date",
+      type: "date",
+      placeholder: "Select Date",
+    },
+    {
+      name: "status",
+      label: "Status",
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Close", value: "close" },
+        { label: "Converted", value: "converted" },
+      ],
+      type: "select",
+      required: true,
+      placeholder: "Select Status",
+    },
+    {
+      name: "attendedBy",
+      label: "Attended By",
+      options: [{ label: "Admin", value: "admin" }],
+      type: "select",
+      allowAddCustomOption: true,
+      addCustomOptionForm: AttendedByCustomAddOptionForm,
+      primaryFieldValue: "firstName",
+    },
+    {
+      name: "convertibility",
+      label: "Convertibility",
+      options: [
+        { label: "Hot", value: "hot" },
+        { label: "Warm", value: "warm" },
+        { label: "Cold", value: "cold" },
+        { label: "Expected Amount", value: "expected-amount" },
+        { label: "Successfull Followup", value: "successfull-followup" },
+      ],
+      type: "select",
+      required: true,
+      placeholder: "Select Convertibility",
+    },
+    {
+      name: "sourceOfInquiry",
+      label: "Source of Inquiry",
+      options: [
+        { label: "Client Ref", value: "client-ref" },
+        { label: "Flyer", value: "flyer" },
+        { label: "Hoarders", value: "hoarders" },
+        { label: "Instagram", value: "instagram" },
+        { label: "Walk-In", value: "walk-in" },
+      ],
+      type: "select",
+      required: true,
+      placeholder: "Select Source",
+      allowAddCustomOption: true,
+      addCustomOptionForm: SourceOfInquiryCustomAddOptionForm,
+      primaryFieldValue: "firstName",
+    },
+    {
+      name: "inquiryFor",
+      label: "Inquiry For",
+      options: [
+        { label: "Annual Package", value: "annual-package" },
+        { label: "1m", value: "1m" },
+        { label: "3m", value: "3m" },
+        { label: "6m", value: "6m" },
+        { label: "7m", value: "7m" },
+        { label: "12m", value: "12m" },
+        { label: "13m", value: "13m" },
+        { label: "14m", value: "14m" },
+        { label: "Trial Pack", value: "trial-pack" },
+
+        { label: "12 PT Sessions", value: "12-PT-sessions" },
+        { label: "12M+PT", value: "12M+PT" },
+        { label: "1M+PT", value: "1M+PT" },
+        { label: "3M+PT", value: "3M+PT" },
+        { label: "12sec-PT", value: "12sec-PT" },
+        { label: "3M+12PT", value: "3M+12PT" },
+      ],
+      type: "select",
+      required: true,
+      placeholder: "Select Source",
+      allowAddCustomOption: true,
+      addCustomOptionForm: InquiryForCustomAddOptionForm,
+      primaryFieldValue: "firstName",
+    },
+    {
+      name: "feedback",
+      label: "Responce/Feedback",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "send-email",
+      label: "Send Text & Email",
+      type: "checkbox",
+      labelPos: "left",
     },
   ],
 };
@@ -150,7 +235,7 @@ const formConfig: FormConfig = {
 export default function ManageQueries() {
   return (
     <div className="p-6">
-      <DynamicForm config={formConfig} />
+      <DynamicForm config={formConfig} submitBtnText="CREATE INQUIRY" />
     </div>
   );
 }

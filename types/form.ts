@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 
-export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone';
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone' | 'email';
 
 export interface SelectOption {
   label: string;
@@ -18,9 +18,12 @@ export interface FieldDependency {
   formula: string; 
 }
 
+type LabelPostion = "right" | "left";
+
 export interface FormFieldBase {
   name: string;
   label: string;
+  labelPos?: LabelPostion;
   type: FieldType;
   required?: boolean;
   options?: SelectOption[];

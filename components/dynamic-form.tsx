@@ -26,6 +26,13 @@ import {
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -114,7 +121,7 @@ export function DynamicForm({
                     message: `${field.label} is required`,
                   });
                 }
-                if (field.validation && val) {
+                if (field.validation && (val || val === 0)) {
                   const { min, max, positiveValue } = field.validation;
                   if (min !== undefined && val < min) {
                     ctx.addIssue({
@@ -165,7 +172,7 @@ export function DynamicForm({
               }
               if (val) {
                 const isMatch = /^([1-9]|1[0-2]):00 (AM|PM)$/.test(val);
-                if (isMatch) {
+                if (!isMatch) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: `Invalid ${field.label}`,
@@ -174,22 +181,44 @@ export function DynamicForm({
               }
             });
           break;
+        case "email":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (typeof val === "string") {
+                return val.trim(); // Trim whitespace from the value
+              }
+              return val;
+            }, z.string().email({ message: "Invalid email address" }))
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+            });
+          break;
         case "checkbox":
           fieldSchema = z
             .preprocess(
               (val) => {
                 if (typeof val === "string") {
-                  return val === "true"
-                    ? true
-                    : val === "false"
-                    ? false
-                    : undefined;
+                  return val === "true" ? true : val ? true : false;
                 }
                 return val;
               },
-              z.boolean({
-                invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-              })
+              z
+                .boolean({
+                  invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
+                })
+                .superRefine((val, ctx) => {
+                  if (field.required && !val) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message: `${field.label} is required`,
+                    });
+                  }
+                })
             )
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
@@ -208,7 +237,7 @@ export function DynamicForm({
                 return isNaN(date.getTime()) ? undefined : date;
               }
               return val;
-            }, z.date())
+            }, z.date().nullish())
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
                 ctx.addIssue({
@@ -216,9 +245,10 @@ export function DynamicForm({
                   message: `${field.label} is required`,
                 });
               }
-              if (val) {
-                const isMatch = val instanceof Date && !isNaN(val.getTime());
-                if (isMatch) {
+              if (val !== undefined && val !== null) {
+                const isInvalid =
+                  !(val instanceof Date) || isNaN(val.getTime());
+                if (isInvalid) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     message: `Invalid ${field.label}`,
@@ -257,14 +287,11 @@ export function DynamicForm({
           fieldSchema = z
             .preprocess((val) => {
               if (!Array.isArray(val) || val.length === 0) {
-                return undefined;
+                return [];
               }
-              return val.filter(
-                (item) => typeof item === "string" && item.trim() !== ""
-              );
-            }, z.array(z.string()))
+              return val;
+            }, z.array(z.union([z.string(), z.number()])))
             .superRefine((val, ctx) => {
-              // Check if the field is required and if there are no valid selections
               if (field.required && (!val || val.length === 0)) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
@@ -274,22 +301,28 @@ export function DynamicForm({
             });
           break;
         case "phone":
-          fieldSchema = z.preprocess(
-            (val) => {
+          fieldSchema = z
+            .preprocess((val) => {
               if (typeof val === "string") {
-                return val.replace(/\D/g, ""); // Remove non-digit characters
+                return val.replace(/\D/g, "");
               }
               return val;
-            },
-            z
-              .string({
-                required_error: `${field.label} is required`,
-                invalid_type_error: `Invalid ${field.label.toLowerCase()}`,
-              })
-              .regex(/^\d{10}$/, {
-                message: `${field.label} must be a 10-digit number`,
-              })
-          );
+            }, z.string())
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              const phoneRegex = /^\d{10}$/;
+              if (!phoneRegex.test(val)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `Invalid ${field.label}`,
+                });
+              }
+            });
           break;
         default:
           fieldSchema = z.preprocess(
@@ -390,10 +423,13 @@ export function DynamicForm({
         name={field.name}
         render={({ field: formField }) => (
           <FormItem>
-            <FormLabel>
-              {field.label}
-              {field.required && <span className="text-red-500">*</span>}
-            </FormLabel>
+            {(!field.labelPos ||
+              (field.labelPos && field.labelPos === "right")) && (
+              <FormLabel>
+                {field.label}
+                {field.required && <span className="text-red-500">*</span>}
+              </FormLabel>
+            )}
             <FormControl>
               {field.type === "select" ? (
                 <CustomSelect
@@ -439,15 +475,34 @@ export function DynamicForm({
                   }}
                 />
               ) : field.type === "date" ? (
-                <Calendar
-                  mode="single"
-                  selected={formField.value}
-                  onSelect={(value) => {
-                    formField.onChange(value);
-                    handleFieldChange(field.name, value);
-                  }}
-                  className="rounded-md border"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formField.value && "text-muted-foreground"
+                      )}
+                    >
+                      {formField.value ? (
+                        format(formField.value, "MMM dd yyyy")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formField.value}
+                      onSelect={(value) => {
+                        formField.onChange(value);
+                        handleFieldChange(field.name, value);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               ) : field.type === "time" ? (
                 <TimePicker
                   value={formField.value}
@@ -506,6 +561,12 @@ export function DynamicForm({
                 />
               )}
             </FormControl>
+            {field.labelPos === "left" && (
+              <FormLabel className="ml-2">
+                {field.label}
+                {field.required && <span className="text-red-500">*</span>}
+              </FormLabel>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -514,19 +575,21 @@ export function DynamicForm({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto border-none shadow-none">
-      {/* <CardHeader>
+    <Card className="w-full mx-auto border-none rounded-md overflow-hidden shadow-none">
+      <CardHeader className="bg-primary text-white mb-5 shadow-sm">
         <CardTitle>{config.title}</CardTitle>
-      </CardHeader> */}
+      </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {config.fields.map(renderField)}
             </div>
-            <Button type="submit" className="w-full">
-              {submitBtnText}
-            </Button>
+            <div className="relative w-full flex justify-end items-center">
+              <Button type="submit" size={"lg"}>
+                {submitBtnText}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>

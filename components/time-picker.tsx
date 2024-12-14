@@ -40,7 +40,7 @@ export function TimePicker({ value, onChange, error }: TimePickerProps) {
           <Clock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-0" align="start">
+      <PopoverContent className="p-0" align="start">
         <div className="flex flex-col">
           <div className="flex justify-center p-2 border-b">
             <Button
