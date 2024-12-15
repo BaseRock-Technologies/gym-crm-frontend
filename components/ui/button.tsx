@@ -9,7 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-white shadow hover:bg-primary/90",
+        default:
+          "bg-primary text-white shadow hover:bg-primary/90 sm:text-base text-sm",
         destructive:
           "bg-destructive text-white shadow-sm hover:bg-destructive/90",
         outline:
@@ -26,7 +27,7 @@ const buttonVariants = cva(
           "relative flex cursor-default gap-2 select-none items-center rounded-sm text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-white data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       },
       size: {
-        default: "h-9 px-4 py-2",
+        default: "sm:h-9 sm:px-4 sm:py-2 h-7 px-3 py-4",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",

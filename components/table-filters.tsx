@@ -16,6 +16,8 @@ interface TableFiltersProps {
   onFilterChange: (filterId: string, value: any) => void;
   onBulkAction: (type: BulkActions) => void;
   searchableColumns?: string[];
+  pageSize: number;
+  onPageSizeChange: (value: number) => void;
 }
 
 export function TableFilters({
@@ -24,60 +26,79 @@ export function TableFilters({
   onFilterChange,
   onBulkAction,
   searchableColumns = [],
+  pageSize,
+  onPageSizeChange,
 }: TableFiltersProps) {
+  const hasSearchFilter = filters.find((filter) => filter.type === "search");
   return (
-    <div className="relative w-full flex justify-center items-center gap-4 ">
-      {filters.map((filter) => {
-        switch (filter.type) {
-          case "select":
-            return (
-              <Select
-                key={filter.id}
-                onValueChange={(value) => onFilterChange(filter.id, value)}
-              >
-                <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
-                  <SelectValue placeholder={filter.label} />
-                </SelectTrigger>
-                <SelectContent>
-                  {filter.options?.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            );
-          case "search":
-            return (
-              <AnimatedSearchInput
-                key={filter.id}
-                searchableColumns={searchableColumns}
-                onSearch={(value) => onFilterChange(filter.id, value)}
-              />
-            );
-          case "date-range":
-            return (
-              <DatePickerWithRange
-                key={filter.id}
-                onValueChange={(value) => onFilterChange(filter.id, value)}
-              />
-            );
-          default:
-            return null;
-        }
-      })}
-      <div className="relative flex gap-4 justify-center items-center ml-auto">
-        {ctaActions.map((btn: BulkActionConfig) => (
-          <Button
-            key={btn.id}
-            variant={btn.btnVariant}
-            className="ml-auto"
-            onClick={() => onBulkAction(btn.id)}
-          >
-            {btn.icon && <btn.icon className="w-6 h-6 text-white" />}
-            {btn.label}
-          </Button>
-        ))}
+    <div className="relative w-full flex flex-col gap-4">
+      <div className="relative w-full flex flex-wrap justify-start items-center gap-4 ">
+        <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => onPageSizeChange(Number(value))}
+        >
+          <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
+            <SelectValue placeholder="Show entries" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">Show 10 entries</SelectItem>
+            <SelectItem value="25">Show 25 entries</SelectItem>
+            <SelectItem value="50">Show 50 entries</SelectItem>
+          </SelectContent>
+        </Select>
+        {filters.map((filter) => {
+          switch (filter.type) {
+            case "select":
+              return (
+                <Select
+                  key={filter.id}
+                  onValueChange={(value) => onFilterChange(filter.id, value)}
+                >
+                  <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
+                    <SelectValue placeholder={filter.label} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filter.options?.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            case "date-range":
+              return (
+                <DatePickerWithRange
+                  key={filter.id}
+                  onValueChange={(value) => onFilterChange(filter.id, value)}
+                />
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+      <div className="relative flex flex-wrap justify-between items-center gap-4">
+        {hasSearchFilter && (
+          <AnimatedSearchInput
+            key={hasSearchFilter.id}
+            searchableColumns={searchableColumns}
+            onSearch={(value) => onFilterChange(hasSearchFilter.id, value)}
+          />
+        )}
+        <div className="relative flex flex-wrap sm:gap-4 gap-2 justify-center items-center ml-auto">
+          {ctaActions.map((btn: BulkActionConfig) => (
+            <Button
+              key={btn.id}
+              variant={btn.btnVariant}
+              className="ml-auto"
+              onClick={() => onBulkAction(btn.id)}
+            >
+              {btn.icon && <btn.icon className="text-white" />}
+              {btn.label}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );

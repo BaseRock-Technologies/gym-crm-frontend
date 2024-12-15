@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import { DataTable } from "@/components/data-table";
 import type { TableConfig, TableState } from "@/types/table";
 
 interface DataTableWrapperProps {
   config: TableConfig;
   initialData: any[];
+  setSelectedRow?: React.Dispatch<SetStateAction<Record<string, boolean>>>;
 }
 
 export function DataTableWrapper({
   config,
   initialData,
+  setSelectedRow,
 }: DataTableWrapperProps) {
   const [tableState, setTableState] = useState<TableState>({
     page: 1,
@@ -84,6 +86,7 @@ export function DataTableWrapper({
         setTableState((prevState) => ({ ...prevState, ...newState }))
       }
       isLoading={isLoading}
+      setSelectedRow={setSelectedRow}
     />
   );
 }

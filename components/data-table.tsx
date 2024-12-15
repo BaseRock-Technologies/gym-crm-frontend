@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import {
   Table,
   TableBody,
@@ -20,6 +20,7 @@ import { TableFilters } from "./table-filters";
 import { TableActions } from "./table-actions";
 import { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
+import { TableOutOfActions } from "./table-out-actions";
 
 interface DataTableProps {
   config: TableConfig;
@@ -28,6 +29,7 @@ interface DataTableProps {
   tableState: TableState;
   onStateChange: (newState: Partial<TableState>) => void;
   isLoading?: boolean;
+  setSelectedRow?: React.Dispatch<SetStateAction<Record<string, boolean>>>;
 }
 
 export function DataTable({
@@ -37,6 +39,7 @@ export function DataTable({
   tableState,
   onStateChange,
   isLoading,
+  setSelectedRow,
 }: DataTableProps) {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
@@ -46,13 +49,18 @@ export function DataTable({
       newSelected[row.id] = checked;
     });
     setSelected(newSelected);
+    setSelectedRow?.(newSelected);
   };
 
   const handleSelectRow = (rowId: string) => {
-    setSelected((prev) => ({
-      ...prev,
-      [rowId]: !prev[rowId],
-    }));
+    setSelected((prev) => {
+      const updated = {
+        ...prev,
+        [rowId]: !prev[rowId],
+      };
+      setSelectedRow?.(updated);
+      return updated;
+    });
   };
 
   const handleBulkAction = (type: BulkActions) => {
@@ -69,6 +77,9 @@ export function DataTable({
       case "whatsapp":
         console.log("whatsapp");
         break;
+      case "transfer-inquiry":
+        console.log("transfer-inquiry");
+        break;
       default:
         break;
     }
@@ -76,26 +87,8 @@ export function DataTable({
   };
 
   return (
-    <div className="w-full relative px-4">
+    <div className="w-full relative">
       <div className="flex items-center py-4 gap-4">
-        <Select
-          value={tableState.pageSize.toString()}
-          onValueChange={(value) => {
-            onStateChange({
-              pageSize: Number(value),
-              page: 1,
-            });
-          }}
-        >
-          <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
-            <SelectValue placeholder="Show entries" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">Show 10 entries</SelectItem>
-            <SelectItem value="25">Show 25 entries</SelectItem>
-            <SelectItem value="50">Show 50 entries</SelectItem>
-          </SelectContent>
-        </Select>
         <TableFilters
           filters={config.filters || []}
           ctaActions={config.bulkActions || []}
@@ -107,6 +100,10 @@ export function DataTable({
           }}
           onBulkAction={handleBulkAction}
           searchableColumns={config.searchableColumns}
+          pageSize={tableState.pageSize}
+          onPageSizeChange={(value) =>
+            onStateChange({ pageSize: Number(value), page: 1 })
+          } // Pass handler for page size change
         />
       </div>
 
@@ -122,7 +119,9 @@ export function DataTable({
                 />
               </TableHead>
               {config.columns.map((column) => (
-                <TableHead key={column.id}>{column.header}</TableHead>
+                <TableHead className="truncate" key={column.id}>
+                  {column.header}
+                </TableHead>
               ))}
               {config.actions && <TableHead>Action</TableHead>}
             </TableRow>
@@ -151,8 +150,17 @@ export function DataTable({
                         </TableCell>
                       ))}
                       {config.actions && (
-                        <TableCell onClick={(e) => e.stopPropagation()}>
+                        <TableCell
+                          className="flex gap-2 flex-wrap"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <TableActions actions={config.actions} row={row} />
+                          {config.outOfActions && (
+                            <TableOutOfActions
+                              actions={config.outOfActions}
+                              row={row}
+                            />
+                          )}
                         </TableCell>
                       )}
                     </TableRow>

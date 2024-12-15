@@ -87,13 +87,13 @@ export function CustomSelect({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "w-full justify-between",
+              "w-full flex justify-between truncate",
               error && "border-red-500",
               !value && "text-muted-foreground"
             )}
           >
-            {selectedOptionLabel}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <p className="relative truncate">{selectedOptionLabel}</p>
+            <ChevronsUpDown className="relative ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" containerRef={selectTriggerRef}>

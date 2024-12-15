@@ -3,6 +3,7 @@ import { LucideIcon } from "lucide-react"
 export interface TableConfig {
   columns: ColumnDef[]
   actions?: ActionConfig[]
+  outOfActions?: Array<OutOfActionsConfig>
   bulkActions?: BulkActionConfig[]
   filters?: FilterConfig[]
   searchableColumns?: string[]
@@ -23,6 +24,24 @@ export interface ActionConfig {
   onClick: (row: any) => void
 }
 
+interface OutOfActionsLinkConfig {
+  id: string
+  label: string
+  href: string
+  type: "link"
+  icon?: LucideIcon
+  customClass?: string,
+}
+interface OutOfActionsBtnConfig {
+  id: string
+  type: "button"
+  icon: LucideIcon,
+  customClass?: string,
+  onClick: (row: any) => void
+}
+
+export type OutOfActionsConfig = OutOfActionsLinkConfig | OutOfActionsBtnConfig;
+
 export interface BulkActionConfig {
   id: BulkActions
   label: string
@@ -31,7 +50,7 @@ export interface BulkActionConfig {
   onClick: (selectedRows: any[]) => void
 }
 
-export type BulkActions = "SMS" | "follow-up" | "whatsapp" | "email";
+export type BulkActions = "SMS" | "follow-up" | "whatsapp" | "email" | "transfer-inquiry";
 export type BulkActionsBtnVariant = "default" | "whatsapp" | "secondary" | "email";
 
 export interface FilterConfig {

@@ -97,4 +97,4 @@ const DashboardPage = () => {
   );
 };
 
-export default WithAuth(DashboardPage);
+export default DashboardPage;

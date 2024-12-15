@@ -568,6 +568,7 @@ export function DynamicForm({
                 />
               ) : field.type === "textarea" ? (
                 <Textarea
+                  className="max-h-40"
                   placeholder={field.placeholder}
                   {...formField}
                   onChange={(e) => {
