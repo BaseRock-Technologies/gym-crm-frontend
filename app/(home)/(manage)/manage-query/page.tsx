@@ -264,6 +264,24 @@ const formConfig: FormConfig = {
       type: "checkbox",
       labelPos: "left",
     },
+    {
+      name: "profile",
+      label: "Profile",
+      type: "image",
+      required: true,
+      formatsAccepted: ["image/png", "image/jpeg"],
+      formatsAcceptedPlaceholder: ["png", "jpeg"],
+      maxSize: 5 * 1024 * 1024,
+    },
+    {
+      name: "resume",
+      label: "Resume",
+      type: "file",
+      required: true,
+      formatsAccepted: ["application/pdf"],
+      formatsAcceptedPlaceholder: ["pdf"],
+      maxSize: 4 * 1024 * 1024,
+    },
   ],
 };
 

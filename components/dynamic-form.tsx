@@ -33,6 +33,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { FileUpload } from "./file-upload";
+import { ImageIcon } from "lucide-react";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -325,6 +327,47 @@ export function DynamicForm({
               }
             });
           break;
+        case "image":
+        case "file":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (val instanceof File) {
+                return val;
+              }
+              return undefined;
+            }, z.union([z.instanceof(File), z.undefined()]))
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val) {
+                if (
+                  field.formatsAccepted &&
+                  !field.formatsAccepted.includes(val.type)
+                ) {
+                  const acceptedPlaceholder =
+                    field.formatsAcceptedPlaceholder || [];
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid file format. Accepted formats: ${acceptedPlaceholder.join(
+                      ", "
+                    )}`,
+                  });
+                }
+                if (field.maxSize && val.size > field.maxSize) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `File size exceeds the maximum limit of ${
+                      field.maxSize / 1024 / 1024
+                    }MB`,
+                  });
+                }
+              }
+            });
+          break;
         default:
           fieldSchema = z.preprocess(
             (val) => {
@@ -437,6 +480,24 @@ export function DynamicForm({
       });
     } catch (error) {
       console.log("Error Adding Custom options");
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (
+    e: React.DragEvent<HTMLDivElement>,
+    fieldName: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      form.setValue(fieldName, file);
+      handleFieldChange(fieldName, file);
     }
   };
 
@@ -595,6 +656,54 @@ export function DynamicForm({
                       .slice(0, 10);
                     formField.onChange(value);
                     handleFieldChange(field.name, value);
+                  }}
+                />
+              ) : field.type === "image" ? (
+                <Card
+                  className="w-full h-40 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, field.name)}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id={`${field.name}-upload`}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        formField.onChange(file);
+                        handleFieldChange(field.name, file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`${field.name}-upload`}
+                    className="w-full h-full flex flex-col items-center justify-center"
+                  >
+                    {formField.value ? (
+                      <img
+                        src={URL.createObjectURL(formField.value)}
+                        alt="Uploaded image"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <>
+                        <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
+                        <span className="text-xs text-muted-foreground text-center w-3/">
+                          Click to upload or drag and drop
+                        </span>
+                      </>
+                    )}
+                  </label>
+                </Card>
+              ) : field.type === "file" ? (
+                <FileUpload
+                  accept={field.formatsAccepted?.join(",")}
+                  maxSize={field.maxSize}
+                  onFileSelected={(file) => {
+                    formField.onChange(file);
+                    handleFieldChange(field.name, file);
                   }}
                 />
               ) : (

@@ -42,6 +42,9 @@ export interface FormFieldBase {
     positiveValue?: boolean;
   };
   multiSelectOptions?: MultiSelectOption[]; 
+  formatsAccepted?: string[];
+  formatsAcceptedPlaceholder?: string[];
+  maxSize?: number; // in bytes
 }
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
@@ -56,19 +59,7 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   primaryFieldValue?: never;
 }
 
-export interface FormFieldWithImageUpload extends FormFieldBase {
-  type: 'image';
-  formatsAccepted?: string[];
-  maxSize?: number; // in bytes
-}
-
-export interface FormFieldWithFileUpload extends FormFieldBase {
-  type: 'file';
-  formatsAccepted?: string[];
-  maxSize?: number; // in bytes
-}
-
-export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions | FormFieldWithImageUpload | FormFieldWithFileUpload;
+export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;
 
 
 export interface FormConfig {
@@ -76,6 +67,3 @@ export interface FormConfig {
   title: string;
   fields: FormField[];
 }
-
-
-
