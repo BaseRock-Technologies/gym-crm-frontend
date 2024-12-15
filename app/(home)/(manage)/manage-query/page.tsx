@@ -270,11 +270,7 @@ const formConfig: FormConfig = {
 export default function ManageQueries() {
   return (
     <div className="p-6">
-      <DynamicForm
-        id="manage-queries"
-        config={formConfig}
-        submitBtnText="CREATE INQUIRY"
-      />
+      <DynamicForm config={formConfig} submitBtnText="CREATE INQUIRY" />
     </div>
   );
 }

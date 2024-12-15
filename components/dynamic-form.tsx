@@ -23,7 +23,6 @@ import {
   FormConfig,
   FormField as FormFieldType,
   GroupedSelectOption,
-  SelectOption,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
@@ -36,14 +35,12 @@ import {
 import { format } from "date-fns";
 
 interface DynamicFormProps {
-  id: string;
   config: FormConfig;
   storeFormValues?: (value: Record<string, any>) => void;
   submitBtnText?: string;
 }
 
 export function DynamicForm({
-  id,
   config,
   storeFormValues,
   submitBtnText = "Submit",
@@ -52,6 +49,7 @@ export function DynamicForm({
     Record<string, GroupedSelectOption[]>
   >({});
   const [formValues, setFormValues] = React.useState<Record<string, any>>({});
+  const formId = React.useId();
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -398,7 +396,7 @@ export function DynamicForm({
   };
 
   const onSubmit = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
-    console.log(`Form ${id} submitted with values:`, values);
+    console.log(`Form ${formId} submitted with values:`, values);
     form.reset();
     setFormValues({});
     if (storeFormValues) {
@@ -411,41 +409,58 @@ export function DynamicForm({
     value: string,
     group: string
   ) => {
-    setCustomOptions((prev) => {
-      const updatedOptions = { ...prev };
-      if (!updatedOptions[fieldName]) {
-        updatedOptions[fieldName] = [];
-      }
-      const existingGroup = updatedOptions[fieldName].find(
-        (g) => g.group === group
-      );
-      if (existingGroup) {
-        existingGroup.options.push({ label: value, value });
-      } else {
-        updatedOptions[fieldName].push({
-          group,
-          options: [{ label: value, value }],
-        });
-      }
-      return updatedOptions;
-    });
+    try {
+      setCustomOptions((prev) => {
+        const updatedOptions = { ...prev };
+        if (!updatedOptions[fieldName]) {
+          updatedOptions[fieldName] = [];
+        }
+        const existingGroup = updatedOptions[fieldName].find(
+          (g) => g.group === group
+        );
+
+        if (existingGroup) {
+          const valueExists = existingGroup.options.some(
+            (option) => option.value === value
+          );
+          if (!valueExists) {
+            existingGroup.options.push({ label: value, value });
+          }
+        } else {
+          // Add a new group with the provided value
+          updatedOptions[fieldName].push({
+            group,
+            options: [{ label: value, value }],
+          });
+        }
+        return updatedOptions;
+      });
+    } catch (error) {
+      console.log("Error Adding Custom options");
+    }
   };
 
   const renderField = (field: FormFieldType) => {
     let options: GroupedSelectOption[];
-    if (field.type === "select" || field.type === "multi-select") {
-      options = Object.values(
-        [...(field.options || []), ...(customOptions[field.name] || [])].reduce(
-          (acc: Record<string, GroupedSelectOption>, curr) => {
-            if (!acc[curr.group]) {
-              acc[curr.group] = { group: curr.group, options: [] };
-            }
-            acc[curr.group].options.push(...curr.options);
-            return acc;
-          },
-          {} as Record<string, GroupedSelectOption>
-        )
-      );
+    if (field.options) {
+      if (field.type === "select" || field.type === "multi-select") {
+        try {
+          options = Object.values(
+            [
+              ...(field.options || []),
+              ...(customOptions[field.name] || []),
+            ].reduce((acc: Record<string, GroupedSelectOption>, curr) => {
+              if (!acc[curr.group]) {
+                acc[curr.group] = { group: curr.group, options: [] };
+              }
+              acc[curr.group].options.push(...curr.options);
+              return acc;
+            }, {} as Record<string, GroupedSelectOption>)
+          );
+        } catch {
+          options = field.options;
+        }
+      }
     }
 
     return (
@@ -615,15 +630,19 @@ export function DynamicForm({
       <CardContent>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit(onSubmit)(e);
+            }}
             className="space-y-6"
-            id={`form-${id}`}
+            id={formId}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {config.fields.map(renderField)}
             </div>
             <div className="relative w-full flex justify-end items-center">
-              <Button type="submit" size={"lg"} form={`form-${id}`}>
+              <Button type="submit" size={"lg"} form={formId}>
                 {submitBtnText}
               </Button>
             </div>

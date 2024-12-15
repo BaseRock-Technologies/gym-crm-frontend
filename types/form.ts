@@ -1,6 +1,4 @@
-import { LucideIcon } from "lucide-react";
-
-export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone' | 'email';
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone' | 'email' | 'image' | 'file';
 
 export interface SelectOption {
   label: string;
@@ -47,18 +45,30 @@ export interface FormFieldBase {
 }
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
-  allowAddCustomOption: true; // When true
-  addCustomOptionForm: FormConfig; // Required
+  allowAddCustomOption: true; 
+  addCustomOptionForm: FormConfig; 
   primaryFieldValue: string;
 }
 
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
-  allowAddCustomOption?: false; // Optional or false
-  addCustomOptionForm?: never; // Not allowed
+  allowAddCustomOption?: false; 
+  addCustomOptionForm?: never; 
   primaryFieldValue?: never;
 }
 
-export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;
+export interface FormFieldWithImageUpload extends FormFieldBase {
+  type: 'image';
+  formatsAccepted?: string[];
+  maxSize?: number; // in bytes
+}
+
+export interface FormFieldWithFileUpload extends FormFieldBase {
+  type: 'file';
+  formatsAccepted?: string[];
+  maxSize?: number; // in bytes
+}
+
+export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions | FormFieldWithImageUpload | FormFieldWithFileUpload;
 
 
 export interface FormConfig {
@@ -66,4 +76,6 @@ export interface FormConfig {
   title: string;
   fields: FormField[];
 }
+
+
 

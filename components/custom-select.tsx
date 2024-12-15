@@ -55,7 +55,7 @@ export function CustomSelect({
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const [customOptionGroupDialog, setCustomOptionGroupDialog] =
-    React.useState<string>("");
+    React.useState<string>(options.length === 1 ? options[0].group : "");
 
   const selectOptionsGroups = options.map((element) => element.group);
 
@@ -139,7 +139,7 @@ export function CustomSelect({
                       open={dialogOpen}
                       onOpenChange={(open) => {
                         setDialogOpen(open);
-                        if (!open) {
+                        if (!open && options.length > 1) {
                           setCustomOptionGroupDialog("");
                         }
                       }}
@@ -167,7 +167,6 @@ export function CustomSelect({
                         </DialogHeader>
                         {customOptionGroupDialog ? (
                           <DynamicForm
-                            id={`custom-option-${fieldName}`}
                             submitBtnText="Add"
                             storeFormValues={handleAddCustomOption}
                             config={addCustomOptionForm}
