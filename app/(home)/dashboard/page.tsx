@@ -10,12 +10,13 @@ import UpcomingRenewals from "@/components/dashboard/UpcomingRenewals";
 import InconsistentClients from "@/components/dashboard/InconsistentClients";
 import Birthdays from "@/components/dashboard/Birthdays";
 import Anniversary from "@/components/dashboard/Anniversary";
+import TodaySchedule from "@/components/dashboard/TodaySchedule";
 
 const DashboardPage = () => {
   return (
     <div className="relative w-full h-full space-y-12 px-2 pt-8">
       <Tabs
-        defaultValue="follow-ups"
+        defaultValue="quick-manage"
         className="relative w-full h-full overflow-hidden"
       >
         <div className="relative w-full">
@@ -39,58 +40,58 @@ const DashboardPage = () => {
           <div className="absolute bottom-0 w-full h-[2px] bg-gray-100 z-0"></div>
         </div>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 container mx-auto overflow-y-auto scrollbar-none"
           value="quick-manage"
         >
           <QuickManage />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="follow-ups"
         >
           <FollowUp />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="pending-inquiries"
         >
           <PendingInquiries />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="pending-payments"
         >
           <PendingPayments />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="upcoming-renewals"
         >
           <UpcomingRenewals />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="inconsistant-clients"
         >
           <InconsistentClients />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="birthdays"
         >
           <Birthdays />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="anniversary"
         >
           <Anniversary />
         </TabsContent>
         <TabsContent
-          className="relative w-full h-full pb-8 overflow-y-auto scrollbar-none"
+          className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
           value="today-schedule"
         >
-          Todays Schedule
+          <TodaySchedule />
         </TabsContent>
       </Tabs>
     </div>

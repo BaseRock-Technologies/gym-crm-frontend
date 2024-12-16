@@ -97,10 +97,12 @@ const tableConfig: TableConfig = {
     },
     {
       id: "whatsapp",
+      label: "Whatsapp",
       type: "button",
       icon: Send,
       onClick: (row) => console.log("Whatapp", row),
       customClass: "bg-green-500",
+      btnType: "icon",
     },
   ],
   filters: [

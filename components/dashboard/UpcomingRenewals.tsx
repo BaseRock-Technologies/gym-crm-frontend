@@ -74,9 +74,5 @@ const tableConfig: TableConfig = {
 };
 
 export default function UpcomingRenewals() {
-  return (
-    <div className="container mx-auto py-5">
-      <DataTableWrapper config={tableConfig} initialData={mockData} />
-    </div>
-  );
+  return <DataTableWrapper config={tableConfig} initialData={mockData} />;
 }

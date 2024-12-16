@@ -35,8 +35,10 @@ interface OutOfActionsLinkConfig {
 interface OutOfActionsBtnConfig {
   id: string
   type: "button"
+  label: string
   icon: LucideIcon,
   customClass?: string,
+  btnType: "icon" | "btn"
   onClick: (row: any) => void
 }
 

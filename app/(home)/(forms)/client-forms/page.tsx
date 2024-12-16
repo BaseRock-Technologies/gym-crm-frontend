@@ -1,7 +1,11 @@
-import React from "react";
+import ClientFormIndex from "@/components/client-forms/ClientFormIndex";
 
 const Forms = () => {
-  return <div>Forms</div>;
+  return (
+    <div>
+      <ClientFormIndex />
+    </div>
+  );
 };
 
 export default Forms;

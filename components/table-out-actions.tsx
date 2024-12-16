@@ -31,19 +31,31 @@ export function TableOutOfActions({ actions, row }: TableOutOfActionsProps) {
               );
 
             case "button":
-              return (
-                <Button
-                  key={action.id}
-                  size="icon"
-                  onClick={() => action.onClick(row)}
-                  className={cn(
-                    "gap-1 bg-primary rounded-full p-2",
-                    action.customClass
-                  )}
-                >
-                  <action.icon className="text-white w-4 h-4" />
-                </Button>
-              );
+              if (action.btnType === "icon") {
+                return (
+                  <Button
+                    key={action.id}
+                    size="icon"
+                    onClick={() => action.onClick(row)}
+                    className={cn(
+                      "gap-1 bg-primary rounded-full p-2",
+                      action.customClass
+                    )}
+                  >
+                    <action.icon className="text-white w-4 h-4" />
+                  </Button>
+                );
+              } else {
+                return (
+                  <Button
+                    key={action.id}
+                    onClick={() => action.onClick(row)}
+                    className={cn("gap-1", action.customClass)}
+                  >
+                    {action.label}
+                  </Button>
+                );
+              }
 
             default:
               return null;

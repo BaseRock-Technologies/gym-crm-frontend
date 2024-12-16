@@ -29,7 +29,7 @@ const QuickManage = () => {
   const calendarToRef = useRef<CalendarInputRef>(null);
 
   return (
-    <div className="relative space-y-12 p-8">
+    <div className="relative space-y-12 pt-6 pb-8">
       <div className="flex-1 space-y-6">
         <div>
           <div className="flex items-center justify-between">

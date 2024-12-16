@@ -8,13 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { TableFilters } from "./table-filters";
 import { TableActions } from "./table-actions";
@@ -127,7 +120,7 @@ export function DataTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!isLoading && (
+            {!isLoading ? (
               <>
                 {data.length > 0 ? (
                   data.map((row) => (
@@ -149,12 +142,14 @@ export function DataTable({
                             : row[column.accessorKey]}
                         </TableCell>
                       ))}
-                      {config.actions && (
+                      {(config.actions || config.outOfActions) && (
                         <TableCell
                           className="flex gap-2 flex-wrap"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <TableActions actions={config.actions} row={row} />
+                          {config.actions && config.actions.length > 0 && (
+                            <TableActions actions={config.actions} row={row} />
+                          )}
                           {config.outOfActions && (
                             <TableOutOfActions
                               actions={config.outOfActions}
@@ -178,6 +173,10 @@ export function DataTable({
                   </TableRow>
                 )}
               </>
+            ) : (
+              <TableRow>
+                <TableCell className="relative h-20 "></TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
