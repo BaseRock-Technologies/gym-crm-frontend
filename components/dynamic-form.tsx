@@ -765,3 +765,10 @@ export function DynamicForm({
 
 
  // "react-dom": "19.0.0-rc-66855b96-20241106",
+
+
+10.4 ApiKeys:
+	ApiKeys are the wway to interact with hyrenet through the use of external api. Using api keys you can fetch the details from the space using the api keys. CLick on Create API Key to create a new one, enter the api key and click on Create API key to create a new one, else click on cancel to close the progress of creating one.
+	To Delete an api key, under the actions column click on three dots and then Click on Delete to delete the api key, only the person who created that api key can delete it.
+	Each api key has certain details like When it is created, and last used and how many times that particular api key is used will be there.
+	

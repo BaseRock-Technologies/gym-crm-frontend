@@ -4,6 +4,13 @@ interface SigninResponse {
     authToken: string
 }
 
+type Status = "error" | "success"
+interface StatusResponse {
+    status: Status,
+    message: string,
+    authToken: string
+}
+
 interface User {
     userName: string,
     authToken: string,
@@ -12,5 +19,6 @@ interface User {
 
 export type {
     SigninResponse,
+    StatusResponse,
     User
 }

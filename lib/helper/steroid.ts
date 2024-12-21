@@ -53,6 +53,7 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
       return responseData;
   } catch (error) {
       console.error('Error:', error);
+      return { status: 'error', message: 'Failed to fetch' };
   }
 };
 

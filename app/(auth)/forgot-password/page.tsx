@@ -1,54 +1,65 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 import bannerImage from "@/public/assets/images/forgot-banner.jpg";
+import { post } from "@/lib/helper/steroid";
+import SpinnerTick from "@/components/Images/SpinnerTick";
+import { showToast } from "@/lib/helper/toast";
+import { StatusResponse } from "@/types/response";
+
+// Define the form schema
+const formSchema = z.object({
+  input: z.string().refine((val) => {
+    // Check if it's a valid email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Check if it's a valid mobile number (assuming 10 digits)
+    const mobileRegex = /^[0-9]{10}$/;
+    return emailRegex.test(val) || mobileRegex.test(val);
+  }, "Please enter a valid email address or mobile number"),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function ForgotPassword() {
-  const [emailError, setEmailError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const emailRef = useRef<HTMLInputElement | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
 
-  // Reset error states
-  const resetErrorStates = () => {
-    emailRef.current!.value = "";
-    setEmailError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const email = emailRef.current?.value.trim();
-
-    resetErrorStates();
-
-    let hasError = false;
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      setEmailError("Email is required");
-      hasError = true;
-    } else if (!emailRegex.test(email)) {
-      setEmailError("Please enter a valid email address");
-      hasError = true;
-    }
-
-    if (hasError) {
-      setTimeout(() => {
-        resetErrorStates();
-      }, 3000);
-      return;
-    }
-
-    // If no errors, proceed with form submission
-    if (!emailError) {
-      console.log("Form submitted with:", { email });
+  const onSubmit = async (data: FormData) => {
+    try {
+      setLoading(true);
+      const isEmail = data.input.includes("@");
+      const payload = isEmail ? { email: data.input } : { mobile: data.input };
+      const res: StatusResponse = await post(payload, "auth/forgot-password");
+      const { status, message } = res;
+      if (status === "success") {
+        showToast("success", "Reset instructions send to mail");
+        reset();
+        return;
+      }
+      showToast("error", message);
+    } catch (error) {
+      showToast("error", "Error Occured");
+    } finally {
+      setLoading(false);
+      setSubmitError(null);
     }
   };
 
@@ -73,7 +84,7 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-4 text-center">
             <Dumbbell className="w-10 h-10 mx-auto text-helper-primary" />
-            <div className=" text-center space-y-2">
+            <div className="text-center space-y-2">
               <h1 className="text-3xl font-extrabold text-primary">
                 Forgot Password?
               </h1>
@@ -83,16 +94,18 @@ export default function ForgotPassword() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <Input
-                name="email"
+                {...register("input")}
+                name="input"
                 type="text"
-                placeholder="Email"
+                placeholder="Email or Mobile Number"
                 className="h-12"
-                errorMessage={emailError}
-                ref={emailRef}
               />
+              {errors.input && (
+                <p className="text-red-500 text-sm">{errors.input.message}</p>
+              )}
             </div>
 
             <div className="relative w-full flex justify-end items-center">
@@ -101,9 +114,13 @@ export default function ForgotPassword() {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full h-12">
-              Continue
+            <Button type="submit" className="w-full h-12" disabled={loading}>
+              {loading ? <SpinnerTick /> : "Continue"}
             </Button>
+
+            {submitError && (
+              <p className="text-red-500 text-sm text-center">{submitError}</p>
+            )}
           </form>
         </div>
       </div>
