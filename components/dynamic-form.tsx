@@ -23,6 +23,7 @@ import {
   FormConfig,
   FormField as FormFieldType,
   GroupedSelectOption,
+  SelectOption,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
@@ -35,6 +36,7 @@ import {
 import { format } from "date-fns";
 import { FileUpload } from "./file-upload";
 import { ImageIcon } from "lucide-react";
+import { TimePickerDetailed } from "./time-picker-detailed";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -175,6 +177,34 @@ export function DynamicForm({
               }
               if (val) {
                 const isMatch = /^([1-9]|1[0-2]):00 (AM|PM)$/.test(val);
+                if (!isMatch) {
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid ${field.label}`,
+                  });
+                }
+              }
+            });
+          break;
+        case "time-detailed":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (typeof val === "string") {
+                return val.trim(); // Trim whitespace from the value
+              }
+              return val;
+            }, z.string())
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val) {
+                const isMatch = /^([1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/.test(
+                  val
+                );
                 if (!isMatch) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -402,13 +432,13 @@ export function DynamicForm({
     ),
   });
 
-  const evaluateFormula = (formula: string, values: Record<string, any>) => {
+  const evaluateFormula = (
+    formula: (values: Record<string, any>, options?: SelectOption[]) => any,
+    values: Record<string, any>,
+    options?: SelectOption[]
+  ) => {
     try {
-      const safeEval = new Function(
-        ...Object.keys(values),
-        `return ${formula}`
-      );
-      return safeEval(...Object.values(values));
+      return formula(values, options);
     } catch (error) {
       console.error("Error evaluating formula:", error);
       return undefined;
@@ -416,26 +446,52 @@ export function DynamicForm({
   };
 
   const handleFieldChange = (name: string, value: any) => {
-    setFormValues((prev) => {
-      const newValues = { ...prev, [name]: value };
-
-      config.fields.forEach((field) => {
-        if (field.dependsOn && field.dependsOn.field === name) {
+    const newValues = { ...formValues, [name]: value };
+    let fieldsUpdated = false;
+    config.fields.forEach((field) => {
+      if (field.dependsOn) {
+        const dependentFields = field.dependsOn.field
+          .split(",")
+          .map((f) => f.trim());
+        if (dependentFields.includes(name)) {
+          let fieldOptions: SelectOption[] = [];
+          dependentFields.forEach((depField) => {
+            const fieldFromConfig = config.fields.find(
+              (item) => item.name === depField
+            );
+            if (
+              fieldFromConfig?.type === "multi-select" ||
+              fieldFromConfig?.type === "select"
+            ) {
+              fieldOptions = [
+                ...fieldOptions,
+                ...(fieldFromConfig.options || []),
+                ...(newValues[fieldFromConfig.name]?.options || []),
+              ]
+                .flatMap((item) => item.options)
+                .filter(Boolean);
+            }
+          });
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
-            newValues
+            newValues,
+            fieldOptions
           );
+          const fieldName = field.name;
           if (calculatedValue !== undefined) {
-            form.setValue(field.name, calculatedValue);
-            newValues[field.name] = calculatedValue;
+            newValues[fieldName] = calculatedValue;
+            form.setValue(fieldName, calculatedValue);
           } else {
-            form.setValue(field.name, "");
-            newValues[field.name] = "";
+            newValues[fieldName] = "";
+            form.setValue(fieldName, "");
           }
+          fieldsUpdated = true;
         }
-      });
-      return newValues;
+      }
     });
+    if (fieldsUpdated) {
+      setFormValues(newValues);
+    }
   };
 
   const onSubmit = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
@@ -533,7 +589,7 @@ export function DynamicForm({
           <FormItem>
             {(!field.labelPos ||
               (field.labelPos && field.labelPos === "right")) && (
-              <FormLabel>
+              <FormLabel className={`${!field.label && "h-6 flex"}`}>
                 {field.label}
                 {field.required && <span className="text-red-500">*</span>}
               </FormLabel>
@@ -615,6 +671,14 @@ export function DynamicForm({
                 </Popover>
               ) : field.type === "time" ? (
                 <TimePicker
+                  value={formField.value}
+                  onChange={(value) => {
+                    formField.onChange(value);
+                    handleFieldChange(field.name, value);
+                  }}
+                />
+              ) : field.type === "time-detailed" ? (
+                <TimePickerDetailed
                   value={formField.value}
                   onChange={(value) => {
                     formField.onChange(value);
@@ -762,13 +826,3 @@ export function DynamicForm({
     </Card>
   );
 }
-
-
- // "react-dom": "19.0.0-rc-66855b96-20241106",
-
-
-10.4 ApiKeys:
-	ApiKeys are the wway to interact with hyrenet through the use of external api. Using api keys you can fetch the details from the space using the api keys. CLick on Create API Key to create a new one, enter the api key and click on Create API key to create a new one, else click on cancel to close the progress of creating one.
-	To Delete an api key, under the actions column click on three dots and then Click on Delete to delete the api key, only the person who created that api key can delete it.
-	Each api key has certain details like When it is created, and last used and how many times that particular api key is used will be there.
-	

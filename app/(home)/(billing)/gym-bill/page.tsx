@@ -1,7 +1,8 @@
+import GymPackage from "@/components/bills/GymPackage";
 import React from "react";
 
 const GymBill = () => {
-  return <div>GymBill</div>;
+  return <GymPackage />;
 };
 
 export default GymBill;

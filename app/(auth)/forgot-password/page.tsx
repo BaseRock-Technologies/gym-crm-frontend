@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Dumbbell } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,13 +15,13 @@ import { post } from "@/lib/helper/steroid";
 import SpinnerTick from "@/components/Images/SpinnerTick";
 import { showToast } from "@/lib/helper/toast";
 import { StatusResponse } from "@/types/response";
+import { useAuth } from "@/lib/context/authContext";
+import { useRouter } from "next/navigation";
 
 // Define the form schema
 const formSchema = z.object({
   input: z.string().refine((val) => {
-    // Check if it's a valid email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // Check if it's a valid mobile number (assuming 10 digits)
     const mobileRegex = /^[0-9]{10}$/;
     return emailRegex.test(val) || mobileRegex.test(val);
   }, "Please enter a valid email address or mobile number"),
@@ -31,7 +31,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ForgotPassword() {
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [apiLoading, setApiLoading] = useState<boolean>(false);
+
+  const router = useRouter();
+  const { loading, user } = useAuth();
 
   const {
     register,
@@ -44,7 +47,7 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      setLoading(true);
+      setApiLoading(true);
       const isEmail = data.input.includes("@");
       const payload = isEmail ? { email: data.input } : { mobile: data.input };
       const res: StatusResponse = await post(payload, "auth/forgot-password");
@@ -58,14 +61,25 @@ export default function ForgotPassword() {
     } catch (error) {
       showToast("error", "Error Occured");
     } finally {
-      setLoading(false);
+      setApiLoading(false);
       setSubmitError(null);
     }
   };
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading]);
+
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Left side - Image placeholder */}
+      {loading && (
+        <div className="absolute  top-0 left-0 w-full min-h-screen z-50 bg-backgroudOverlay flex justify-center items-center">
+          <SpinnerTick />
+        </div>
+      )}
+
       <div className="relative hidden md:flex md:w-3/5 bg-black">
         <div className="absolute top-0 left-0 w-full h-full bg-black/50"></div>
         <Image
@@ -114,8 +128,8 @@ export default function ForgotPassword() {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full h-12" disabled={loading}>
-              {loading ? <SpinnerTick /> : "Continue"}
+            <Button type="submit" className="w-full h-12" disabled={apiLoading}>
+              {apiLoading ? <SpinnerTick /> : "Continue"}
             </Button>
 
             {submitError && (

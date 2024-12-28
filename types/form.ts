@@ -1,8 +1,9 @@
-export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'phone' | 'email' | 'image' | 'file';
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file';
 
 export interface SelectOption {
   label: string;
   value: string;
+  [key: string]: any;
 }
 
 export interface GroupedSelectOption {
@@ -18,8 +19,9 @@ export interface MultiSelectOption {
 
 export interface FieldDependency {
   field: string;
-  formula: string; 
+  formula: (values: Record<string, any>, options?: SelectOption[]) => any; 
 }
+
 
 type LabelPostion = "right" | "left";
 
@@ -29,7 +31,7 @@ export interface FormFieldBase {
   labelPos?: LabelPostion;
   type: FieldType;
   required?: boolean;
-  options?: GroupedSelectOption[];
+  options?: GroupedSelectOption[] | [];
   placeholder?: string;
   defaultValue?: string | number | boolean;
   dependsOn?: FieldDependency;
@@ -45,6 +47,7 @@ export interface FormFieldBase {
   formatsAccepted?: string[];
   formatsAcceptedPlaceholder?: string[];
   maxSize?: number; // in bytes
+  editable?: boolean;
 }
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
@@ -66,4 +69,5 @@ export interface FormConfig {
   id: string;
   title: string;
   fields: FormField[];
+  additionalData?: Record<string, any>
 }

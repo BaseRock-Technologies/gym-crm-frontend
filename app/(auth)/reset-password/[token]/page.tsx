@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,6 +14,7 @@ import { Dumbbell } from "lucide-react";
 import Image from "next/image";
 import bannerImage from "@/public/assets/images/login-banner.jpg";
 import Link from "next/link";
+import { useAuth } from "@/lib/context/authContext";
 
 const formSchema = z
   .object({
@@ -32,9 +33,12 @@ interface ResetPasswordProps {
 }
 
 const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
-  const [loading, setLoading] = useState(false);
+  const [apiLoading, setApiLoading] = useState(false);
   const router = useRouter();
   const { token } = React.use(params);
+
+  const { loading, user } = useAuth();
+  console.log(loading);
 
   const {
     register,
@@ -47,7 +51,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      setLoading(true);
+      setApiLoading(true);
       const payload = {
         token,
         password: data.newPassword,
@@ -63,13 +67,24 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
     } catch (error) {
       showToast("error", "An error occurred.");
     } finally {
-      setLoading(false);
+      setApiLoading(false);
       reset();
     }
   };
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading]);
+
   return (
     <div className="relative w-full min-h-screen flex bg-gray-50">
+      {loading && (
+        <div className="absolute  top-0 left-0 w-full min-h-screen z-50 bg-backgroudOverlay flex justify-center items-center">
+          <SpinnerTick />
+        </div>
+      )}
       {/* Left side - Image placeholder */}
       <div className="relative hidden md:flex md:w-3/5 bg-black">
         <div className="absolute top-0 left-0 w-full h-full bg-black/50"></div>
@@ -126,8 +141,8 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ params }) => {
               )}
             </div>
 
-            <Button type="submit" className="w-full h-12" disabled={loading}>
-              {loading ? <SpinnerTick /> : "Reset Password"}
+            <Button type="submit" className="w-full h-12" disabled={apiLoading}>
+              {apiLoading ? <SpinnerTick /> : "Reset Password"}
             </Button>
           </form>
 

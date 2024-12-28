@@ -13,7 +13,6 @@ import { SigninResponse } from "@/types/response";
 import { useAuth } from "@/lib/context/authContext";
 import Cookies from "js-cookie";
 import { showToast } from "@/lib/helper/toast";
-import { Spinner } from "@/components/ui/spinner";
 import { InputWithError } from "@/components/ui/inputWithError";
 import SpinnerTick from "@/components/Images/SpinnerTick";
 
@@ -39,6 +38,7 @@ export default function SignInForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (authenticating) return;
     e.preventDefault();
     setAuthenticating(true);
     const userName = userNameRef.current?.value.trim();
@@ -76,6 +76,7 @@ export default function SignInForm() {
             expires: 1,
           });
           router.push("/dashboard");
+          return;
         }
 
         if (res.status === "error") {
@@ -84,8 +85,8 @@ export default function SignInForm() {
       } else {
         showToast("error", "Error Occured");
       }
-      resetErrorStates();
       setAuthenticating(false);
+      resetErrorStates();
     }
   };
 
@@ -134,7 +135,7 @@ export default function SignInForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <InputWithError
                   name="username"
                   type="text"
@@ -164,10 +165,10 @@ export default function SignInForm() {
 
               {authenticating ? (
                 <div className="inline-flex items-center justify-center rounded-md w-full h-12 bg-primary text-white shadow hover:bg-primary/90 px-4 py-2">
-                  <Spinner />
+                  <SpinnerTick />
                 </div>
               ) : (
-                <Button type="submit" className="w-full h-12">
+                <Button size="lg" type="submit" className="w-full h-12">
                   Log In
                 </Button>
               )}

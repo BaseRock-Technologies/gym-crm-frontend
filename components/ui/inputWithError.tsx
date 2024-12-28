@@ -28,7 +28,9 @@ const InputWithError = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
         </div>
-        <p className="text-xs h-4 text-red-500 mt-1">{errorMessage || ""}</p>
+        {errorMessage && (
+          <p className="text-xs h-4 text-red-500 mt-1">{errorMessage}</p>
+        )}
       </div>
     );
   }
