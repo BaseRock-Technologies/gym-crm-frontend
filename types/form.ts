@@ -48,6 +48,7 @@ export interface FormFieldBase {
   formatsAcceptedPlaceholder?: string[];
   maxSize?: number; // in bytes
   editable?: boolean;
+  conditionalFields?: Record<string, FormField[]>;
 }
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
@@ -64,10 +65,22 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
 
 export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;
 
+export interface FormGroup {
+  id: string;
+  title: string;
+  accordianOpenTitle?: string;
+  type: 'accordion' | 'background' | 'default' | 'action-group';
+  backgroundColor?: string;
+  fields: string[];
+  className?: string;
+  renderType?: 'accordion' | 'background' | 'default';
+  layout?: 'row' | 'col' | 'grid';
+}
 
 export interface FormConfig {
   id: string;
   title: string;
+  groups?: FormGroup[];
   fields: FormField[];
-  additionalData?: Record<string, any>
 }
+

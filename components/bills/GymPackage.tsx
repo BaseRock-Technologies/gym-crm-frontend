@@ -1,7 +1,9 @@
 "use client";
 import { DynamicForm } from "@/components/dynamic-form";
+import { useAuth } from "@/lib/context/authContext";
 import { showToast } from "@/lib/helper/toast";
-import { FormConfig } from "@/types/form";
+import { FormConfig, FormField, FormGroup } from "@/types/form";
+import React from "react";
 
 const PackageCustomAddOptionForm: FormConfig = {
   id: "new-package",
@@ -94,6 +96,20 @@ const ClientSourceCustomAddOptionForm: FormConfig = {
   ],
 };
 
+const PaytmMethodCustomAddOptionForm: FormConfig = {
+  id: "add-payment",
+  title: "Add Payment Method",
+  fields: [
+    {
+      name: "paymentMethod",
+      label: "Payment Method",
+      type: "text",
+      required: true,
+      placeholder: "method",
+    },
+  ],
+};
+
 const TaxCustomAddOptionForm: FormConfig = {
   id: "tax-details",
   title: "Add tax",
@@ -115,9 +131,105 @@ const TaxCustomAddOptionForm: FormConfig = {
   ],
 };
 
+const chequeConditionalFields: FormField[] = [
+  {
+    name: "chequeNumber",
+    label: "Cheque Number",
+    type: "text",
+    required: true,
+  },
+  {
+    name: "chequeDate",
+    label: "Cheque Date",
+    type: "date",
+    required: true,
+  },
+  {
+    name: "chequeStatus",
+    label: "Cheque Status",
+    type: "select",
+    options: [
+      {
+        group: "default",
+        options: [
+          { label: "Pending", value: "pending" },
+          { label: "Cleared", value: "cleared" },
+          { label: "Bounced", value: "bounced" },
+        ],
+      },
+    ],
+    required: true,
+  },
+];
+
 const formConfig: FormConfig = {
   id: "gym-package",
   title: "Create new bill for Gym Membership",
+  groups: [
+    {
+      id: "personal-info",
+      title: "Personal Information",
+      type: "default",
+      fields: [
+        "memberID",
+        "invoiceDate",
+        "clientName",
+        "contactNumber",
+        "alternateContact",
+        "email",
+        "clientSource",
+      ],
+    },
+    {
+      id: "more-personal-info",
+      title: "More Details",
+      accordianOpenTitle: "Hide Details",
+      type: "accordion",
+      fields: [
+        "gender",
+        "birthday",
+        "anniversary",
+        "profession",
+        "taxId",
+        "workoutHourmorning",
+        "workoutHourevening",
+        "areaAddress",
+        "remarks",
+        "picture",
+      ],
+    },
+    {
+      id: "package-info",
+      title: "Package Information",
+      type: "background",
+      backgroundColor: "bg-transparent",
+      fields: [
+        "package",
+        "joiningDate",
+        "endDate",
+        "packagePrice",
+        "discount",
+        "discountAmount",
+        "admissionCharges",
+        "taxCalc",
+        "amountPayable",
+        "amountPaid",
+        "paymentMode",
+        "balanceAmount",
+        "trainer",
+        "clientRepresentative",
+      ],
+    },
+    {
+      id: "actions",
+      title: "Actions",
+      type: "action-group",
+      renderType: "default",
+      backgroundColor: "bg-transparent",
+      layout: "col",
+      fields: ["sendTextAndEmail", "sendWhatsapp"],
+    },
+  ],
   fields: [
     {
       name: "memberID",
@@ -327,7 +439,7 @@ const formConfig: FormConfig = {
             0;
           if ((packagePrice * discount) / 100 > maxDiscount)
             showToast("info", `Max Discount is ${maxDiscount}`, {
-              toastId: "maxDiscount",
+              toastId: "019411cb-5477-7a10-869e-cedb19af7489",
             });
           return Math.min((packagePrice * discount) / 100, maxDiscount).toFixed(
             2
@@ -397,13 +509,150 @@ const formConfig: FormConfig = {
         },
       },
     },
+    {
+      name: "amountPaid",
+      label: "Amount Paid",
+      type: "decimal",
+      placeholder: "paid",
+    },
+    {
+      name: "paymentMode",
+      label: "Payment Mode",
+      options: [
+        {
+          group: "default",
+          options: [
+            { label: "Cash", value: "cash" },
+            { label: "Cheque", value: "cheque" },
+            { label: "Card", value: "card" },
+          ],
+        },
+      ],
+      type: "select",
+      placeholder: "Select method",
+      conditionalFields: {
+        cheque: chequeConditionalFields,
+      },
+      allowAddCustomOption: true,
+      addCustomOptionForm: PaytmMethodCustomAddOptionForm,
+      primaryFieldValue: "paymentMethod",
+    },
+    {
+      name: "balanceAmount",
+      label: "Balance",
+      type: "decimal",
+      placeholder: "paid",
+      dependsOn: {
+        field: "amountPayable, amountPaid",
+        formula: (values) => {
+          const amountPaid: number = parseFloat(values.amountPaid) || 0;
+          const amountPayable: number = parseFloat(values.amountPayable) || 0;
+          if (amountPaid > amountPayable) {
+            showToast(
+              "error",
+              "Total amount paid is greater than amount payable",
+              { toastId: "019411cb-2722-7096-b07d-4a743ac6518e" }
+            );
+            return amountPayable;
+          }
+          const priceCalculates = amountPayable - amountPaid;
+          return priceCalculates.toFixed(2);
+        },
+      },
+    },
+    {
+      name: "clientRepresentative",
+      label: "Client Representative",
+      type: "text",
+      placeholder: "rep",
+      editable: false,
+    },
+    {
+      name: "trainer",
+      label: "Appoint Trainer",
+      type: "select",
+      options: [
+        {
+          group: "default",
+          options: [
+            {
+              label: "hari",
+              value: "hari",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "trainer",
+      label: "Appoint Trainer",
+      type: "select",
+      options: [
+        {
+          group: "default",
+          options: [
+            {
+              label: "hari",
+              value: "hari",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "sendTextAndEmail",
+      label: "Send Text & Email",
+      type: "checkbox",
+      labelPos: "left",
+    },
+    {
+      name: "sendWhatsapp",
+      label: "Send WhatsApp",
+      type: "checkbox",
+      labelPos: "left",
+    },
   ],
 };
 
 export default function GymPackage() {
+  const { user } = useAuth();
+  const [initialData, setInitialData] = React.useState<Record<
+    string,
+    any
+  > | null>(null);
+
+  React.useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const data = await new Promise<Record<string, any>>((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                clientName: "John Doe",
+                contactNumber: "1234567890",
+                package: "gold",
+                clientRepresentative: user?.userName || "null",
+              }),
+            1000
+          )
+        );
+        setInitialData(data);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+        showToast("error", "Failed to load initial data");
+      }
+    };
+
+    fetchInitialData();
+  }, [user]);
+
   return (
     <div className="relative p-6 flex flex-col gap-6">
-      <DynamicForm config={formConfig} submitBtnText="Save" />
+      <DynamicForm
+        config={formConfig}
+        submitBtnText="Save"
+        initialData={initialData}
+      />
     </div>
   );
 }

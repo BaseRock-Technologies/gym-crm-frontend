@@ -15,7 +15,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FormConfig, GroupedSelectOption, SelectOption } from "../types/form";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DynamicForm } from "./dynamic-form";
+import { FormConfig, GroupedSelectOption, SelectOption } from "../types/form";
 
 interface CustomSelectProps {
   fieldName: string;
@@ -37,6 +37,7 @@ interface CustomSelectProps {
   addCustomOptionForm?: FormConfig;
   onAddCustomOption?: (value: string, group: string) => void;
   error?: string;
+  disabled: boolean;
 }
 
 export function CustomSelect({
@@ -50,6 +51,7 @@ export function CustomSelect({
   addCustomOptionForm,
   onAddCustomOption,
   error,
+  disabled,
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -79,7 +81,7 @@ export function CustomSelect({
 
   return (
     <div className="space-y-1">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open && !disabled} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             ref={selectTriggerRef}
@@ -89,8 +91,10 @@ export function CustomSelect({
             className={cn(
               "w-full flex justify-between truncate",
               error && "border-red-500",
-              !value && "text-muted-foreground"
+              !value && "text-muted-foreground",
+              disabled && "opacity-50 cursor-not-allowed"
             )}
+            disabled={disabled}
           >
             <p className="relative truncate">{selectedOptionLabel}</p>
             <ChevronsUpDown className="relative ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -101,40 +105,40 @@ export function CustomSelect({
             <CommandInput placeholder="Search an option" />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              {options.length &&
-                options.length > 0 &&
-                options.map((selectGroups) => (
-                  <CommandGroup
-                    key={selectGroups.group}
-                    heading={options.length > 1 ? selectGroups.group : ""}
-                  >
-                    {selectGroups.options &&
-                      selectGroups.options.length > 0 &&
-                      selectGroups.options.map((option) => (
-                        <CommandItem
-                          key={option.value}
-                          value={option.value}
-                          onSelect={() => {
-                            onChange(option.value);
-                            setOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              value === option.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {option.label}
-                        </CommandItem>
-                      ))}
-                  </CommandGroup>
-                ))}
-              <CommandGroup>
-                <CommandItem className="px-0 py-0 text-white mt-1">
-                  {allowAddCustomOption && addCustomOptionForm && (
+              {options.length && options.length > 0
+                ? options.map((selectGroups) => (
+                    <CommandGroup
+                      key={selectGroups.group}
+                      heading={options.length > 1 ? selectGroups.group : ""}
+                    >
+                      {selectGroups.options &&
+                        selectGroups.options.length > 0 &&
+                        selectGroups.options.map((option) => (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            onSelect={() => {
+                              onChange(option.value);
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                value === option.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  ))
+                : null}
+              {allowAddCustomOption && addCustomOptionForm && (
+                <CommandGroup>
+                  <CommandItem className="px-0 py-0 text-white mt-1">
                     <Dialog
                       open={dialogOpen}
                       onOpenChange={(open) => {
@@ -144,10 +148,15 @@ export function CustomSelect({
                         }
                       }}
                     >
-                      <DialogTrigger className="w-full" asChild>
+                      <DialogTrigger
+                        className="w-full"
+                        asChild
+                        disabled={disabled}
+                      >
                         <Button
                           variant="command"
                           className="cursor-pointer w-full justify-start bg-helper-primary"
+                          disabled={disabled}
                         >
                           <Plus />
                           Add option
@@ -189,9 +198,9 @@ export function CustomSelect({
                         )}
                       </DialogContent>
                     </Dialog>
-                  )}
-                </CommandItem>
-              </CommandGroup>
+                  </CommandItem>
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
