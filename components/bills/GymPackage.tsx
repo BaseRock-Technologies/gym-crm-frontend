@@ -1,8 +1,10 @@
 "use client";
 import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
+import { get, post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { FormConfig, FormField, FormGroup } from "@/types/form";
+import { StatusResponse } from "@/types/response";
 import React from "react";
 
 const PackageCustomAddOptionForm: FormConfig = {
@@ -177,7 +179,7 @@ const formConfig: FormConfig = {
         "contactNumber",
         "alternateContact",
         "email",
-        "clientSource",
+        "clientSourceDetails",
       ],
     },
     {
@@ -204,21 +206,40 @@ const formConfig: FormConfig = {
       type: "background",
       backgroundColor: "bg-transparent",
       fields: [
-        "package",
+        "packageDetails",
         "joiningDate",
         "endDate",
         "packagePrice",
         "discount",
         "discountAmount",
         "admissionCharges",
-        "taxCalc",
+        "taxDetails",
         "amountPayable",
         "amountPaid",
         "paymentMode",
         "balanceAmount",
-        "trainer",
-        "clientRepresentative",
       ],
+    },
+    {
+      id: "payment-info",
+      title: "Payment Information",
+      type: "background",
+      backgroundColor: "bg-gray-400",
+      additionalClass: "p-4",
+      fields: [
+        "amount",
+        "followUpDate",
+        "amountStatus",
+        "paymentMethod",
+        "paymentMethodDetail",
+      ],
+    },
+    {
+      id: "trainer-info",
+      title: "Trainer Information",
+      type: "background",
+      backgroundColor: "bg-transparent",
+      fields: ["trainer", "clientRepresentative"],
     },
     {
       id: "actions",
@@ -235,6 +256,7 @@ const formConfig: FormConfig = {
       name: "memberID",
       label: "Member ID",
       type: "text",
+      editable: false,
       required: true,
     },
     {
@@ -242,12 +264,14 @@ const formConfig: FormConfig = {
       label: "Invoice Date",
       type: "date",
       placeholder: "Invoice Date",
+      required: true,
     },
     {
       name: "clientName",
       label: "Client",
       options: [],
       type: "select",
+      required: true,
       placeholder: "Select Client Name",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientCustomAddOptionForm,
@@ -265,7 +289,6 @@ const formConfig: FormConfig = {
       label: "Alternate Contact",
       type: "phone",
       placeholder: "Select Alternate Contact",
-      required: true,
     },
     {
       name: "email",
@@ -274,14 +297,20 @@ const formConfig: FormConfig = {
       placeholder: "Email",
     },
     {
-      name: "clientSource",
+      name: "clientSourceDetails",
       label: "Client Source",
-      options: [],
+      options: [
+        {
+          group: "default",
+          options: [],
+        },
+      ],
       type: "select",
       placeholder: "Select Client Source",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
-      primaryFieldValue: "clientSourceName",
+      primaryFieldValue: "sourceName",
+      shouldAskGroupNameInAddOption: false,
     },
     {
       name: "gender",
@@ -296,44 +325,43 @@ const formConfig: FormConfig = {
         },
       ],
       type: "select",
-      required: true,
       placeholder: "Select gender",
     },
     {
       name: "birthday",
       label: "Birthday",
       type: "date",
-      placeholder: "select birthday",
+      placeholder: "birthday date",
     },
     {
       name: "anniversary",
       label: "Anniversary",
       type: "date",
-      placeholder: "select anniversary",
+      placeholder: "anniversary date",
     },
     {
       name: "profession",
       label: "Profession",
       type: "text",
-      placeholder: "select profession",
+      placeholder: "profession",
     },
     {
       name: "taxId",
       label: "Tax ID",
       type: "text",
-      placeholder: "Select Tax ID",
+      placeholder: "Tax ID",
     },
     {
       name: "workoutHourmorning",
       label: "Workout Hours",
       type: "time-detailed",
-      placeholder: "select workout hour",
+      placeholder: "choose workout hour",
     },
     {
       name: "workoutHourevening",
       label: "",
       type: "time-detailed",
-      placeholder: "select workout hour",
+      placeholder: "choose workout hour",
     },
     {
       name: "areaAddress",
@@ -363,10 +391,13 @@ const formConfig: FormConfig = {
       label: "Joining Date",
       type: "date",
       placeholder: "joining date",
+      required: true,
     },
     {
-      name: "package",
+      name: "packageDetails",
       label: "Package",
+      required: true,
+
       options: [
         {
           group: "default",
@@ -389,6 +420,7 @@ const formConfig: FormConfig = {
     {
       name: "endDate",
       label: "End Date",
+      required: true,
       type: "date",
       placeholder: "end date",
     },
@@ -399,9 +431,10 @@ const formConfig: FormConfig = {
       placeholder: "price",
       editable: false,
       dependsOn: {
-        field: "package",
+        field: "packageDetails",
         formula: (values, options) =>
-          options?.find((opt) => opt.value === values.package)?.price || 0,
+          options?.find((opt) => opt.value === values.packageDetails)?.price ||
+          0,
       },
     },
     {
@@ -415,8 +448,8 @@ const formConfig: FormConfig = {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discountAmount: number = parseFloat(values.discountAmount) || 0;
           const maxDiscount: number =
-            options?.find((opt) => opt.value === values.package)?.discountMax ||
-            0;
+            options?.find((opt) => opt.value === values.packageDetails)
+              ?.discountMax || 0;
           return Math.min(
             (discountAmount / packagePrice) * 100,
             maxDiscount
@@ -430,13 +463,13 @@ const formConfig: FormConfig = {
       type: "decimal",
       placeholder: "discount amount",
       dependsOn: {
-        field: "packagePrice,discount,package",
+        field: "packagePrice,discount,packageDetails",
         formula: (values, options) => {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discount: number = parseFloat(values.discount) || 0;
           const maxDiscount: number =
-            options?.find((opt) => opt.value === values.package)?.discountMax ||
-            0;
+            options?.find((opt) => opt.value === values.packageDetails)
+              ?.discountMax || 0;
           if ((packagePrice * discount) / 100 > maxDiscount)
             showToast("info", `Max Discount is ${maxDiscount}`, {
               toastId: "019411cb-5477-7a10-869e-cedb19af7489",
@@ -454,7 +487,7 @@ const formConfig: FormConfig = {
       placeholder: "admission",
     },
     {
-      name: "taxCalc",
+      name: "taxDetails",
       label: "Tax",
       options: [
         {
@@ -488,17 +521,19 @@ const formConfig: FormConfig = {
       name: "amountPayable",
       label: "Amount Payable",
       type: "decimal",
+      required: true,
+      editable: false,
       placeholder: "payable",
       dependsOn: {
         field:
-          "package, packagePrice,discountAmount,discount,admissionCharges,taxCalc",
+          "packageDetails, packagePrice,discountAmount,discount,admissionCharges,taxDetails",
         formula: (values, options) => {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discountAmount: number = parseFloat(values.discountAmount) || 0;
           const admissionCharges: number =
             parseFloat(values.admissionCharges) || 0;
           const taxPercent: number =
-            options?.find((opt) => opt.value === values.taxCalc)
+            options?.find((opt) => opt.value === values.taxDetails)
               ?.taxPercentage || 0;
           const priceCalculates =
             packagePrice - discountAmount + admissionCharges;
@@ -514,6 +549,7 @@ const formConfig: FormConfig = {
       label: "Amount Paid",
       type: "decimal",
       placeholder: "paid",
+      required: true,
     },
     {
       name: "paymentMode",
@@ -542,6 +578,8 @@ const formConfig: FormConfig = {
       label: "Balance",
       type: "decimal",
       placeholder: "paid",
+      required: true,
+      editable: false,
       dependsOn: {
         field: "amountPayable, amountPaid",
         formula: (values) => {
@@ -561,27 +599,68 @@ const formConfig: FormConfig = {
       },
     },
     {
-      name: "clientRepresentative",
-      label: "Client Representative",
-      type: "text",
-      placeholder: "rep",
+      name: "amount",
+      label: "Amount",
+      type: "decimal",
+      placeholder: "amount",
       editable: false,
+      dependsOn: {
+        field: "amountPayable, amountPaid",
+        formula: (values) => {
+          const amountPaid: number = parseFloat(values.amountPaid) || 0;
+          const amountPayable: number = parseFloat(values.amountPayable) || 0;
+          if (amountPaid > amountPayable) {
+            return amountPayable;
+          }
+          const priceCalculates = amountPayable - amountPaid;
+          return priceCalculates.toFixed(2);
+        },
+      },
     },
     {
-      name: "trainer",
-      label: "Appoint Trainer",
-      type: "select",
+      name: "followUpDate",
+      label: "Followup Date",
+      type: "date",
+    },
+    {
+      name: "amountStatus",
+      label: "Status",
       options: [
         {
           group: "default",
           options: [
-            {
-              label: "hari",
-              value: "hari",
-            },
+            { label: "Pending", value: "pending" },
+            { label: "Paid", value: "paid" },
           ],
         },
       ],
+      type: "select",
+      placeholder: "Select Status",
+    },
+    {
+      name: "paymentMethod",
+      label: "Payment Method",
+      options: [
+        {
+          group: "default",
+          options: [],
+        },
+      ],
+      type: "select",
+      placeholder: "Select method",
+    },
+    {
+      name: "paymentMethodDetail",
+      label: "Payment Method Detail (if any)",
+      type: "textarea",
+    },
+    {
+      name: "clientRepresentative",
+      label: "Client Representative",
+      type: "text",
+      placeholder: "rep",
+      required: true,
+      editable: false,
     },
     {
       name: "trainer",
@@ -624,19 +703,15 @@ export default function GymPackage() {
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const data = await new Promise<Record<string, any>>((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                clientName: "John Doe",
-                contactNumber: "1234567890",
-                package: "gold",
-                clientRepresentative: user?.userName || "null",
-              }),
-            1000
-          )
-        );
+        const data = {
+          clientName: "John Doe",
+          contactNumber: "1234567890",
+          packageDetails: "gold",
+          clientRepresentative: user?.userName || "null",
+        };
         setInitialData(data);
+        const res: StatusResponse = await post({}, "bills/gym-bill");
+        console.log(res);
       } catch (error) {
         console.error("Error fetching initial data:", error);
         showToast("error", "Failed to load initial data");

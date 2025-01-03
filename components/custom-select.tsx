@@ -18,7 +18,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -38,6 +37,7 @@ interface CustomSelectProps {
   onAddCustomOption?: (value: string, group: string) => void;
   error?: string;
   disabled: boolean;
+  shouldAskGroup?: boolean;
 }
 
 export function CustomSelect({
@@ -52,6 +52,7 @@ export function CustomSelect({
   onAddCustomOption,
   error,
   disabled,
+  shouldAskGroup,
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -65,7 +66,11 @@ export function CustomSelect({
 
   const handleAddCustomOption = (value: Record<string, any>) => {
     if (primaryField && onAddCustomOption && allowAddCustomOption) {
-      onAddCustomOption(value[primaryField], customOptionGroupDialog);
+      if (shouldAskGroup) {
+        onAddCustomOption(value[primaryField], customOptionGroupDialog);
+      } else {
+        onAddCustomOption(value[primaryField], options[0].group);
+      }
     }
   };
 
@@ -143,7 +148,7 @@ export function CustomSelect({
                       open={dialogOpen}
                       onOpenChange={(open) => {
                         setDialogOpen(open);
-                        if (!open && options.length > 1) {
+                        if (!open && shouldAskGroup && options.length > 1) {
                           setCustomOptionGroupDialog("");
                         }
                       }}
@@ -162,25 +167,15 @@ export function CustomSelect({
                           Add option
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className=" bg-backgroundSupport">
                         <DialogHeader>
-                          <DialogTitle
-                            className={`${
-                              customOptionGroupDialog ? "hidden" : "flex"
-                            }`}
-                          >
-                            {customOptionGroupDialog
-                              ? `Add ${fieldName} option`
-                              : "Select Group"}
+                          <DialogTitle>
+                            {shouldAskGroup &&
+                              !customOptionGroupDialog &&
+                              "Select Group"}
                           </DialogTitle>
                         </DialogHeader>
-                        {customOptionGroupDialog ? (
-                          <DynamicForm
-                            submitBtnText="Add"
-                            storeFormValues={handleAddCustomOption}
-                            config={addCustomOptionForm}
-                          />
-                        ) : (
+                        {shouldAskGroup && !customOptionGroupDialog ? (
                           <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {selectOptionsGroups.map((group) => (
                               <Button
@@ -195,6 +190,13 @@ export function CustomSelect({
                               </Button>
                             ))}
                           </div>
+                        ) : (
+                          <DynamicForm
+                            submitBtnText="Add"
+                            storeFormValues={handleAddCustomOption}
+                            config={addCustomOptionForm}
+                            shouldFlex={true}
+                          />
                         )}
                       </DialogContent>
                     </Dialog>

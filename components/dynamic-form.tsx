@@ -51,6 +51,7 @@ interface DynamicFormProps {
   storeFormValues?: (value: Record<string, any>) => void;
   submitBtnText?: string;
   initialData?: Record<string, any> | null;
+  shouldFlex?: boolean;
 }
 
 export function DynamicForm({
@@ -58,6 +59,7 @@ export function DynamicForm({
   storeFormValues,
   submitBtnText = "Submit",
   initialData,
+  shouldFlex,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -661,6 +663,7 @@ export function DynamicForm({
                       handleAddCustomOption(field.name, value, group)
                     }
                     disabled={field.editable === false}
+                    shouldAskGroup={field.shouldAskGroupNameInAddOption}
                   />
                 ) : field.type === "multi-select" &&
                   field.multiSelectOptions ? (
@@ -742,7 +745,8 @@ export function DynamicForm({
                 ) : field.type === "decimal" ? (
                   <Input
                     {...formField}
-                    type="text"
+                    type="number"
+                    step={0.01}
                     inputMode="decimal"
                     placeholder={field.placeholder}
                     onChange={(e) => {
@@ -903,7 +907,12 @@ export function DynamicForm({
       );
     } else if (group.type === "background") {
       return (
-        <div className={`rounded-md ${group.backgroundColor}`} key={group.id}>
+        <div
+          className={`rounded-md ${
+            group.backgroundColor
+          } ${group.additionalClass!}`}
+          key={group.id}
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
@@ -1003,7 +1012,7 @@ export function DynamicForm({
       </CardHeader>
       <CardContent className="relative">
         {initialData === null && (
-          <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/80 flex justify-center items-center">
+          <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
             <SpinnerTick color="#1a0f2b" />
           </div>
         )}
@@ -1016,7 +1025,13 @@ export function DynamicForm({
             {config.groups ? (
               config.groups.map(renderGroup)
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-auto">
+              <div
+                className={`${
+                  shouldFlex
+                    ? "flex flex-wrap"
+                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
+                } gap-6`}
+              >
                 {config.fields.map(renderField)}
               </div>
             )}

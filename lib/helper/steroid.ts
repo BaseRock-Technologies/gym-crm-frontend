@@ -57,7 +57,42 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
   }
 };
 
+const get = async (apiPath: string, validateResponse: boolean = true) => {
+  try {
+      const response = await fetch(`${backendApiPath}/${apiPath}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          if (response.status === 401) {
+              Cookies.remove('user');
+              setTimeout(() => {
+                  window.location.href = "/signin";
+              }, 6000);
+              throw new Error('Unauthorized');
+          }
+          throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (validateResponse && responseData.status === 'unauthorized') {
+          Cookies.remove('user');
+          showToast("error", "Access Denied");
+      }
+
+      return responseData;
+  } catch (error) {
+      console.error('Error:', error);
+      return { status: 'error', message: 'Failed to fetch' };
+  }
+};
+
 
 export {
   post,
+  get,
 }

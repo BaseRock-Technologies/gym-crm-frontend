@@ -32,6 +32,7 @@ export interface FormFieldBase {
   type: FieldType;
   required?: boolean;
   options?: GroupedSelectOption[] | [];
+  shouldAskGroupNameInAddOption?: boolean;
   placeholder?: string;
   defaultValue?: string | number | boolean;
   dependsOn?: FieldDependency;
@@ -75,6 +76,7 @@ export interface FormGroup {
   className?: string;
   renderType?: 'accordion' | 'background' | 'default';
   layout?: 'row' | 'col' | 'grid';
+  additionalClass?: string;
 }
 
 export interface FormConfig {

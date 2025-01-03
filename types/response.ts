@@ -8,7 +8,8 @@ type Status = "error" | "success"
 interface StatusResponse {
     status: Status,
     message: string,
-    authToken: string
+    authToken?: string
+    data?: any,
 }
 
 interface User {
