@@ -24,6 +24,12 @@ export interface FieldDependency {
 
 
 type LabelPostion = "right" | "left";
+export type ApiMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
+
+export interface SelectApiData {
+  apiPath: string, 
+  method: ApiMethod
+}
 
 export interface FormFieldBase {
   name: string;
@@ -56,14 +62,16 @@ export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; 
   addCustomOptionForm: FormConfig; 
   primaryFieldValues: string[];
-  targetedFieldNames: string[];
+  valuesToStore: string[];
+  formApiData?: SelectApiData;
 }
 
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   allowAddCustomOption?: false; 
   addCustomOptionForm?: never; 
   primaryFieldValues?: never;
-  targetedFieldNames?: never;
+  valuesToStore?: never;
+  formApiData?: never;
 }
 
 export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;

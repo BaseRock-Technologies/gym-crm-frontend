@@ -20,11 +20,11 @@ import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
 import {
-  FieldType,
   FormConfig,
   FormField as FormFieldType,
   FormGroup,
   GroupedSelectOption,
+  SelectApiData,
   SelectOption,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +46,9 @@ import {
   AccordionContent,
 } from "@radix-ui/react-accordion";
 import SpinnerTick from "./Images/SpinnerTick";
+import { SigninResponse, StatusResponse } from "@/types/query";
+import { get, post } from "@/lib/helper/steroid";
+import { showToast } from "@/lib/helper/toast";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -53,6 +56,7 @@ interface DynamicFormProps {
   submitBtnText?: string;
   initialData?: Record<string, any> | null;
   shouldFlex?: boolean;
+  apiData: SelectApiData | null;
 }
 
 export function DynamicForm({
@@ -61,6 +65,7 @@ export function DynamicForm({
   submitBtnText = "Submit",
   initialData,
   shouldFlex,
+  apiData,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -70,6 +75,7 @@ export function DynamicForm({
   const [openAccordions, setOpenAccordions] = React.useState<
     Record<string, boolean>
   >({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -560,12 +566,62 @@ export function DynamicForm({
     }
   };
 
-  const onSubmit = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
-    console.log(`Form ${formId} submitted with values:`, values);
+  const sendApiRequest = async (
+    data: SelectApiData,
+    postData?: { [key: string]: any }
+  ) => {
+    if (data.method === "POST" && postData) {
+      try {
+        const res: StatusResponse = await post(postData, data.apiPath);
+        if (res.status === "error") {
+          showToast("error", "Failed to process data");
+          return false;
+        }
+        return true;
+      } catch (error) {
+        showToast("error", "Failed to send data");
+        return false;
+      }
+    } else if (data.method === "GET") {
+      try {
+        const res: SigninResponse = await get(data.apiPath);
+        if (res.status === "error") {
+          showToast("error", "Failed to process data");
+          return false;
+        }
+        return true; // Indicate success
+      } catch (error) {
+        showToast("error", "Failed to send data");
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const resetForm = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
     form.reset();
     setFormValues({});
     if (storeFormValues) {
       storeFormValues(values);
+    }
+  };
+
+  const onSubmit = async (
+    values: z.infer<ReturnType<typeof generateZodSchema>>
+  ) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      if (apiData) {
+        const sentData: boolean = await sendApiRequest(apiData, values);
+        if (sentData) {
+          resetForm(values);
+        }
+      } else {
+        resetForm(values);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -689,13 +745,14 @@ export function DynamicForm({
                     addCustomOptionForm={field.addCustomOptionForm}
                     onAddCustomOption={(value: string[], group: string) =>
                       handleAddCustomOption(
-                        field.targetedFieldNames ?? [],
+                        field.valuesToStore ?? [],
                         value,
                         group
                       )
                     }
                     disabled={field.editable === false}
                     shouldAskGroup={field.shouldAskGroupNameInAddOption}
+                    apiData={field.formApiData ?? null}
                   />
                 ) : field.type === "multi-select" &&
                   field.multiSelectOptions ? (
@@ -867,6 +924,7 @@ export function DynamicForm({
                 ) : (
                   <Input
                     {...formField}
+                    {...formField}
                     type={field.type}
                     placeholder={field.placeholder}
                     onChange={(e) => {
@@ -1004,7 +1062,6 @@ export function DynamicForm({
             </div>
           ) : (
             <div>
-              {/* <h3 className="text-lg font-semibold mb-4">{group.title}</h3> */}
               <div
                 className={`grid gap-1 place-content-end ${
                   group.layout === "row"
@@ -1072,8 +1129,13 @@ export function DynamicForm({
               </div>
             )}
             <div className="relative w-full flex justify-end items-center">
-              <Button type="submit" size={"lg"} form={formId}>
-                {submitBtnText}
+              <Button
+                type="submit"
+                size={"lg"}
+                form={formId}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <SpinnerTick color="#fff" /> : submitBtnText}
               </Button>
             </div>
           </form>

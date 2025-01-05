@@ -9,7 +9,7 @@ import Image from "next/image";
 import bannerImage from "@/public/assets/images/login-banner.jpg";
 import { useRouter } from "next/navigation";
 import { post } from "@/lib/helper/steroid";
-import { SigninResponse } from "@/types/response";
+import { SigninResponse } from "@/types/query";
 import { useAuth } from "@/lib/context/authContext";
 import Cookies from "js-cookie";
 import { showToast } from "@/lib/helper/toast";

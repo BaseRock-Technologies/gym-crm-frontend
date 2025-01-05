@@ -17,9 +17,10 @@ interface User {
     authToken: string,
   }
   
-
 export type {
     SigninResponse,
     StatusResponse,
-    User
+    User,
 }
+
+

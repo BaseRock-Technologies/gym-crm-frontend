@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { FormConfig, FormField, FormGroup } from "@/types/form";
-import { StatusResponse } from "@/types/response";
+import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
 
@@ -13,28 +13,28 @@ const PackageCustomAddOptionForm: FormConfig = {
   title: "Add package",
   fields: [
     {
-      name: "addOptionPackageName",
+      name: "packageName",
       label: "Package Name",
       type: "text",
       required: true,
       placeholder: "Annual For male",
     },
     {
-      name: "addOptionPackagePrice",
+      name: "packagePrice",
       label: "Package Price",
       type: "number",
       required: true,
       placeholder: "eg: 12000, 5000",
     },
     {
-      name: "addOptionPackageDuration",
+      name: "packageDuration",
       label: "Package Duration",
       type: "number",
       required: true,
       placeholder: "eg: 365, 180",
     },
     {
-      name: "addOptionIsActive",
+      name: "isActive",
       label: "Active",
       type: "select",
       required: true,
@@ -49,7 +49,7 @@ const PackageCustomAddOptionForm: FormConfig = {
       ],
     },
     {
-      name: "addOptionShowOnWebsite",
+      name: "showOnWebsite",
       label: "Show On website",
       type: "checkbox",
       labelPos: "left",
@@ -62,21 +62,21 @@ const ClientCustomAddOptionForm: FormConfig = {
   title: "Add Client",
   fields: [
     {
-      name: "addOptionClientName",
+      name: "clientName",
       label: "Client Name",
       type: "text",
       required: true,
       placeholder: "name",
     },
     {
-      name: "addOptionContactNumber",
+      name: "contactNumber",
       label: "Contact",
       type: "phone",
       required: true,
       placeholder: "contact",
     },
     {
-      name: "addOptionEmail",
+      name: "email",
       label: "Email",
       type: "email",
       placeholder: "email",
@@ -89,7 +89,7 @@ const ClientSourceCustomAddOptionForm: FormConfig = {
   title: "Add Source",
   fields: [
     {
-      name: "addOptionSourceName",
+      name: "sourceName",
       label: "Source Name",
       type: "text",
       required: true,
@@ -103,7 +103,7 @@ const PaytmMethodCustomAddOptionForm: FormConfig = {
   title: "Add Payment Method",
   fields: [
     {
-      name: "addOptionPaymentMethod",
+      name: "paymentMethod",
       label: "Payment Method",
       type: "text",
       required: true,
@@ -117,14 +117,14 @@ const TaxCustomAddOptionForm: FormConfig = {
   title: "Add tax",
   fields: [
     {
-      name: "addOptionTaxName",
+      name: "taxName",
       label: "Tax Name",
       type: "text",
       required: true,
       placeholder: "tax",
     },
     {
-      name: "addOptionCharges",
+      name: "charges",
       label: "Charges",
       type: "text",
       required: true,
@@ -141,13 +141,13 @@ const chequeConditionalFields: FormField[] = [
     required: true,
   },
   {
-    name: "condFieldChequeDate",
+    name: "chequeDate",
     label: "Cheque Date",
     type: "date",
     required: true,
   },
   {
-    name: "condFieldChequeStatus",
+    name: "chequeStatus",
     label: "Cheque Status",
     type: "select",
     options: [
@@ -275,12 +275,12 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Name",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientCustomAddOptionForm,
-      primaryFieldValues: [
-        "addOptionClientName",
-        "addOptionContactNumber",
-        "addOptionEmail",
-      ],
-      targetedFieldNames: ["clientName", "contactNumber", "email"],
+      primaryFieldValues: ["clientName", "contactNumber", "email"],
+      valuesToStore: ["clientName", "contactNumber", "email"],
+      formApiData: {
+        apiPath: "client/create",
+        method: "POST",
+      },
     },
     {
       name: "contactNumber",
@@ -314,8 +314,8 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Source",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
-      primaryFieldValues: ["addOptionSourceName"],
-      targetedFieldNames: ["sourceName"],
+      primaryFieldValues: ["sourceName"],
+      valuesToStore: ["sourceName"],
       shouldAskGroupNameInAddOption: false,
     },
     {
@@ -414,8 +414,8 @@ const formConfig: FormConfig = {
       placeholder: "Select Package Name",
       allowAddCustomOption: true,
       addCustomOptionForm: PackageCustomAddOptionForm,
-      primaryFieldValues: ["addOptionPackageName"],
-      targetedFieldNames: ["packageDetails"],
+      primaryFieldValues: ["packageName"],
+      valuesToStore: ["packageName"],
     },
     {
       name: "endDate",
@@ -514,7 +514,7 @@ const formConfig: FormConfig = {
       allowAddCustomOption: true,
       addCustomOptionForm: TaxCustomAddOptionForm,
       primaryFieldValues: ["taxDetails"],
-      targetedFieldNames: ["addOptionTaxName"],
+      valuesToStore: ["taxName", "charges"],
     },
     {
       name: "amountPayable",
@@ -566,8 +566,8 @@ const formConfig: FormConfig = {
       },
       allowAddCustomOption: true,
       addCustomOptionForm: PaytmMethodCustomAddOptionForm,
-      primaryFieldValues: ["addOptionPaymentMethod"],
-      targetedFieldNames: ["paymentMode"],
+      primaryFieldValues: ["paymentMethod"],
+      valuesToStore: ["paymentMethod"],
     },
     {
       name: "balanceAmount",
@@ -784,6 +784,7 @@ export default function GymPackage() {
         config={formConfig}
         submitBtnText="Save"
         initialData={initialData}
+        apiData={null}
       />
     </div>
   );

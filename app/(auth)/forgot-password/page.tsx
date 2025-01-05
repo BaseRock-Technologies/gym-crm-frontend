@@ -14,7 +14,7 @@ import bannerImage from "@/public/assets/images/forgot-banner.jpg";
 import { post } from "@/lib/helper/steroid";
 import SpinnerTick from "@/components/Images/SpinnerTick";
 import { showToast } from "@/lib/helper/toast";
-import { StatusResponse } from "@/types/response";
+import { StatusResponse } from "@/types/query";
 import { useAuth } from "@/lib/context/authContext";
 import { useRouter } from "next/navigation";
 

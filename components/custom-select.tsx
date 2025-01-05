@@ -23,7 +23,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DynamicForm } from "./dynamic-form";
-import { FormConfig, GroupedSelectOption, SelectOption } from "../types/form";
+import {
+  FormConfig,
+  GroupedSelectOption,
+  SelectApiData,
+  SelectOption,
+} from "../types/form";
 
 interface CustomSelectProps {
   primaryFields?: string[];
@@ -37,6 +42,7 @@ interface CustomSelectProps {
   error?: string;
   disabled: boolean;
   shouldAskGroup?: boolean;
+  apiData?: SelectApiData | null;
 }
 
 export function CustomSelect({
@@ -51,6 +57,7 @@ export function CustomSelect({
   error,
   disabled,
   shouldAskGroup,
+  apiData,
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -196,6 +203,7 @@ export function CustomSelect({
                             storeFormValues={handleAddCustomOption}
                             config={addCustomOptionForm}
                             shouldFlex={true}
+                            apiData={apiData ?? null}
                           />
                         )}
                       </DialogContent>
