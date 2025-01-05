@@ -1,6 +1,7 @@
 import { backendApiPath } from "@/env";
 import Cookies from "js-cookie";
 import { showToast } from "./toast";
+import { FormConfig, FormField, GroupedSelectOption } from "@/types/form";
 
 
 type customObject = { [key: string]: any };
@@ -91,8 +92,50 @@ const get = async (apiPath: string, validateResponse: boolean = true) => {
   }
 };
 
+const updateFormConfigOptions = (
+  formConfig: FormConfig,
+  fieldName: string,
+  options: Record<string, any[]>,
+  labelField: string,
+  valueField: string,
+  fieldsToDelete?: string[]
+) => {
+  const field: FormField | undefined = formConfig.fields.find((item) => item.name === fieldName);
+  if (field) {
+    const tempOptions: GroupedSelectOption[] = [];
+
+    for (const group in options) {
+      if (options.hasOwnProperty(group)) {
+        const groupOptions = options[group].map(option => {
+            const { ...filteredOption } = option;
+            const data = {
+                label: filteredOption[labelField],
+                value: filteredOption[valueField],
+            };
+          delete filteredOption[labelField];
+          delete filteredOption[valueField];
+
+          if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
+              fieldsToDelete.forEach(fieldToDelete => {
+                delete filteredOption[fieldToDelete];
+              });
+          }
+          return { ...data, ...filteredOption };
+        });
+
+        tempOptions.push({
+          group,
+          options: groupOptions,
+        });
+      }
+    }
+
+    field.options = tempOptions;
+  }
+};
 
 export {
   post,
   get,
+  updateFormConfigOptions,
 }

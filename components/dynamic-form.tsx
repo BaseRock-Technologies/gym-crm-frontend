@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
 import {
+  FieldType,
   FormConfig,
   FormField as FormFieldType,
   FormGroup,
@@ -236,12 +237,20 @@ export function DynamicForm({
                 return val.trim();
               }
               return val;
-            }, z.string().email({ message: "Invalid email address" }))
+            }, z.string())
             .superRefine((val, ctx) => {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               if (field.required && !val) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `${field.label} is required`,
+                });
+              }
+
+              if (val && !emailRegex.test(val)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `Invalid email address format`,
                 });
               }
             });
@@ -348,14 +357,13 @@ export function DynamicForm({
               return val;
             }, z.string())
             .superRefine((val, ctx) => {
+              const phoneRegex = /^\d{10}$/;
               if (field.required && !val) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `${field.label} is required`,
                 });
-              }
-              const phoneRegex = /^\d{10}$/;
-              if (!phoneRegex.test(val)) {
+              } else if (val && !phoneRegex.test(val)) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `Invalid ${field.label}`,
@@ -465,6 +473,12 @@ export function DynamicForm({
     }
   }, [initialData, form]);
 
+  React.useEffect(() => {
+    Object.entries(formValues).forEach(([key, value]) => {
+      form.setValue(key, value);
+    });
+  }, [formValues]);
+
   const evaluateFormula = (
     formula: (values: Record<string, any>, options?: SelectOption[]) => any,
     values: Record<string, any>,
@@ -482,7 +496,6 @@ export function DynamicForm({
     form.setValue(name, value);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
-
     // Handle dependent fields
     config.fields.forEach((field) => {
       if (field.dependsOn) {
@@ -557,34 +570,50 @@ export function DynamicForm({
   };
 
   const handleAddCustomOption = (
-    fieldName: string,
-    value: string,
+    primaryFields: string[],
+    value: string[],
     group: string
   ) => {
     try {
-      setCustomOptions((prev) => {
-        const updatedOptions = { ...prev };
-        if (!updatedOptions[fieldName]) {
-          updatedOptions[fieldName] = [];
-        }
-        const existingGroup = updatedOptions[fieldName].find(
-          (g) => g.group === group
-        );
+      primaryFields.forEach((field, index) => {
+        const currentValue = value[index];
+        if (currentValue) {
+          const fieldType = config.fields.find(
+            (fieldDetails) => fieldDetails.name === field
+          )?.type;
+          if (fieldType) {
+            if (fieldType === "multi-select" || fieldType === "select") {
+              setCustomOptions((prev) => {
+                const updatedOptions = { ...prev };
+                if (!updatedOptions[field]) {
+                  updatedOptions[field] = [];
+                }
+                const existingGroup = updatedOptions[field].find(
+                  (g) => g.group === group
+                );
 
-        if (existingGroup) {
-          const valueExists = existingGroup.options.some(
-            (option) => option.value === value
-          );
-          if (!valueExists) {
-            existingGroup.options.push({ label: value, value });
+                if (existingGroup) {
+                  const valueExists = existingGroup.options.some(
+                    (option) => option.value === currentValue
+                  );
+                  if (!valueExists) {
+                    existingGroup.options.push({
+                      label: currentValue,
+                      value: currentValue,
+                    });
+                  }
+                } else {
+                  updatedOptions[field].push({
+                    group,
+                    options: [{ label: currentValue, value: currentValue }],
+                  });
+                }
+                return updatedOptions;
+              });
+              handleFieldChange(field, currentValue);
+            }
           }
-        } else {
-          updatedOptions[fieldName].push({
-            group,
-            options: [{ label: value, value }],
-          });
         }
-        return updatedOptions;
       });
     } catch (error) {
       console.log("Error Adding Custom options");
@@ -648,8 +677,7 @@ export function DynamicForm({
               <FormControl>
                 {field.type === "select" ? (
                   <CustomSelect
-                    fieldName={field.name}
-                    primaryField={field.primaryFieldValue}
+                    primaryFields={field.primaryFieldValues}
                     options={options}
                     value={formField.value}
                     onChange={(value) => {
@@ -659,8 +687,12 @@ export function DynamicForm({
                     placeholder={field.placeholder}
                     allowAddCustomOption={field.allowAddCustomOption}
                     addCustomOptionForm={field.addCustomOptionForm}
-                    onAddCustomOption={(value: string, group: string) =>
-                      handleAddCustomOption(field.name, value, group)
+                    onAddCustomOption={(value: string[], group: string) =>
+                      handleAddCustomOption(
+                        field.targetedFieldNames ?? [],
+                        value,
+                        group
+                      )
                     }
                     disabled={field.editable === false}
                     shouldAskGroup={field.shouldAskGroupNameInAddOption}
@@ -1018,7 +1050,11 @@ export function DynamicForm({
         )}
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={(event) => {
+              event.stopPropagation();
+              event.preventDefault();
+              form.handleSubmit(onSubmit)(event);
+            }}
             className="space-y-6"
             id={formId}
           >

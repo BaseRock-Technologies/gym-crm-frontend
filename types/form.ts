@@ -55,13 +55,15 @@ export interface FormFieldBase {
 export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; 
   addCustomOptionForm: FormConfig; 
-  primaryFieldValue: string;
+  primaryFieldValues: string[];
+  targetedFieldNames: string[];
 }
 
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   allowAddCustomOption?: false; 
   addCustomOptionForm?: never; 
-  primaryFieldValue?: never;
+  primaryFieldValues?: never;
+  targetedFieldNames?: never;
 }
 
 export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;

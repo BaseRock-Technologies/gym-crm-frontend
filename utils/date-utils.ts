@@ -54,7 +54,7 @@ export function generateTimeSlots(): TimeSlot[] {
   return slots;
 }
 
-export function formatDate(date: Date): string {
+export  const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -62,3 +62,14 @@ export function formatDate(date: Date): string {
   });
 }
 
+
+export const formatTimestamp = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000);
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  };
+  
+  return date.toLocaleDateString('en-US', options).replace(',', '');
+};

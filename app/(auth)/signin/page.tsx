@@ -159,7 +159,7 @@ export default function SignInForm() {
                   href="/forgot-password"
                   className="text-sm text-helper-primary"
                 >
-                  Forgot password
+                  Forgot password?
                 </Link>
               </div>
 

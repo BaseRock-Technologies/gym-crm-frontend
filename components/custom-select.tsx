@@ -26,24 +26,22 @@ import { DynamicForm } from "./dynamic-form";
 import { FormConfig, GroupedSelectOption, SelectOption } from "../types/form";
 
 interface CustomSelectProps {
-  fieldName: string;
-  primaryField?: string;
+  primaryFields?: string[];
   options?: GroupedSelectOption[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   allowAddCustomOption?: boolean;
   addCustomOptionForm?: FormConfig;
-  onAddCustomOption?: (value: string, group: string) => void;
+  onAddCustomOption?: (value: string[], group: string) => void;
   error?: string;
   disabled: boolean;
   shouldAskGroup?: boolean;
 }
 
 export function CustomSelect({
-  fieldName,
   options = [],
-  primaryField,
+  primaryFields,
   value,
   onChange,
   placeholder = "Select an option",
@@ -65,11 +63,13 @@ export function CustomSelect({
   const selectTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleAddCustomOption = (value: Record<string, any>) => {
-    if (primaryField && onAddCustomOption && allowAddCustomOption) {
+    if (primaryFields && onAddCustomOption && allowAddCustomOption) {
+      const primaryValues = primaryFields.map((field) => value[field]);
       if (shouldAskGroup) {
-        onAddCustomOption(value[primaryField], customOptionGroupDialog);
+        onAddCustomOption(primaryValues, customOptionGroupDialog);
       } else {
-        onAddCustomOption(value[primaryField], options[0].group);
+        const optionsGroup = options[0] ? options[0].group : "default";
+        onAddCustomOption(primaryValues, optionsGroup);
       }
     }
   };

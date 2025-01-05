@@ -14,7 +14,7 @@ import TodaySchedule from "@/components/dashboard/TodaySchedule";
 
 const DashboardHome = () => {
   return (
-    <div className="relative w-full h-full space-y-12 px-2 pt-8">
+    <div className="relative w-full h-full space-y-12 px-2 pt-8 shadow-none">
       <Tabs
         defaultValue="quick-manage"
         className="relative w-full h-full overflow-hidden"

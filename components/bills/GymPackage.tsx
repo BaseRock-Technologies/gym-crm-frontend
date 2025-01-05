@@ -1,10 +1,11 @@
 "use client";
 import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
-import { get, post } from "@/lib/helper/steroid";
+import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { FormConfig, FormField, FormGroup } from "@/types/form";
 import { StatusResponse } from "@/types/response";
+import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
 
 const PackageCustomAddOptionForm: FormConfig = {
@@ -12,28 +13,28 @@ const PackageCustomAddOptionForm: FormConfig = {
   title: "Add package",
   fields: [
     {
-      name: "packageName",
+      name: "addOptionPackageName",
       label: "Package Name",
       type: "text",
       required: true,
       placeholder: "Annual For male",
     },
     {
-      name: "packagePrice",
+      name: "addOptionPackagePrice",
       label: "Package Price",
       type: "number",
       required: true,
       placeholder: "eg: 12000, 5000",
     },
     {
-      name: "packageDuration",
+      name: "addOptionPackageDuration",
       label: "Package Duration",
       type: "number",
       required: true,
       placeholder: "eg: 365, 180",
     },
     {
-      name: "isActive",
+      name: "addOptionIsActive",
       label: "Active",
       type: "select",
       required: true,
@@ -48,7 +49,7 @@ const PackageCustomAddOptionForm: FormConfig = {
       ],
     },
     {
-      name: "showOnWebsite",
+      name: "addOptionShowOnWebsite",
       label: "Show On website",
       type: "checkbox",
       labelPos: "left",
@@ -61,24 +62,23 @@ const ClientCustomAddOptionForm: FormConfig = {
   title: "Add Client",
   fields: [
     {
-      name: "clientName",
+      name: "addOptionClientName",
       label: "Client Name",
       type: "text",
       required: true,
       placeholder: "name",
     },
     {
-      name: "contact",
+      name: "addOptionContactNumber",
       label: "Contact",
       type: "phone",
       required: true,
       placeholder: "contact",
     },
     {
-      name: "email",
+      name: "addOptionEmail",
       label: "Email",
       type: "email",
-      required: true,
       placeholder: "email",
     },
   ],
@@ -89,7 +89,7 @@ const ClientSourceCustomAddOptionForm: FormConfig = {
   title: "Add Source",
   fields: [
     {
-      name: "sourceName",
+      name: "addOptionSourceName",
       label: "Source Name",
       type: "text",
       required: true,
@@ -103,7 +103,7 @@ const PaytmMethodCustomAddOptionForm: FormConfig = {
   title: "Add Payment Method",
   fields: [
     {
-      name: "paymentMethod",
+      name: "addOptionPaymentMethod",
       label: "Payment Method",
       type: "text",
       required: true,
@@ -117,14 +117,14 @@ const TaxCustomAddOptionForm: FormConfig = {
   title: "Add tax",
   fields: [
     {
-      name: "taxName",
+      name: "addOptionTaxName",
       label: "Tax Name",
       type: "text",
       required: true,
       placeholder: "tax",
     },
     {
-      name: "charges",
+      name: "addOptionCharges",
       label: "Charges",
       type: "text",
       required: true,
@@ -135,19 +135,19 @@ const TaxCustomAddOptionForm: FormConfig = {
 
 const chequeConditionalFields: FormField[] = [
   {
-    name: "chequeNumber",
+    name: "condFieldChequeNumber",
     label: "Cheque Number",
     type: "text",
     required: true,
   },
   {
-    name: "chequeDate",
+    name: "condFieldChequeDate",
     label: "Cheque Date",
     type: "date",
     required: true,
   },
   {
-    name: "chequeStatus",
+    name: "condFieldChequeStatus",
     label: "Cheque Status",
     type: "select",
     options: [
@@ -173,7 +173,7 @@ const formConfig: FormConfig = {
       title: "Personal Information",
       type: "default",
       fields: [
-        "memberID",
+        "memberId",
         "invoiceDate",
         "clientName",
         "contactNumber",
@@ -224,7 +224,7 @@ const formConfig: FormConfig = {
       id: "payment-info",
       title: "Payment Information",
       type: "background",
-      backgroundColor: "bg-gray-400",
+      backgroundColor: "bg-gray-200",
       additionalClass: "p-4",
       fields: [
         "amount",
@@ -253,7 +253,7 @@ const formConfig: FormConfig = {
   ],
   fields: [
     {
-      name: "memberID",
+      name: "memberId",
       label: "Member ID",
       type: "text",
       editable: false,
@@ -275,7 +275,12 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Name",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientCustomAddOptionForm,
-      primaryFieldValue: "clientName",
+      primaryFieldValues: [
+        "addOptionClientName",
+        "addOptionContactNumber",
+        "addOptionEmail",
+      ],
+      targetedFieldNames: ["clientName", "contactNumber", "email"],
     },
     {
       name: "contactNumber",
@@ -309,7 +314,8 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Source",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
-      primaryFieldValue: "sourceName",
+      primaryFieldValues: ["addOptionSourceName"],
+      targetedFieldNames: ["sourceName"],
       shouldAskGroupNameInAddOption: false,
     },
     {
@@ -401,21 +407,15 @@ const formConfig: FormConfig = {
       options: [
         {
           group: "default",
-          options: [
-            {
-              label: "sample",
-              value: "Sample",
-              price: 7000,
-              discountMax: 2000,
-            },
-          ],
+          options: [],
         },
       ],
       type: "select",
       placeholder: "Select Package Name",
       allowAddCustomOption: true,
       addCustomOptionForm: PackageCustomAddOptionForm,
-      primaryFieldValue: "packageName",
+      primaryFieldValues: ["addOptionPackageName"],
+      targetedFieldNames: ["packageDetails"],
     },
     {
       name: "endDate",
@@ -423,6 +423,23 @@ const formConfig: FormConfig = {
       required: true,
       type: "date",
       placeholder: "end date",
+      dependsOn: {
+        field: "packageDetails,joiningDate",
+        formula: (values, options) => {
+          const packageDetails = options?.find(
+            (opt) => opt.value === values.packageDetails
+          );
+          const totalDurationOfPackageInDays =
+            packageDetails?.durationInDays || 0;
+          const joiningDate = values.joiningDate
+            ? new Date(values.joiningDate)
+            : new Date();
+
+          const endDate = new Date(joiningDate);
+          endDate.setDate(joiningDate.getDate() + totalDurationOfPackageInDays);
+          return formatTimestamp(Math.floor(endDate.getTime() / 1000));
+        },
+      },
     },
     {
       name: "packagePrice",
@@ -449,7 +466,8 @@ const formConfig: FormConfig = {
           const discountAmount: number = parseFloat(values.discountAmount) || 0;
           const maxDiscount: number =
             options?.find((opt) => opt.value === values.packageDetails)
-              ?.discountMax || 0;
+              ?.maxDiscount || 0;
+
           return Math.min(
             (discountAmount / packagePrice) * 100,
             maxDiscount
@@ -462,6 +480,7 @@ const formConfig: FormConfig = {
       label: "Discount",
       type: "decimal",
       placeholder: "discount amount",
+      editable: false,
       dependsOn: {
         field: "packagePrice,discount,packageDetails",
         formula: (values, options) => {
@@ -469,7 +488,7 @@ const formConfig: FormConfig = {
           const discount: number = parseFloat(values.discount) || 0;
           const maxDiscount: number =
             options?.find((opt) => opt.value === values.packageDetails)
-              ?.discountMax || 0;
+              ?.maxDiscount || 0;
           if ((packagePrice * discount) / 100 > maxDiscount)
             showToast("info", `Max Discount is ${maxDiscount}`, {
               toastId: "019411cb-5477-7a10-869e-cedb19af7489",
@@ -489,33 +508,13 @@ const formConfig: FormConfig = {
     {
       name: "taxDetails",
       label: "Tax",
-      options: [
-        {
-          group: "No Tax",
-          options: [
-            {
-              label: "No Tax (0%)",
-              value: "no-tax",
-              taxPercentage: 0,
-            },
-          ],
-        },
-        {
-          group: "Exclusive Taxes",
-          options: [
-            {
-              label: "Goods and Service tax (18%)",
-              value: "goods-service-tax",
-              taxPercentage: 18,
-            },
-          ],
-        },
-      ],
+      options: [],
       type: "select",
       placeholder: "Select tax",
       allowAddCustomOption: true,
       addCustomOptionForm: TaxCustomAddOptionForm,
-      primaryFieldValue: "taxName",
+      primaryFieldValues: ["taxDetails"],
+      targetedFieldNames: ["addOptionTaxName"],
     },
     {
       name: "amountPayable",
@@ -557,11 +556,7 @@ const formConfig: FormConfig = {
       options: [
         {
           group: "default",
-          options: [
-            { label: "Cash", value: "cash" },
-            { label: "Cheque", value: "cheque" },
-            { label: "Card", value: "card" },
-          ],
+          options: [],
         },
       ],
       type: "select",
@@ -571,7 +566,8 @@ const formConfig: FormConfig = {
       },
       allowAddCustomOption: true,
       addCustomOptionForm: PaytmMethodCustomAddOptionForm,
-      primaryFieldValue: "paymentMethod",
+      primaryFieldValues: ["addOptionPaymentMethod"],
+      targetedFieldNames: ["paymentMode"],
     },
     {
       name: "balanceAmount",
@@ -669,12 +665,7 @@ const formConfig: FormConfig = {
       options: [
         {
           group: "default",
-          options: [
-            {
-              label: "hari",
-              value: "hari",
-            },
-          ],
+          options: [],
         },
       ],
     },
@@ -703,18 +694,84 @@ export default function GymPackage() {
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const data = {
-          clientName: "John Doe",
-          contactNumber: "1234567890",
-          packageDetails: "gold",
-          clientRepresentative: user?.userName || "null",
-        };
-        setInitialData(data);
         const res: StatusResponse = await post({}, "bills/gym-bill");
-        console.log(res);
+        if (res.status === "success" && res.data) {
+          const {
+            billId,
+            clientDetails,
+            clientSourceDetails,
+            packageDetails,
+            taxDetails,
+            paymentMethod,
+            trainersDetails,
+          } = res.data;
+          const currentDate = formatTimestamp(
+            Math.floor(new Date().getTime() / 1000)
+          );
+          const data = {
+            memberId: billId.toString(),
+            clientRepresentative: user?.userName || "",
+            invoiceDate: currentDate,
+            joiningDate: currentDate,
+            endDate: currentDate,
+          };
+          updateFormConfigOptions(
+            formConfig,
+            "clientName",
+            clientDetails,
+            "clientName",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "contactNumber",
+            clientDetails,
+            "contactNumber",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "clientSourceDetails",
+            clientSourceDetails,
+            "source",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "packageDetails",
+            packageDetails,
+            "package",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "taxDetails",
+            taxDetails,
+            "taxName",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "paymentMethod",
+            paymentMethod,
+            "method",
+            "_id"
+          );
+          updateFormConfigOptions(
+            formConfig,
+            "trainer",
+            trainersDetails,
+            "trainer",
+            "_id"
+          );
+          setInitialData(data);
+        }
       } catch (error) {
-        console.error("Error fetching initial data:", error);
-        showToast("error", "Failed to load initial data");
+        console.error(
+          "Error fetching initial data in Gym Packgae Bill:",
+          error
+        );
+        showToast("error", "Failed to load data");
       }
     };
 
