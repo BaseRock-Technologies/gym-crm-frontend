@@ -123,9 +123,12 @@ const updateFormConfigOptions = (
           return { ...data, ...filteredOption };
         });
 
+        const uniqueGroupOptions = Array.from(new Set(groupOptions.map(item => item.value)))
+          .map(value => groupOptions.find(item => item.value === value));
+
         tempOptions.push({
           group,
-          options: groupOptions,
+          options: uniqueGroupOptions,
         });
       }
     }

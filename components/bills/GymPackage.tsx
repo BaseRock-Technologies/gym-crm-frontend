@@ -13,31 +13,32 @@ const PackageCustomAddOptionForm: FormConfig = {
   title: "Add package",
   fields: [
     {
-      name: "packageName",
+      name: "package",
       label: "Package Name",
       type: "text",
       required: true,
       placeholder: "Annual For male",
     },
     {
-      name: "packagePrice",
+      name: "price",
       label: "Package Price",
       type: "number",
       required: true,
       placeholder: "eg: 12000, 5000",
     },
     {
-      name: "packageDuration",
+      name: "durationInDays",
       label: "Package Duration",
       type: "number",
       required: true,
       placeholder: "eg: 365, 180",
     },
     {
-      name: "isActive",
-      label: "Active",
+      name: "status",
+      label: "Status",
       type: "select",
       required: true,
+      placeholder: "status",
       options: [
         {
           group: "default",
@@ -89,7 +90,7 @@ const ClientSourceCustomAddOptionForm: FormConfig = {
   title: "Add Source",
   fields: [
     {
-      name: "sourceName",
+      name: "clientSource",
       label: "Source Name",
       type: "text",
       required: true,
@@ -103,7 +104,7 @@ const PaytmMethodCustomAddOptionForm: FormConfig = {
   title: "Add Payment Method",
   fields: [
     {
-      name: "paymentMethod",
+      name: "method",
       label: "Payment Method",
       type: "text",
       required: true,
@@ -124,7 +125,7 @@ const TaxCustomAddOptionForm: FormConfig = {
       placeholder: "tax",
     },
     {
-      name: "charges",
+      name: "chargesPercentage",
       label: "Charges",
       type: "text",
       required: true,
@@ -179,7 +180,7 @@ const formConfig: FormConfig = {
         "contactNumber",
         "alternateContact",
         "email",
-        "clientSourceDetails",
+        "clientSource",
       ],
     },
     {
@@ -275,8 +276,9 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Name",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientCustomAddOptionForm,
-      primaryFieldValues: ["clientName", "contactNumber", "email"],
-      valuesToStore: ["clientName", "contactNumber", "email"],
+      primaryFieldValues: ClientCustomAddOptionForm.fields.map(
+        (item) => item.name
+      ),
       formApiData: {
         apiPath: "client/create",
         method: "POST",
@@ -302,7 +304,7 @@ const formConfig: FormConfig = {
       placeholder: "Email",
     },
     {
-      name: "clientSourceDetails",
+      name: "clientSource",
       label: "Client Source",
       options: [
         {
@@ -314,9 +316,12 @@ const formConfig: FormConfig = {
       placeholder: "Select Client Source",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
-      primaryFieldValues: ["sourceName"],
-      valuesToStore: ["sourceName"],
+      primaryFieldValues: ["clientSource"],
       shouldAskGroupNameInAddOption: false,
+      formApiData: {
+        apiPath: "others/client-source/create",
+        method: "POST",
+      },
     },
     {
       name: "gender",
@@ -414,8 +419,11 @@ const formConfig: FormConfig = {
       placeholder: "Select Package Name",
       allowAddCustomOption: true,
       addCustomOptionForm: PackageCustomAddOptionForm,
-      primaryFieldValues: ["packageName"],
-      valuesToStore: ["packageName"],
+      primaryFieldValues: ["package"],
+      formApiData: {
+        apiPath: "package/create",
+        method: "POST",
+      },
     },
     {
       name: "endDate",
@@ -513,8 +521,11 @@ const formConfig: FormConfig = {
       placeholder: "Select tax",
       allowAddCustomOption: true,
       addCustomOptionForm: TaxCustomAddOptionForm,
-      primaryFieldValues: ["taxDetails"],
-      valuesToStore: ["taxName", "charges"],
+      primaryFieldValues: ["taxName"],
+      formApiData: {
+        apiPath: "others/tax/create",
+        method: "POST",
+      },
     },
     {
       name: "amountPayable",
@@ -566,8 +577,11 @@ const formConfig: FormConfig = {
       },
       allowAddCustomOption: true,
       addCustomOptionForm: PaytmMethodCustomAddOptionForm,
-      primaryFieldValues: ["paymentMethod"],
-      valuesToStore: ["paymentMethod"],
+      primaryFieldValues: ["method"],
+      formApiData: {
+        apiPath: "others/payment-method/create",
+        method: "POST",
+      },
     },
     {
       name: "balanceAmount",
@@ -720,14 +734,14 @@ export default function GymPackage() {
             "clientName",
             clientDetails,
             "clientName",
-            "_id"
+            "clientName"
           );
           updateFormConfigOptions(
             formConfig,
             "contactNumber",
             clientDetails,
             "contactNumber",
-            "_id"
+            "contactNumber"
           );
           updateFormConfigOptions(
             formConfig,

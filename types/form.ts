@@ -62,7 +62,6 @@ export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; 
   addCustomOptionForm: FormConfig; 
   primaryFieldValues: string[];
-  valuesToStore: string[];
   formApiData?: SelectApiData;
 }
 
@@ -70,7 +69,6 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   allowAddCustomOption?: false; 
   addCustomOptionForm?: never; 
   primaryFieldValues?: never;
-  valuesToStore?: never;
   formApiData?: never;
 }
 

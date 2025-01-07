@@ -86,45 +86,52 @@ export function DynamicForm({
       switch (field.type) {
         case "text":
         case "textarea":
-          fieldSchema = z.string().superRefine((val, ctx) => {
-            if (field.required && !val) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `${field.label} is required`,
-              });
-              return z.NEVER;
-            }
-            if (
-              val &&
-              field.validation?.minLength &&
-              val.length < field.validation.minLength
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `${field.label} must be at least ${field.validation.minLength} characters`,
-              });
-            }
-            if (
-              val &&
-              field.validation?.maxLength &&
-              val.length > field.validation.maxLength
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `${field.label} must be at most ${field.validation.maxLength} characters`,
-              });
-            }
-            if (
-              val &&
-              field.validation?.pattern &&
-              !new RegExp(field.validation.pattern).test(val)
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: `${field.label} is invalid`,
-              });
-            }
-          });
+          fieldSchema = z
+            .preprocess((val) => {
+              if (typeof val === "string") {
+                return val.trim();
+              }
+              return val;
+            }, z.string())
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+                return z.NEVER;
+              }
+              if (
+                val &&
+                field.validation?.minLength &&
+                val.length < field.validation.minLength
+              ) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} must be at least ${field.validation.minLength} characters`,
+                });
+              }
+              if (
+                val &&
+                field.validation?.maxLength &&
+                val.length > field.validation.maxLength
+              ) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} must be at most ${field.validation.maxLength} characters`,
+                });
+              }
+              if (
+                val &&
+                field.validation?.pattern &&
+                !new RegExp(field.validation.pattern).test(val)
+              ) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is invalid`,
+                });
+              }
+            });
           break;
         case "number":
         case "decimal":
@@ -570,32 +577,31 @@ export function DynamicForm({
     data: SelectApiData,
     postData?: { [key: string]: any }
   ) => {
-    if (data.method === "POST" && postData) {
-      try {
-        const res: StatusResponse = await post(postData, data.apiPath);
-        if (res.status === "error") {
-          showToast("error", "Failed to process data");
-          return false;
-        }
-        return true;
-      } catch (error) {
-        showToast("error", "Failed to send data");
-        return false;
+    const handleResponse = (res: StatusResponse) => {
+      const { status, message } = res;
+      if (status === "success" && res.exists) {
+        showToast("info", message);
       }
-    } else if (data.method === "GET") {
-      try {
-        const res: SigninResponse = await get(data.apiPath);
-        if (res.status === "error") {
-          showToast("error", "Failed to process data");
-          return false;
-        }
-        return true; // Indicate success
-      } catch (error) {
-        showToast("error", "Failed to send data");
-        return false;
+      if (status === "error") {
+        showToast("error", "Failed to process data");
       }
+      return status === "success";
+    };
+
+    try {
+      let res: StatusResponse;
+      if (data.method === "POST" && postData) {
+        res = await post(postData, data.apiPath);
+      } else if (data.method === "GET") {
+        res = await get(data.apiPath);
+      } else {
+        return false; // Unsupported method
+      }
+      return handleResponse(res);
+    } catch (error) {
+      showToast("error", "Failed to send data");
+      return false;
     }
-    return false;
   };
 
   const resetForm = (values: z.infer<ReturnType<typeof generateZodSchema>>) => {
@@ -612,6 +618,7 @@ export function DynamicForm({
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
+      console.log(values);
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, values);
         if (sentData) {
@@ -627,12 +634,12 @@ export function DynamicForm({
 
   const handleAddCustomOption = (
     primaryFields: string[],
-    value: string[],
+    primaryValues: string[],
     group: string
   ) => {
     try {
       primaryFields.forEach((field, index) => {
-        const currentValue = value[index];
+        const currentValue = primaryValues[index];
         if (currentValue) {
           const fieldType = config.fields.find(
             (fieldDetails) => fieldDetails.name === field
@@ -647,7 +654,6 @@ export function DynamicForm({
                 const existingGroup = updatedOptions[field].find(
                   (g) => g.group === group
                 );
-
                 if (existingGroup) {
                   const valueExists = existingGroup.options.some(
                     (option) => option.value === currentValue
@@ -743,13 +749,11 @@ export function DynamicForm({
                     placeholder={field.placeholder}
                     allowAddCustomOption={field.allowAddCustomOption}
                     addCustomOptionForm={field.addCustomOptionForm}
-                    onAddCustomOption={(value: string[], group: string) =>
-                      handleAddCustomOption(
-                        field.valuesToStore ?? [],
-                        value,
-                        group
-                      )
-                    }
+                    onAddCustomOption={(
+                      fields: string[],
+                      value: string[],
+                      group: string
+                    ) => handleAddCustomOption(fields, value, group)}
                     disabled={field.editable === false}
                     shouldAskGroup={field.shouldAskGroupNameInAddOption}
                     apiData={field.formApiData ?? null}
@@ -1121,7 +1125,7 @@ export function DynamicForm({
               <div
                 className={`${
                   shouldFlex
-                    ? "flex flex-wrap"
+                    ? "grid grid-cols-1 md:grid-cols-2 auto-rows-auto"
                     : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
                 } gap-6`}
               >

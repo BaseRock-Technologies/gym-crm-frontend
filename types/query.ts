@@ -10,6 +10,7 @@ interface StatusResponse {
     message: string,
     authToken?: string
     data?: any,
+    exists?: boolean;
 }
 
 interface User {
