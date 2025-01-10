@@ -47,9 +47,10 @@ import {
   AccordionContent,
 } from "@radix-ui/react-accordion";
 import SpinnerTick from "./Images/SpinnerTick";
-import { SigninResponse, StatusResponse } from "@/types/query";
+import { StatusResponse } from "@/types/query";
 import { get, post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
+import { useRouter } from "next/navigation";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -79,6 +80,7 @@ export function DynamicForm({
     Record<string, boolean>
   >({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const router = useRouter();
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -237,7 +239,6 @@ export function DynamicForm({
                 const isMatch = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/.test(
                   val
                 );
-                console.log(isMatch);
                 if (!isMatch) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -308,10 +309,12 @@ export function DynamicForm({
             .preprocess((val) => {
               if (typeof val === "string") {
                 const date = new Date(val);
-                return isNaN(date.getTime()) ? undefined : date;
+                return isNaN(date.getTime())
+                  ? undefined
+                  : Math.floor(date.getTime() / 1000);
               }
               return val;
-            }, z.date().nullish())
+            }, z.number().nullish())
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
                 ctx.addIssue({
@@ -320,8 +323,7 @@ export function DynamicForm({
                 });
               }
               if (val !== undefined && val !== null) {
-                const isInvalid =
-                  !(val instanceof Date) || isNaN(val.getTime());
+                const isInvalid = isNaN(val);
                 if (isInvalid) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -340,7 +342,11 @@ export function DynamicForm({
               return val;
             }, z.union([z.string(), z.number()]))
             .superRefine((val, ctx) => {
-              if (field.required && (val === undefined || val === null)) {
+              console.log(val);
+              if (
+                field.required &&
+                (val === undefined || val === null || !val)
+              ) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `${field.label} is required`,
@@ -619,24 +625,33 @@ export function DynamicForm({
     if (storeFormValues) {
       storeFormValues(values);
     }
+    if (config.redirectRules && config.redirectRules.shouldRedirect) {
+      router.push(config.redirectRules.redirectPath);
+    }
   };
 
   const onSubmit = async (
     values: z.infer<ReturnType<typeof generateZodSchema>>
   ) => {
     if (isSubmitting) return;
-    console.log(values);
     setIsSubmitting(true);
     try {
+      const filteredValues = Object.fromEntries(
+        Object.entries(values).filter(
+          ([_, value]) => value !== null && value !== undefined && value !== ""
+        )
+      );
+
       if (formCategory && formCategory.length > 0)
-        values["category"] = formCategory;
+        filteredValues["category"] = formCategory;
+
       if (apiData) {
-        const sentData: boolean = await sendApiRequest(apiData, values);
+        const sentData: boolean = await sendApiRequest(apiData, filteredValues);
         if (sentData) {
-          resetForm(values);
+          resetForm(filteredValues);
         }
       } else {
-        resetForm(values);
+        resetForm(filteredValues);
       }
     } finally {
       setIsSubmitting(false);
@@ -810,7 +825,7 @@ export function DynamicForm({
                     shouldAskGroup={
                       field.options ? field.options?.length > 1 : false
                     }
-                    apiData={field.formApiData ?? null}
+                    apiData={field.apiConfig ?? null}
                   />
                 ) : field.type === "multi-select" &&
                   field.multiSelectOptions ? (
@@ -893,7 +908,6 @@ export function DynamicForm({
                   <Input
                     {...formField}
                     type="number"
-                    step={0.01}
                     inputMode="decimal"
                     placeholder={field.placeholder}
                     onChange={(e) => {
@@ -902,6 +916,8 @@ export function DynamicForm({
                       handleFieldChange(field.name, value);
                     }}
                     readOnly={field.editable === false}
+                    min={field.validation?.min}
+                    max={field.validation?.max}
                   />
                 ) : field.type === "number" ? (
                   <Input

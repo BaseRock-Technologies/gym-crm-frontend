@@ -3,7 +3,7 @@ import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
-import { FormConfig, FormField, FormGroup } from "@/types/form";
+import { FormConfig, FormField, FormGroup, SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
@@ -32,6 +32,13 @@ const PackageCustomAddOptionForm: FormConfig = {
       type: "number",
       required: true,
       placeholder: "eg: 365, 180",
+    },
+    {
+      name: "maxDiscount",
+      label: "Max Discount in Rupees",
+      type: "number",
+      required: true,
+      placeholder: "eg: 1250",
     },
     {
       name: "status",
@@ -150,16 +157,14 @@ const TaxCustomAddOptionForm: FormConfig = {
 
 const chequeConditionalFields: FormField[] = [
   {
-    name: "condFieldChequeNumber",
+    name: "chequeNumber",
     label: "Cheque Number",
     type: "text",
-    required: true,
   },
   {
     name: "chequeDate",
     label: "Cheque Date",
     type: "date",
-    required: true,
   },
   {
     name: "chequeStatus",
@@ -175,7 +180,6 @@ const chequeConditionalFields: FormField[] = [
         ],
       },
     ],
-    required: true,
   },
 ];
 
@@ -210,7 +214,7 @@ const formConfig: FormConfig = {
         "taxId",
         "workoutHourmorning",
         "workoutHourevening",
-        "areaAddress",
+        "address",
         "remarks",
         "picture",
       ],
@@ -272,14 +276,12 @@ const formConfig: FormConfig = {
       label: "Member ID",
       type: "text",
       editable: false,
-      required: true,
     },
     {
       name: "invoiceDate",
       label: "Invoice Date",
       type: "date",
       placeholder: "Invoice Date",
-      required: true,
     },
     {
       name: "clientName",
@@ -293,7 +295,7 @@ const formConfig: FormConfig = {
       primaryFieldValues: ClientCustomAddOptionForm.fields.map(
         (item) => item.name
       ),
-      formApiData: {
+      apiConfig: {
         apiPath: "client/create",
         method: "POST",
       },
@@ -326,7 +328,7 @@ const formConfig: FormConfig = {
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
       primaryFieldValues: ["clientSource"],
-      formApiData: {
+      apiConfig: {
         apiPath: "others/client-source/create",
         method: "POST",
       },
@@ -383,7 +385,7 @@ const formConfig: FormConfig = {
       placeholder: "choose workout hour",
     },
     {
-      name: "areaAddress",
+      name: "address",
       placeholder: "address",
       label: "Area Address",
       type: "textarea",
@@ -410,19 +412,12 @@ const formConfig: FormConfig = {
       label: "Joining Date",
       type: "date",
       placeholder: "joining date",
-      required: true,
     },
     {
       name: "packageName",
       label: "Package",
-      required: true,
 
-      options: [
-        {
-          group: "default",
-          options: [],
-        },
-      ],
+      options: [],
       type: "select",
       placeholder: "Select Package Name",
       allowAddCustomOption: true,
@@ -431,8 +426,9 @@ const formConfig: FormConfig = {
       fieldsToAddInOptions: {
         durationInDays: ["packageName"],
         packagePrice: ["packageName"],
+        maxDiscount: ["packageName"],
       },
-      formApiData: {
+      apiConfig: {
         apiPath: "package/create",
         method: "POST",
       },
@@ -440,7 +436,6 @@ const formConfig: FormConfig = {
     {
       name: "endDate",
       label: "End Date",
-      required: true,
       type: "date",
       placeholder: "end date",
       dependsOn: {
@@ -479,19 +474,32 @@ const formConfig: FormConfig = {
       label: "Discount(%)",
       type: "decimal",
       placeholder: "discount",
+      validation: {
+        max: 100,
+        min: 0.1,
+      },
       dependsOn: {
-        field: "packagePrice,discountAmount",
+        field: "packagePrice,discountAmount,packageName",
         formula: (values, options) => {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
-          const discountAmount: number = parseFloat(values.discountAmount) || 0;
+          const userDiscount: number = parseFloat(values.discount) || 0;
           const maxDiscount: number =
             options?.find((opt) => opt.value === values.packageName)
               ?.maxDiscount || 0;
 
-          return Math.min(
-            (discountAmount / packagePrice) * 100,
-            maxDiscount
-          ).toFixed(2);
+          if (packagePrice) {
+            const maxDiscountPercentage = (maxDiscount / packagePrice) * 100;
+            if (userDiscount > maxDiscountPercentage) {
+              showToast(
+                "info",
+                `Max discount percentage is ${maxDiscountPercentage}`
+              );
+              return maxDiscountPercentage;
+            }
+            return userDiscount;
+          } else {
+            return userDiscount;
+          }
         },
       },
     },
@@ -534,7 +542,7 @@ const formConfig: FormConfig = {
       allowAddCustomOption: true,
       addCustomOptionForm: TaxCustomAddOptionForm,
       primaryFieldValues: ["taxName"],
-      formApiData: {
+      apiConfig: {
         apiPath: "others/tax/create",
         method: "POST",
       },
@@ -543,7 +551,6 @@ const formConfig: FormConfig = {
       name: "amountPayable",
       label: "Amount Payable",
       type: "decimal",
-      required: true,
       editable: false,
       placeholder: "payable",
       dependsOn: {
@@ -571,7 +578,6 @@ const formConfig: FormConfig = {
       label: "Amount Paid",
       type: "decimal",
       placeholder: "paid",
-      required: true,
     },
     {
       name: "paymentMode",
@@ -580,12 +586,12 @@ const formConfig: FormConfig = {
       type: "select",
       placeholder: "Select method",
       conditionalFields: {
-        cheque: chequeConditionalFields,
+        Cheque: chequeConditionalFields,
       },
       allowAddCustomOption: true,
       addCustomOptionForm: PaytmMethodCustomAddOptionForm,
       primaryFieldValues: ["paymentMode"],
-      formApiData: {
+      apiConfig: {
         apiPath: "others/payment-method/create",
         method: "POST",
       },
@@ -595,7 +601,6 @@ const formConfig: FormConfig = {
       label: "Balance",
       type: "decimal",
       placeholder: "paid",
-      required: true,
       editable: false,
       dependsOn: {
         field: "amountPayable, amountPaid",
@@ -664,7 +669,6 @@ const formConfig: FormConfig = {
       label: "Client Representative",
       type: "text",
       placeholder: "rep",
-      required: true,
       editable: false,
     },
     {
@@ -675,7 +679,7 @@ const formConfig: FormConfig = {
       allowAddCustomOption: true,
       addCustomOptionForm: TrainerCustomAddOptionForm,
       primaryFieldValues: ["trainer"],
-      formApiData: {
+      apiConfig: {
         apiPath: "others/trainer/create",
         method: "POST",
       },
@@ -693,6 +697,10 @@ const formConfig: FormConfig = {
       labelPos: "left",
     },
   ],
+  redirectRules: {
+    shouldRedirect: true,
+    redirectPath: "/dashboard",
+  },
 };
 
 export default function GymPackage() {
@@ -701,6 +709,11 @@ export default function GymPackage() {
     string,
     any
   > | null>(null);
+
+  const apiConfig: SelectApiData = {
+    apiPath: "bills/gym-bill/create",
+    method: "POST",
+  };
 
   React.useEffect(() => {
     const fetchInitialData = async () => {
@@ -766,7 +779,7 @@ export default function GymPackage() {
             "paymentMode",
             paymentMethod,
             "paymentMode",
-            "_id"
+            "paymentMode"
           );
           updateFormConfigOptions(
             formConfig,
@@ -795,7 +808,7 @@ export default function GymPackage() {
         config={formConfig}
         submitBtnText="Save"
         initialData={initialData}
-        apiData={null}
+        apiData={apiConfig}
       />
     </div>
   );

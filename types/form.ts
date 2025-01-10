@@ -17,6 +17,11 @@ export interface MultiSelectOption {
   icon?: React.ReactElement;
 }
 
+export interface RedirectRules {
+  shouldRedirect: boolean,
+  redirectPath: string
+}
+
 export interface FieldDependency {
   field: string;
   formula: (values: Record<string, any>, options?: SelectOption[]) => any; 
@@ -65,7 +70,7 @@ export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; 
   addCustomOptionForm: FormConfig; 
   primaryFieldValues: string[];
-  formApiData?: SelectApiData;
+  apiConfig?: SelectApiData;
   fieldsToAddInOptions?: FieldsToAddInOptions;
 }
 
@@ -73,7 +78,7 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   allowAddCustomOption?: false; 
   addCustomOptionForm?: never; 
   primaryFieldValues?: never;
-  formApiData?: never;
+  apiConfig?: never;
   fieldsToAddInOptions?: never;
 }
 
@@ -97,5 +102,6 @@ export interface FormConfig {
   title: string;
   groups?: FormGroup[];
   fields: FormField[];
+  redirectRules?: RedirectRules;
 }
 
