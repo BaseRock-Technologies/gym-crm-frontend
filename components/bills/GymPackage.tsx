@@ -13,14 +13,14 @@ const PackageCustomAddOptionForm: FormConfig = {
   title: "Add package",
   fields: [
     {
-      name: "package",
+      name: "packageName",
       label: "Package Name",
       type: "text",
       required: true,
       placeholder: "Annual For male",
     },
     {
-      name: "price",
+      name: "packagePrice",
       label: "Package Price",
       type: "number",
       required: true,
@@ -99,12 +99,26 @@ const ClientSourceCustomAddOptionForm: FormConfig = {
   ],
 };
 
+const TrainerCustomAddOptionForm: FormConfig = {
+  id: "client-trainer",
+  title: "Add-Trainer",
+  fields: [
+    {
+      name: "trainer",
+      label: "Trainer name",
+      type: "text",
+      required: true,
+      placeholder: "name",
+    },
+  ],
+};
+
 const PaytmMethodCustomAddOptionForm: FormConfig = {
   id: "add-payment",
   title: "Add Payment Method",
   fields: [
     {
-      name: "method",
+      name: "paymentMode",
       label: "Payment Method",
       type: "text",
       required: true,
@@ -207,14 +221,14 @@ const formConfig: FormConfig = {
       type: "background",
       backgroundColor: "bg-transparent",
       fields: [
-        "packageDetails",
+        "packageName",
         "joiningDate",
         "endDate",
         "packagePrice",
         "discount",
         "discountAmount",
         "admissionCharges",
-        "taxDetails",
+        "taxName",
         "amountPayable",
         "amountPaid",
         "paymentMode",
@@ -306,18 +320,12 @@ const formConfig: FormConfig = {
     {
       name: "clientSource",
       label: "Client Source",
-      options: [
-        {
-          group: "default",
-          options: [],
-        },
-      ],
+      options: [],
       type: "select",
       placeholder: "Select Client Source",
       allowAddCustomOption: true,
       addCustomOptionForm: ClientSourceCustomAddOptionForm,
       primaryFieldValues: ["clientSource"],
-      shouldAskGroupNameInAddOption: false,
       formApiData: {
         apiPath: "others/client-source/create",
         method: "POST",
@@ -405,7 +413,7 @@ const formConfig: FormConfig = {
       required: true,
     },
     {
-      name: "packageDetails",
+      name: "packageName",
       label: "Package",
       required: true,
 
@@ -419,7 +427,11 @@ const formConfig: FormConfig = {
       placeholder: "Select Package Name",
       allowAddCustomOption: true,
       addCustomOptionForm: PackageCustomAddOptionForm,
-      primaryFieldValues: ["package"],
+      primaryFieldValues: ["packageName", "packagePrice"],
+      fieldsToAddInOptions: {
+        durationInDays: ["packageName"],
+        packagePrice: ["packageName"],
+      },
       formApiData: {
         apiPath: "package/create",
         method: "POST",
@@ -432,10 +444,10 @@ const formConfig: FormConfig = {
       type: "date",
       placeholder: "end date",
       dependsOn: {
-        field: "packageDetails,joiningDate",
+        field: "packageName,joiningDate",
         formula: (values, options) => {
           const packageDetails = options?.find(
-            (opt) => opt.value === values.packageDetails
+            (opt) => opt.value === values.packageName
           );
           const totalDurationOfPackageInDays =
             packageDetails?.durationInDays || 0;
@@ -456,10 +468,10 @@ const formConfig: FormConfig = {
       placeholder: "price",
       editable: false,
       dependsOn: {
-        field: "packageDetails",
+        field: "packageName",
         formula: (values, options) =>
-          options?.find((opt) => opt.value === values.packageDetails)?.price ||
-          0,
+          options?.find((opt) => opt.value === values.packageName)
+            ?.packagePrice || 0,
       },
     },
     {
@@ -473,7 +485,7 @@ const formConfig: FormConfig = {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discountAmount: number = parseFloat(values.discountAmount) || 0;
           const maxDiscount: number =
-            options?.find((opt) => opt.value === values.packageDetails)
+            options?.find((opt) => opt.value === values.packageName)
               ?.maxDiscount || 0;
 
           return Math.min(
@@ -490,12 +502,12 @@ const formConfig: FormConfig = {
       placeholder: "discount amount",
       editable: false,
       dependsOn: {
-        field: "packagePrice,discount,packageDetails",
+        field: "packagePrice,discount,packageName",
         formula: (values, options) => {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discount: number = parseFloat(values.discount) || 0;
           const maxDiscount: number =
-            options?.find((opt) => opt.value === values.packageDetails)
+            options?.find((opt) => opt.value === values.packageName)
               ?.maxDiscount || 0;
           if ((packagePrice * discount) / 100 > maxDiscount)
             showToast("info", `Max Discount is ${maxDiscount}`, {
@@ -514,7 +526,7 @@ const formConfig: FormConfig = {
       placeholder: "admission",
     },
     {
-      name: "taxDetails",
+      name: "taxName",
       label: "Tax",
       options: [],
       type: "select",
@@ -536,15 +548,15 @@ const formConfig: FormConfig = {
       placeholder: "payable",
       dependsOn: {
         field:
-          "packageDetails, packagePrice,discountAmount,discount,admissionCharges,taxDetails",
+          "packageName, packagePrice,discountAmount,discount,admissionCharges,taxName",
         formula: (values, options) => {
           const packagePrice: number = parseFloat(values.packagePrice) || 0;
           const discountAmount: number = parseFloat(values.discountAmount) || 0;
           const admissionCharges: number =
             parseFloat(values.admissionCharges) || 0;
           const taxPercent: number =
-            options?.find((opt) => opt.value === values.taxDetails)
-              ?.taxPercentage || 0;
+            options?.find((opt) => opt.value === values.taxName)
+              ?.chargesPercentage || 0;
           const priceCalculates =
             packagePrice - discountAmount + admissionCharges;
           return (
@@ -564,12 +576,7 @@ const formConfig: FormConfig = {
     {
       name: "paymentMode",
       label: "Payment Mode",
-      options: [
-        {
-          group: "default",
-          options: [],
-        },
-      ],
+      options: [],
       type: "select",
       placeholder: "Select method",
       conditionalFields: {
@@ -577,7 +584,7 @@ const formConfig: FormConfig = {
       },
       allowAddCustomOption: true,
       addCustomOptionForm: PaytmMethodCustomAddOptionForm,
-      primaryFieldValues: ["method"],
+      primaryFieldValues: ["paymentMode"],
       formApiData: {
         apiPath: "others/payment-method/create",
         method: "POST",
@@ -648,18 +655,6 @@ const formConfig: FormConfig = {
       placeholder: "Select Status",
     },
     {
-      name: "paymentMethod",
-      label: "Payment Method",
-      options: [
-        {
-          group: "default",
-          options: [],
-        },
-      ],
-      type: "select",
-      placeholder: "Select method",
-    },
-    {
       name: "paymentMethodDetail",
       label: "Payment Method Detail (if any)",
       type: "textarea",
@@ -676,12 +671,14 @@ const formConfig: FormConfig = {
       name: "trainer",
       label: "Appoint Trainer",
       type: "select",
-      options: [
-        {
-          group: "default",
-          options: [],
-        },
-      ],
+      options: [],
+      allowAddCustomOption: true,
+      addCustomOptionForm: TrainerCustomAddOptionForm,
+      primaryFieldValues: ["trainer"],
+      formApiData: {
+        apiPath: "others/trainer/create",
+        method: "POST",
+      },
     },
     {
       name: "sendTextAndEmail",
@@ -745,30 +742,30 @@ export default function GymPackage() {
           );
           updateFormConfigOptions(
             formConfig,
-            "clientSourceDetails",
+            "clientSource",
             clientSourceDetails,
-            "source",
+            "clientSource",
             "_id"
           );
           updateFormConfigOptions(
             formConfig,
-            "packageDetails",
+            "packageName",
             packageDetails,
             "package",
             "_id"
           );
           updateFormConfigOptions(
             formConfig,
-            "taxDetails",
+            "taxName",
             taxDetails,
             "taxName",
             "_id"
           );
           updateFormConfigOptions(
             formConfig,
-            "paymentMethod",
+            "paymentMode",
             paymentMethod,
-            "method",
+            "paymentMode",
             "_id"
           );
           updateFormConfigOptions(

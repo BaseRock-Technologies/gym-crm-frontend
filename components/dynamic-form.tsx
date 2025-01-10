@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
 import {
+  FieldsToAddInOptions,
   FormConfig,
   FormField as FormFieldType,
   FormGroup,
@@ -35,7 +36,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { add, format } from "date-fns";
 import { FileUpload } from "./file-upload";
 import { ImageIcon } from "lucide-react";
 import { TimePickerDetailed } from "./time-picker-detailed";
@@ -57,6 +58,7 @@ interface DynamicFormProps {
   initialData?: Record<string, any> | null;
   shouldFlex?: boolean;
   apiData: SelectApiData | null;
+  formCategory?: string;
 }
 
 export function DynamicForm({
@@ -66,6 +68,7 @@ export function DynamicForm({
   initialData,
   shouldFlex,
   apiData,
+  formCategory,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -231,9 +234,10 @@ export function DynamicForm({
                 });
               }
               if (val) {
-                const isMatch = /^([1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/.test(
+                const isMatch = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/.test(
                   val
                 );
+                console.log(isMatch);
                 if (!isMatch) {
                   ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -334,9 +338,9 @@ export function DynamicForm({
                 return val.trim();
               }
               return val;
-            }, z.string())
+            }, z.union([z.string(), z.number()]))
             .superRefine((val, ctx) => {
-              if (field.required && !val) {
+              if (field.required && (val === undefined || val === null)) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `${field.label} is required`,
@@ -505,7 +509,11 @@ export function DynamicForm({
     }
   };
 
-  const handleFieldChange = (name: string, value: any) => {
+  const handleFieldChange = (
+    name: string,
+    value: any,
+    customOptionsOfField: GroupedSelectOption[] = []
+  ) => {
     form.setValue(name, value);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
@@ -529,6 +537,7 @@ export function DynamicForm({
                 ...fieldOptions,
                 ...(fieldFromConfig.options || []),
                 ...(newValues[fieldFromConfig.name]?.options || []),
+                ...customOptionsOfField,
               ]
                 .flatMap((item) => item.options)
                 .filter(Boolean);
@@ -616,9 +625,11 @@ export function DynamicForm({
     values: z.infer<ReturnType<typeof generateZodSchema>>
   ) => {
     if (isSubmitting) return;
+    console.log(values);
     setIsSubmitting(true);
     try {
-      console.log(values);
+      if (formCategory && formCategory.length > 0)
+        values["category"] = formCategory;
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, values);
         if (sentData) {
@@ -635,7 +646,10 @@ export function DynamicForm({
   const handleAddCustomOption = (
     primaryFields: string[],
     primaryValues: string[],
-    group: string
+    group: string,
+    fieldsToAddInOptions: FieldsToAddInOptions = {},
+    additionalFieldsToFoucs: Array<String>,
+    additionalValuesToFocus: Array<String | Number>
   ) => {
     try {
       primaryFields.forEach((field, index) => {
@@ -646,6 +660,7 @@ export function DynamicForm({
           )?.type;
           if (fieldType) {
             if (fieldType === "multi-select" || fieldType === "select") {
+              let fieldNewOptions: GroupedSelectOption[] = [];
               setCustomOptions((prev) => {
                 const updatedOptions = { ...prev };
                 if (!updatedOptions[field]) {
@@ -654,31 +669,55 @@ export function DynamicForm({
                 const existingGroup = updatedOptions[field].find(
                   (g) => g.group === group
                 );
+                const newOptions: SelectOption = {
+                  label: currentValue,
+                  value: currentValue,
+                };
+                if (Object.keys(fieldsToAddInOptions).length) {
+                  Object.entries(fieldsToAddInOptions).forEach(
+                    ([sourceField, targetFields]) => {
+                      const sourceValue =
+                        additionalValuesToFocus[
+                          additionalFieldsToFoucs.indexOf(sourceField)
+                        ];
+                      if (sourceValue) {
+                        targetFields.forEach((targetField) => {
+                          if (targetField === field) {
+                            newOptions[sourceField] = sourceValue;
+                          }
+                        });
+                      }
+                    }
+                  );
+                }
                 if (existingGroup) {
                   const valueExists = existingGroup.options.some(
                     (option) => option.value === currentValue
                   );
                   if (!valueExists) {
-                    existingGroup.options.push({
-                      label: currentValue,
-                      value: currentValue,
-                    });
+                    existingGroup.options.push(newOptions);
                   }
                 } else {
                   updatedOptions[field].push({
                     group,
-                    options: [{ label: currentValue, value: currentValue }],
+                    options: [newOptions],
                   });
                 }
+                fieldNewOptions = [
+                  {
+                    group,
+                    options: [newOptions],
+                  },
+                ];
                 return updatedOptions;
               });
-              handleFieldChange(field, currentValue);
+              handleFieldChange(field, currentValue, fieldNewOptions);
             }
           }
         }
       });
     } catch (error) {
-      console.log("Error Adding Custom options");
+      console.error("Error Adding Custom options:", error);
     }
   };
 
@@ -742,6 +781,7 @@ export function DynamicForm({
                     primaryFields={field.primaryFieldValues}
                     options={options}
                     value={formField.value}
+                    fieldsInOptions={field.fieldsToAddInOptions}
                     onChange={(value) => {
                       formField.onChange(value);
                       handleFieldChange(field.name, value);
@@ -752,10 +792,24 @@ export function DynamicForm({
                     onAddCustomOption={(
                       fields: string[],
                       value: string[],
-                      group: string
-                    ) => handleAddCustomOption(fields, value, group)}
+                      group: string,
+                      fieldsInOptions: FieldsToAddInOptions,
+                      additionalFieldsToFoucs: Array<String>,
+                      additionalValuesToFocus: Array<String | Number>
+                    ) =>
+                      handleAddCustomOption(
+                        fields,
+                        value,
+                        group,
+                        fieldsInOptions,
+                        additionalFieldsToFoucs,
+                        additionalValuesToFocus
+                      )
+                    }
                     disabled={field.editable === false}
-                    shouldAskGroup={field.shouldAskGroupNameInAddOption}
+                    shouldAskGroup={
+                      field.options ? field.options?.length > 1 : false
+                    }
                     apiData={field.formApiData ?? null}
                   />
                 ) : field.type === "multi-select" &&

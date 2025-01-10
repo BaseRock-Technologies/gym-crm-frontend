@@ -38,7 +38,6 @@ export interface FormFieldBase {
   type: FieldType;
   required?: boolean;
   options?: GroupedSelectOption[] | [];
-  shouldAskGroupNameInAddOption?: boolean;
   placeholder?: string;
   defaultValue?: string | number | boolean;
   dependsOn?: FieldDependency;
@@ -56,13 +55,18 @@ export interface FormFieldBase {
   maxSize?: number; // in bytes
   editable?: boolean;
   conditionalFields?: Record<string, FormField[]>;
+  alias?: string;
 }
+
+export type FieldsToAddInOptions = Record<string, string[]>;
+
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
   allowAddCustomOption: true; 
   addCustomOptionForm: FormConfig; 
   primaryFieldValues: string[];
   formApiData?: SelectApiData;
+  fieldsToAddInOptions?: FieldsToAddInOptions;
 }
 
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
@@ -70,6 +74,7 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   addCustomOptionForm?: never; 
   primaryFieldValues?: never;
   formApiData?: never;
+  fieldsToAddInOptions?: never;
 }
 
 export type FormField = FormFieldWithCustomOptions | FormFieldWithoutCustomOptions;

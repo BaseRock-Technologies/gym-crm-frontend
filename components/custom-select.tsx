@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { DynamicForm } from "./dynamic-form";
 import {
+  FieldsToAddInOptions,
   FormConfig,
   GroupedSelectOption,
   SelectApiData,
@@ -32,6 +33,7 @@ import {
 
 interface CustomSelectProps {
   primaryFields?: string[];
+  fieldsInOptions?: FieldsToAddInOptions;
   options?: GroupedSelectOption[];
   value: string;
   onChange: (value: string) => void;
@@ -41,7 +43,10 @@ interface CustomSelectProps {
   onAddCustomOption?: (
     fields: string[],
     value: string[],
-    group: string
+    group: string,
+    fieldsInOptions: FieldsToAddInOptions,
+    additionalFieldsToFoucs: Array<String>,
+    additionalValuesToFocus: Array<String | Number>
   ) => void;
   error?: string;
   disabled: boolean;
@@ -51,6 +56,7 @@ interface CustomSelectProps {
 
 export function CustomSelect({
   options = [],
+  fieldsInOptions,
   primaryFields,
   value,
   onChange,
@@ -69,25 +75,48 @@ export function CustomSelect({
   const [customOptionGroupDialog, setCustomOptionGroupDialog] =
     React.useState<string>(options.length === 1 ? options[0].group : "");
 
-  const selectOptionsGroups = options.map((element) => element.group);
+  const selectOptionsGroups = options
+    .filter((element) => element.group && element.group !== "default")
+    .map((element) => element.group);
 
   const selectTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleAddCustomOption = (value: Record<string, any>) => {
     if (primaryFields && onAddCustomOption && allowAddCustomOption) {
       const primaryValues = primaryFields.map((field) => value[field]);
+      let additionalFieldsToFoucs: String[] = [];
+      let additionalValuesToFocus: Array<String> = [];
+      if (fieldsInOptions) {
+        additionalFieldsToFoucs = Object.keys(fieldsInOptions);
+        additionalValuesToFocus = additionalFieldsToFoucs.map(
+          (field: any) => value[field]
+        );
+      }
       if (shouldAskGroup) {
         onAddCustomOption(
           primaryFields,
           primaryValues,
-          customOptionGroupDialog
+          customOptionGroupDialog,
+          fieldsInOptions ?? {},
+          additionalFieldsToFoucs,
+          additionalValuesToFocus
         );
       } else {
         const optionsGroup = options[0] ? options[0].group : "default";
-        onAddCustomOption(primaryFields, primaryValues, optionsGroup);
+        onAddCustomOption(
+          primaryFields,
+          primaryValues,
+          optionsGroup,
+          fieldsInOptions ?? {},
+          additionalFieldsToFoucs,
+          additionalValuesToFocus
+        );
       }
     }
     setDialogOpen(false);
+    if (shouldAskGroup) {
+      setCustomOptionGroupDialog("");
+    }
   };
 
   const selectedOptionLabel = React.useMemo(() => {
@@ -138,7 +167,6 @@ export function CustomSelect({
               {options.length && options.length > 0
                 ? options.map((selectGroups) => (
                     <CommandGroup
-                      onClick={() => console.log("sec")}
                       key={selectGroups.group}
                       heading={options.length > 1 ? selectGroups.group : ""}
                     >
@@ -196,15 +224,12 @@ export function CustomSelect({
           open={dialogOpen}
           onOpenChange={(open) => {
             setDialogOpen(open);
-            if (!open && shouldAskGroup && options.length > 1) {
+            if (!open && shouldAskGroup) {
               setCustomOptionGroupDialog("");
             }
           }}
         >
-          <DialogContent
-            className="bg-backgroundSupport"
-            onClick={() => console.log("first")}
-          >
+          <DialogContent className="bg-backgroundSupport">
             <DialogHeader>
               <DialogTitle>
                 {shouldAskGroup && !customOptionGroupDialog && "Select Group"}
@@ -230,6 +255,7 @@ export function CustomSelect({
                 config={addCustomOptionForm}
                 shouldFlex={true}
                 apiData={apiData ?? null}
+                formCategory={customOptionGroupDialog}
               />
             )}
           </DialogContent>
