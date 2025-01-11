@@ -1,6 +1,6 @@
 "use client";
 import { DynamicForm } from "@/components/dynamic-form";
-import { FormConfig } from "@/types/form";
+import { FormConfig, SelectApiData } from "@/types/form";
 
 import { useState } from "react";
 import InquiryHistory from "./inquiryHistory";
@@ -277,11 +277,21 @@ export default function InquiryHome() {
     Record<string, boolean>
   >({});
 
+  const apiConfig: SelectApiData = {
+    apiPath: "",
+    method: "POST",
+  };
+
   return (
     <div className="relative p-6 flex flex-col gap-6">
       <div className="relative flex md:flex-row flex-col gap-6 justify-stretch items-stretch min-h-screen">
         <div className="relative md:w-3/4 w-full flex">
-          <DynamicForm config={formConfig} submitBtnText="CREATE INQUIRY" />
+          <DynamicForm
+            config={formConfig}
+            submitBtnText="CREATE INQUIRY"
+            apiData={apiConfig}
+            resetOnSubmit={true}
+          />
         </div>
         <div className="relative md:w-1/4 w-full flex">
           <InquiryHistory selectedInquiry={selectedInquiry} />
