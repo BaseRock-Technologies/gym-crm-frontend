@@ -5,6 +5,23 @@ import { formatTimestamp } from "@/utils/date-utils";
 const PackageCustomAddOptionForm: FormConfig = {
     id: "new-package",
     title: "Add package",
+    groups: [
+      {
+        id: "packageDetailsFields",
+        title: "Package Details",
+        type: "card-form",
+        fields: ["packageName", "packagePrice", "durationInDays", "maxDiscount", "status"],
+      },
+      {
+        id: "actions",
+        title: "Actions",
+        type: "action-group",
+        renderType: "default",
+        backgroundColor: "bg-transparent",
+        layout: "col",
+        fields: ["showOnWebsite"],
+      },
+    ],
     fields: [
       {
         name: "packageName",
@@ -179,7 +196,7 @@ const PackageCustomAddOptionForm: FormConfig = {
   
 const formConfig: FormConfig = {
     id: "gym-package",
-    title: "Create new bill for Gym Membership",
+    title: "Create New Bill",
     groups: [
       {
         id: "personal-info",

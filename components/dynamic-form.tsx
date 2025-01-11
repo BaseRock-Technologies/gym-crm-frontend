@@ -846,7 +846,11 @@ export function DynamicForm({
             <FormItem>
               {(!field.labelPos ||
                 (field.labelPos && field.labelPos === "right")) && (
-                <FormLabel className={`${!field.label && "h-6 flex"}`}>
+                <FormLabel
+                  className={`${
+                    !field.label && "h-6 flex"
+                  } text-helper-secondary`}
+                >
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </FormLabel>
@@ -1071,7 +1075,7 @@ export function DynamicForm({
                 )}
               </FormControl>
               {field.labelPos === "left" && (
-                <FormLabel className="ml-2">
+                <FormLabel className="ml-2 text-helper-secondary">
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </FormLabel>
@@ -1213,6 +1217,17 @@ export function DynamicForm({
               </div>
             </div>
           )}
+        </div>
+      );
+    } else if (group.type === "card-form") {
+      return (
+        <div key={group.id}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {group.fields.map((fieldName) => {
+              const field = config.fields.find((f) => f.name === fieldName);
+              return field ? renderField(field) : null;
+            })}
+          </div>
         </div>
       );
     } else {

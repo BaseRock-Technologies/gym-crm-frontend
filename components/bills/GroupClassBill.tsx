@@ -40,10 +40,15 @@ const additionalFormFieldsToAdd: AddtionalFormFieldsConfig = {
 };
 
 const fieldsToRemove: FieldsToRemoveConfig = {
-  groups: [],
+  groups: [
+    {
+      id: "trainer-info",
+      fields: ["trainer"],
+    },
+  ],
 };
 
-export default function PersonalTrainingBill() {
+export default function GroupClassBill() {
   const { user } = useAuth();
   const [initialData, setInitialData] = React.useState<Record<
     string,
@@ -53,14 +58,14 @@ export default function PersonalTrainingBill() {
   const apiConfig: SelectApiData = {
     apiPath: "bills/create",
     method: "POST",
-    billType: "personal-training",
+    billType: "group-class",
   };
 
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const res: StatusResponse = await post(
-          { billType: "personal-training" },
+          { billType: "group-class" },
           "bills/options",
           "Failed to fetch bill options"
         );
@@ -202,14 +207,14 @@ export default function PersonalTrainingBill() {
       );
     }
 
-    formConfig.title = "Create New Personal Training bill";
+    formConfig.title = "Create New Group Class bill";
 
     fetchInitialData();
   }, [user]);
 
   const redirectRules = {
     shouldRedirect: true,
-    redirectPath: `/personal-training-bill/${initialData?.memberId}`,
+    redirectPath: `/group-class-bill/${initialData?.memberId}`,
   };
 
   return (

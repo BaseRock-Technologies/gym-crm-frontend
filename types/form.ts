@@ -91,7 +91,7 @@ export interface FormGroup {
   id: string;
   title: string;
   accordianOpenTitle?: string;
-  type: 'accordion' | 'background' | 'default' | 'action-group';
+  type: 'accordion' | 'background' | 'default' | 'action-group'| 'card-form';
   backgroundColor?: string;
   fields: string[];
   className?: string;
@@ -101,9 +101,8 @@ export interface FormGroup {
 }
 export interface AddtionalFormFieldsConfigGroup {
   id: string;
-  fields: string[];
+  fields: { name: string; position: number }[]; 
 }
-
 export interface FormConfig {
   id: string;
   title: string;
@@ -116,3 +115,11 @@ export interface AddtionalFormFieldsConfig {
   fields: FormField[];
 }
 
+export interface FieldsToRemoveConfigGroup {
+  id: string;
+  fields: string[];
+}
+
+export interface FieldsToRemoveConfig {
+  groups: FieldsToRemoveConfigGroup[];
+}
