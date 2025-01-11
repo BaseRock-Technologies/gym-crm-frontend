@@ -293,6 +293,15 @@ const formConfig: FormConfig = {
           apiPath: "client/create",
           method: "POST",
         },
+        dependsOn: {
+          field: "contactNumber",
+          formula: (values, options) => {
+            const clientName = options?.find(
+              (opt) => opt.value === values.contactNumber
+            )?.clientName;
+            return clientName || ''
+          },
+        }
       },
       {
         name: "contactNumber",
@@ -300,6 +309,16 @@ const formConfig: FormConfig = {
         type: "select",
         placeholder: "Select Contact Number",
         required: true,
+        editable: false,
+        dependsOn: {
+          field: "clientName",
+          formula: (values, options) => {
+            const contactNumber = options?.find(
+              (opt) => opt.value === values.clientName
+            )?.contactNumber;
+            return contactNumber || ''
+          },
+        }
       },
       {
         name: "alternateContact",

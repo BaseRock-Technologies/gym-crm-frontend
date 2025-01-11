@@ -575,11 +575,12 @@ export function DynamicForm({
                 ...(fieldFromConfig.options || []),
                 ...(newValues[fieldFromConfig.name]?.options || []),
                 ...customOptionsOfField,
-              ]
-                .flatMap((item) => item.options)
-                .filter(Boolean);
+              ];
             }
           });
+          fieldOptions = fieldOptions
+            .flatMap((item) => item.options)
+            .filter(Boolean);
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
             newValues,

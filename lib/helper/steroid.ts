@@ -1,7 +1,7 @@
 import { backendApiPath } from "@/env";
 import Cookies from "js-cookie";
 import { showToast } from "./toast";
-import { FormConfig, FormField, GroupedSelectOption } from "@/types/form";
+import { FieldDependency, FormConfig, FormField, GroupedSelectOption } from "@/types/form";
 
 
 type customObject = { [key: string]: any };

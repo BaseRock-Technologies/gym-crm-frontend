@@ -3,13 +3,30 @@ import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
-import { SelectApiData } from "@/types/form";
+import { AddtionalFormFieldsConfig, SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
 import { formConfig } from "./constant";
 
-export default function GymPackage() {
+const additionalFormFieldsToAdd: AddtionalFormFieldsConfig = {
+  groups: [
+    {
+      id: "personal-info",
+      fields: ["invoiceId"],
+    },
+  ],
+  fields: [
+    {
+      name: "invoiceId",
+      label: "Invoice ID",
+      type: "number",
+      editable: false,
+    },
+  ],
+};
+
+export default function PersonalTrainingBill() {
   const { user } = useAuth();
   const [initialData, setInitialData] = React.useState<Record<
     string,
@@ -49,8 +66,23 @@ export default function GymPackage() {
             invoiceDate: currentDate,
             joiningDate: currentDate,
             endDate: currentDate,
-            clientSource: "Flyers",
           };
+
+          const membeIdField = formConfig.fields.find(
+            (field) => field.name === "memberId"
+          );
+          if (membeIdField) {
+            membeIdField.dependsOn = {
+              field: "clientName",
+              formula: (values, options) => {
+                return (
+                  options?.find((opt) => opt.value === values.clientName)
+                    ?.memberId ?? data.memberId
+                );
+              },
+            };
+          }
+
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -98,6 +130,29 @@ export default function GymPackage() {
         showToast("error", "Failed to load data");
       }
     };
+
+    if (additionalFormFieldsToAdd) {
+      additionalFormFieldsToAdd.groups?.forEach((group) => {
+        const relatedFormConfigGroup = formConfig.groups?.find(
+          (configGroup) => configGroup.id === group.id
+        );
+        if (relatedFormConfigGroup) {
+          relatedFormConfigGroup.fields = [
+            ...new Set([...group.fields, ...relatedFormConfigGroup.fields]),
+          ];
+        }
+      });
+
+      const existingFieldNames = new Set(
+        formConfig.fields.map((fieldConfig) => fieldConfig.name)
+      );
+      additionalFormFieldsToAdd.fields.forEach((field) => {
+        if (!existingFieldNames.has(field.name)) {
+          formConfig.fields.push(field);
+        }
+      });
+    }
+    formConfig.title = "Create Personal Training bill";
 
     fetchInitialData();
   }, [user]);

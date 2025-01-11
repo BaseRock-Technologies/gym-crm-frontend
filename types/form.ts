@@ -99,11 +99,20 @@ export interface FormGroup {
   layout?: 'row' | 'col' | 'grid';
   additionalClass?: string;
 }
+export interface AddtionalFormFieldsConfigGroup {
+  id: string;
+  fields: string[];
+}
 
 export interface FormConfig {
   id: string;
   title: string;
   groups?: FormGroup[];
+  fields: FormField[];
+}
+
+export interface AddtionalFormFieldsConfig {
+  groups?: AddtionalFormFieldsConfigGroup[];
   fields: FormField[];
 }
 

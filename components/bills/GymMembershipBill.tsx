@@ -1,48 +1,71 @@
 "use client";
+import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { DynamicForm } from "../dynamic-form";
+import React from "react";
 import { formConfig } from "./constant";
 
-const GymPackageWithId = () => {
-  const { id } = useParams();
-  const [initialData, setInitialData] = useState<Record<string, any> | null>(
-    null
-  );
+export default function GymMembershipBill() {
   const { user } = useAuth();
+  const [initialData, setInitialData] = React.useState<Record<
+    string,
+    any
+  > | null>(null);
 
   const apiConfig: SelectApiData = {
-    apiPath: `bills/update`,
-    method: "PATCH",
+    apiPath: "bills/create",
+    method: "POST",
     billType: "gym-membership",
-    postData: {
-      billId: id,
-    },
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const billSelectOptions: StatusResponse = await post(
+        const res: StatusResponse = await post(
           { billType: "gym-membership" },
           "bills/options",
           "Failed to fetch bill options"
         );
-        if (billSelectOptions.status === "success" && billSelectOptions.data) {
+        if (res.status === "success" && res.data) {
           const {
+            billId,
             clientDetails,
             clientSourceDetails,
             packageDetails,
             taxDetails,
             paymentMethod,
             trainersDetails,
-          } = billSelectOptions.data;
+          } = res.data;
+          const currentDate = formatTimestamp(
+            Math.floor(new Date().getTime() / 1000)
+          );
+          const data = {
+            memberId: billId.toString(),
+            clientRepresentative: user?.userName || "",
+            invoiceDate: currentDate,
+            joiningDate: currentDate,
+            endDate: currentDate,
+          };
+
+          const membeIdField = formConfig.fields.find(
+            (field) => field.name === "memberId"
+          );
+          if (membeIdField) {
+            membeIdField.dependsOn = {
+              field: "clientName",
+              formula: (values, options) => {
+                return (
+                  options?.find((opt) => opt.value === values.clientName)
+                    ?.memberId ?? data.memberId
+                );
+              },
+            };
+          }
+
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -80,49 +103,35 @@ const GymPackageWithId = () => {
             trainersDetails,
             "trainer"
           );
-        }
-        if (billSelectOptions.status === "error") {
-          showToast("error", billSelectOptions.message);
-          return;
-        }
-        const billDetails: StatusResponse = await post(
-          { billType: "gym-membership", billId: id },
-          `bills/details`,
-          "Failed to fetch bill details"
-        );
-        if (billDetails.status === "success" && billDetails.data) {
-          const { data } = billDetails;
-
-          const dateFields = formConfig.fields
-            .filter((field) => field.type === "date")
-            .map((field) => field.name);
-
-          dateFields.forEach((field) => {
-            if (data[field]) {
-              data[field] = formatTimestamp(data[field]);
-            }
-          });
           setInitialData(data);
         }
       } catch (error) {
-        console.error("Error fetching data in Gym Packgae Bill:", error);
+        console.error(
+          "Error fetching initial data in Gym Packgae Bill:",
+          error
+        );
         showToast("error", "Failed to load data");
       }
     };
+
     fetchInitialData();
   }, [user]);
+
+  const redirectRules = {
+    shouldRedirect: true,
+    redirectPath: `/gym-bill/${initialData?.memberId}`,
+  };
 
   return (
     <div className="relative p-6 flex flex-col gap-6">
       <DynamicForm
         config={formConfig}
-        submitBtnText="Update"
+        submitBtnText="Save"
         initialData={initialData}
         apiData={apiConfig}
-        resetOnSubmit={false}
+        redirectRules={redirectRules}
+        resetOnSubmit={true}
       />
     </div>
   );
-};
-
-export default GymPackageWithId;
+}
