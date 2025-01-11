@@ -176,7 +176,7 @@ const formConfig: FormConfig = {
       type: "select",
       allowAddCustomOption: true,
       addCustomOptionForm: AttendedByCustomAddOptionForm,
-      primaryFieldValue: "firstName",
+      primaryFieldValues: ["firstName"],
     },
     {
       name: "convertibility",
@@ -217,7 +217,7 @@ const formConfig: FormConfig = {
       placeholder: "Select Source",
       allowAddCustomOption: true,
       addCustomOptionForm: SourceOfInquiryCustomAddOptionForm,
-      primaryFieldValue: "firstName",
+      primaryFieldValues: ["firstName"],
     },
     {
       name: "inquiryFor",
@@ -255,7 +255,7 @@ const formConfig: FormConfig = {
       placeholder: "Select Source",
       allowAddCustomOption: true,
       addCustomOptionForm: InquiryForCustomAddOptionForm,
-      primaryFieldValue: "packageName",
+      primaryFieldValues: ["packageName"],
     },
     {
       name: "feedback",
