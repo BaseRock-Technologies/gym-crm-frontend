@@ -256,6 +256,7 @@ export function CustomSelect({
                 shouldFlex={true}
                 apiData={apiData ?? null}
                 formCategory={customOptionGroupDialog}
+                resetOnSubmit={true}
               />
             )}
           </DialogContent>

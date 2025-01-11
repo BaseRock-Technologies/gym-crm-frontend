@@ -30,10 +30,13 @@ export interface FieldDependency {
 
 type LabelPostion = "right" | "left";
 export type ApiMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
+export type BillTypes = 'gym-membership'| 'personal-training'| 'group-class'
 
 export interface SelectApiData {
   apiPath: string, 
-  method: ApiMethod
+  method: ApiMethod,
+  billType?: BillTypes,
+  postData?: Record<string, any>
 }
 
 export interface FormFieldBase {
@@ -102,6 +105,5 @@ export interface FormConfig {
   title: string;
   groups?: FormGroup[];
   fields: FormField[];
-  redirectRules?: RedirectRules;
 }
 

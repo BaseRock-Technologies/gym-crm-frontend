@@ -4,7 +4,7 @@ interface SigninResponse {
     authToken: string
 }
 
-type Status = "error" | "success"
+type Status = "error" | "success" | 'info'
 interface StatusResponse {
     status: Status,
     message: string,

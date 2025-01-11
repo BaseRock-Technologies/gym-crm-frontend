@@ -1,56 +1,48 @@
 "use client";
-import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
-import React from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { DynamicForm } from "../dynamic-form";
 import { formConfig } from "./constant";
 
-export default function GymPackage() {
+const GymPackageWithId = () => {
+  const { id } = useParams();
+  const [initialData, setInitialData] = useState<Record<string, any> | null>(
+    null
+  );
   const { user } = useAuth();
-  const [initialData, setInitialData] = React.useState<Record<
-    string,
-    any
-  > | null>(null);
 
   const apiConfig: SelectApiData = {
-    apiPath: "bills/create",
-    method: "POST",
+    apiPath: `bills/update`,
+    method: "PATCH",
     billType: "gym-membership",
+    postData: {
+      billId: id,
+    },
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const res: StatusResponse = await post(
+        const billSelectOptions: StatusResponse = await post(
           { billType: "gym-membership" },
           "bills/options",
           "Failed to fetch bill options"
         );
-        if (res.status === "success" && res.data) {
+        if (billSelectOptions.status === "success" && billSelectOptions.data) {
           const {
-            billId,
             clientDetails,
             clientSourceDetails,
             packageDetails,
             taxDetails,
             paymentMethod,
             trainersDetails,
-          } = res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
-          const data = {
-            memberId: billId.toString(),
-            clientRepresentative: user?.userName || "",
-            invoiceDate: currentDate,
-            joiningDate: currentDate,
-            endDate: currentDate,
-            clientSource: "Flyers",
-          };
+          } = billSelectOptions.data;
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -88,35 +80,49 @@ export default function GymPackage() {
             trainersDetails,
             "trainer"
           );
+        }
+        if (billSelectOptions.status === "error") {
+          showToast("error", billSelectOptions.message);
+          return;
+        }
+        const billDetails: StatusResponse = await post(
+          { billType: "gym-membership", billId: id },
+          `bills/details`,
+          "Failed to fetch bill details"
+        );
+        if (billDetails.status === "success" && billDetails.data) {
+          const { data } = billDetails;
+
+          const dateFields = formConfig.fields
+            .filter((field) => field.type === "date")
+            .map((field) => field.name);
+
+          dateFields.forEach((field) => {
+            if (data[field]) {
+              data[field] = formatTimestamp(data[field]);
+            }
+          });
           setInitialData(data);
         }
       } catch (error) {
-        console.error(
-          "Error fetching initial data in Gym Packgae Bill:",
-          error
-        );
+        console.error("Error fetching data in Gym Packgae Bill:", error);
         showToast("error", "Failed to load data");
       }
     };
-
     fetchInitialData();
   }, [user]);
-
-  const redirectRules = {
-    shouldRedirect: true,
-    redirectPath: `/gym-bill/${initialData?.memberId}`,
-  };
 
   return (
     <div className="relative p-6 flex flex-col gap-6">
       <DynamicForm
         config={formConfig}
-        submitBtnText="Save"
+        submitBtnText="Update"
         initialData={initialData}
         apiData={apiConfig}
-        redirectRules={redirectRules}
-        resetOnSubmit={true}
+        resetOnSubmit={false}
       />
     </div>
   );
-}
+};
+
+export default GymPackageWithId;

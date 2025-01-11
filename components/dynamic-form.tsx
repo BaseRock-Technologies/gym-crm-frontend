@@ -25,6 +25,7 @@ import {
   FormField as FormFieldType,
   FormGroup,
   GroupedSelectOption,
+  RedirectRules,
   SelectApiData,
   SelectOption,
 } from "../types/form";
@@ -36,7 +37,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { add, format } from "date-fns";
+import { format } from "date-fns";
 import { FileUpload } from "./file-upload";
 import { ImageIcon } from "lucide-react";
 import { TimePickerDetailed } from "./time-picker-detailed";
@@ -48,9 +49,11 @@ import {
 } from "@radix-ui/react-accordion";
 import SpinnerTick from "./Images/SpinnerTick";
 import { StatusResponse } from "@/types/query";
-import { get, post } from "@/lib/helper/steroid";
+import { deepEqualObjs, get, patch, post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { formatTimestamp } from "@/utils/date-utils";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -60,6 +63,8 @@ interface DynamicFormProps {
   shouldFlex?: boolean;
   apiData: SelectApiData | null;
   formCategory?: string;
+  redirectRules?: RedirectRules;
+  resetOnSubmit: boolean;
 }
 
 export function DynamicForm({
@@ -70,6 +75,8 @@ export function DynamicForm({
   shouldFlex,
   apiData,
   formCategory,
+  redirectRules,
+  resetOnSubmit = true,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -80,6 +87,9 @@ export function DynamicForm({
     Record<string, boolean>
   >({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const initialDataRef = React.useRef(initialData);
+  const formCardRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const generateZodSchema = (fields: FormFieldType[]) => {
@@ -307,13 +317,14 @@ export function DynamicForm({
         case "date":
           fieldSchema = z
             .preprocess((val) => {
-              if (typeof val === "string") {
-                const date = new Date(val);
-                return isNaN(date.getTime())
-                  ? undefined
-                  : Math.floor(date.getTime() / 1000);
+              if (val instanceof Date) {
+                return Math.floor(val.getTime() / 1000);
               }
-              return val;
+              if (typeof val === "string" && !isNaN(Date.parse(val))) {
+                const date = new Date(val);
+                return Math.floor(date.getTime() / 1000);
+              }
+              return null;
             }, z.number().nullish())
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
@@ -342,7 +353,6 @@ export function DynamicForm({
               return val;
             }, z.union([z.string(), z.number()]))
             .superRefine((val, ctx) => {
-              console.log(val);
               if (
                 field.required &&
                 (val === undefined || val === null || !val)
@@ -375,18 +385,23 @@ export function DynamicForm({
           fieldSchema = z
             .preprocess((val) => {
               if (typeof val === "string") {
-                return val.replace(/\D/g, "");
+                const parsedValue = parseInt(val.replace(/\D/g, ""), 10);
+                return isNaN(parsedValue) ? null : parsedValue;
               }
               return val;
-            }, z.string())
+            }, z.number().nullish()) // Allow nullish values
             .superRefine((val, ctx) => {
               const phoneRegex = /^\d{10}$/;
-              if (field.required && !val) {
+              if (field.required && (val === undefined || val === null)) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `${field.label} is required`,
                 });
-              } else if (val && !phoneRegex.test(val)) {
+              } else if (
+                val !== null &&
+                val !== undefined &&
+                !phoneRegex.test(val.toString())
+              ) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
                   message: `Invalid ${field.label}`,
@@ -489,7 +504,8 @@ export function DynamicForm({
   });
 
   React.useEffect(() => {
-    if (initialData) {
+    if (initialData && initialData !== initialDataRef.current) {
+      initialDataRef.current = initialData;
       Object.entries(initialData).forEach(([key, value]) => {
         form.setValue(key, value);
       });
@@ -501,6 +517,21 @@ export function DynamicForm({
       form.setValue(key, value);
     });
   }, [formValues]);
+
+  React.useEffect(() => {
+    const { isSubmitting, errors } = form.formState;
+    if (isSubmitting && Object.keys(errors).length) {
+      showToast("error", "Please check all your data");
+
+      if (formCardRef.current) {
+        formCardRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        window.scrollBy(0, -100);
+      }
+    }
+  }, [form.formState.errors]);
 
   const evaluateFormula = (
     formula: (values: Record<string, any>, options?: SelectOption[]) => any,
@@ -594,23 +625,44 @@ export function DynamicForm({
   ) => {
     const handleResponse = (res: StatusResponse) => {
       const { status, message } = res;
-      if (status === "success" && res.exists) {
-        showToast("info", message);
-      }
-      if (status === "error") {
-        showToast("error", "Failed to process data");
-      }
-      return status === "success";
+      showToast(status, message);
+      return status !== "error";
     };
-
+    if (data.billType) {
+      postData = { ...postData, billType: data.billType };
+    }
+    if (data.postData) {
+      postData = { ...postData, ...data.postData };
+    }
     try {
       let res: StatusResponse;
       if (data.method === "POST" && postData) {
         res = await post(postData, data.apiPath);
       } else if (data.method === "GET") {
-        res = await get(data.apiPath);
+        res = await get(data.apiPath, "Failed to process data");
+      } else if (data.method === "PATCH" && postData) {
+        const dateFields = config.fields
+          .filter((field) => field.type === "date")
+          .map((field) => field.name);
+        const changedData = Object.fromEntries(
+          Object.entries(postData).filter(([key, value]) => {
+            return !deepEqualObjs(
+              dateFields.includes(key) ? formatTimestamp(value) : value,
+              initialData?.[key]
+            );
+          })
+        );
+        if (Object.keys(changedData).length) {
+          res = await patch(
+            changedData,
+            data.apiPath,
+            "Failed to process data"
+          );
+        } else {
+          res = { status: "info", message: "No changes made" };
+        }
       } else {
-        return false; // Unsupported method
+        return false;
       }
       return handleResponse(res);
     } catch (error) {
@@ -625,15 +677,16 @@ export function DynamicForm({
     if (storeFormValues) {
       storeFormValues(values);
     }
-    if (config.redirectRules && config.redirectRules.shouldRedirect) {
-      router.push(config.redirectRules.redirectPath);
+    if (redirectRules && redirectRules.shouldRedirect) {
+      setIsRedirecting(true);
+      router.push(redirectRules.redirectPath);
     }
   };
 
   const onSubmit = async (
     values: z.infer<ReturnType<typeof generateZodSchema>>
   ) => {
-    if (isSubmitting) return;
+    if (isSubmitting || isRedirecting) return;
     setIsSubmitting(true);
     try {
       const filteredValues = Object.fromEntries(
@@ -642,17 +695,24 @@ export function DynamicForm({
         )
       );
 
+      if (deepEqualObjs(filteredValues, initialData)) {
+        showToast("info", "No changes made");
+        return;
+      }
+
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
-        if (sentData) {
+        if (sentData && resetOnSubmit) {
           resetForm(filteredValues);
         }
-      } else {
+      } else if (resetOnSubmit) {
         resetForm(filteredValues);
       }
+    } catch (error) {
+      showToast("error", "Failed to submit form");
     } finally {
       setIsSubmitting(false);
     }
@@ -1169,12 +1229,15 @@ export function DynamicForm({
   };
 
   return (
-    <Card className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none">
+    <Card
+      ref={formCardRef}
+      className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none"
+    >
       <CardHeader className="relative bg-primary text-white mb-5 shadow-sm">
         <CardTitle>{config.title}</CardTitle>
       </CardHeader>
       <CardContent className="relative">
-        {initialData === null && (
+        {(initialData === null || isRedirecting) && (
           <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
             <SpinnerTick color="#1a0f2b" />
           </div>

@@ -21,7 +21,7 @@ const authTokenAppend = (data: customObject) => {
   return data;
 };
 
-const post = async (postData: customObject, apiPath: string, validateResponse: boolean = true) => {
+const post = async (postData: customObject, apiPath: string,  errorMsg: string = "Failed to process data", validateResponse: boolean = true) => {
   try {
       const jsonData = authTokenAppend(postData);
 
@@ -51,6 +51,11 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
           showToast("error", "Access Denied");
       }
 
+      if(responseData.status === "error") {
+        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+      }
+
+
       return responseData;
   } catch (error) {
       console.error('Error:', error);
@@ -58,7 +63,48 @@ const post = async (postData: customObject, apiPath: string, validateResponse: b
   }
 };
 
-const get = async (apiPath: string, validateResponse: boolean = true) => {
+const patch = async (postData: customObject, apiPath: string, errorMsg: string = "Failed to process data", validateResponse: boolean = true) => {
+  try {
+      const jsonData = authTokenAppend(postData);
+
+      const response = await fetch(`${backendApiPath}/${apiPath}`, {
+          method: 'PATCH',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ myData: jsonData }),
+      });
+
+      if (!response.ok) {
+          if (response.status === 401) {
+              Cookies.remove('user');
+              setTimeout(() => {
+                  window.location.href = "/signin";
+              }, 6000);
+              throw new Error('Unauthorized');
+          }
+          throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (validateResponse && responseData.status === 'unauthorized') {
+          Cookies.remove('user');
+          showToast("error", "Access Denied", { toastId: "ba3ed155-c109-43a8-b7d1-7fda55c3f3f2"});
+      }
+
+      if(responseData.status === "error") {
+        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+      }
+
+      return responseData;
+  } catch (error) {
+      console.error('Error:', error);
+      return { status: 'error', message: 'Failed to fetch' };
+  }
+};
+
+const get = async (apiPath: string,errorMsg: string = "Failed to process data",  validateResponse: boolean = true) => {
   try {
       const response = await fetch(`${backendApiPath}/${apiPath}`, {
           method: 'GET',
@@ -85,6 +131,11 @@ const get = async (apiPath: string, validateResponse: boolean = true) => {
           showToast("error", "Access Denied");
       }
 
+      if(responseData.status === "error") {
+        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+      }
+
+
       return responseData;
   } catch (error) {
       console.error('Error:', error);
@@ -97,7 +148,6 @@ const updateFormConfigOptions = (
   fieldName: string,
   options: Record<string, any[]>,
   labelField: string,
-  valueField: string,
   fieldsToDelete?: string[]
 ) => {
   const field: FormField | undefined = formConfig.fields.find((item) => item.name === fieldName);
@@ -110,10 +160,10 @@ const updateFormConfigOptions = (
             const { ...filteredOption } = option;
             const data = {
                 label: filteredOption[labelField],
-                value: filteredOption[valueField],
+                value: filteredOption[labelField],
             };
           delete filteredOption[labelField];
-          delete filteredOption[valueField];
+          delete filteredOption[labelField];
 
           if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
               fieldsToDelete.forEach(fieldToDelete => {
@@ -137,8 +187,31 @@ const updateFormConfigOptions = (
   }
 };
 
+function deepEqualObjs(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) return true;
+
+  if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+    return false;
+  }
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  for (const key of keys1) {
+    if (!keys2.includes(key) || !deepEqualObjs(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export {
   post,
   get,
+  patch,
   updateFormConfigOptions,
+  deepEqualObjs
 }
