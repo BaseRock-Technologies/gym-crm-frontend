@@ -19,7 +19,14 @@ export interface MultiSelectOption {
 
 export interface RedirectRules {
   shouldRedirect: boolean,
-  redirectPath: string
+  redirectPath: string,
+  redirectOnMemberId?: boolean,
+}
+
+export interface AdminOnlyEdit {
+  adminOnlyEdit: boolean,
+  redirectPath: string,
+  memberId?: string,
 }
 
 export interface FieldDependency {

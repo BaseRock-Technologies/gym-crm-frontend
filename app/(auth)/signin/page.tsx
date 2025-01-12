@@ -70,7 +70,11 @@ export default function SignInForm() {
 
       if (res) {
         if (res.status === "success") {
-          const userData = { userName, authToken: res.authToken };
+          const userData = {
+            userName,
+            authToken: res.authToken,
+            role: res.role,
+          };
           setUser(userData);
           Cookies.set("user", JSON.stringify(userData), {
             expires: 1,

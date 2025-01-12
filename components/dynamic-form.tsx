@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
 import {
+  AdminOnlyEdit,
   FieldsToAddInOptions,
   FormConfig,
   FormField as FormFieldType,
@@ -54,6 +55,9 @@ import { showToast } from "@/lib/helper/toast";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { formatTimestamp } from "@/utils/date-utils";
+import { useAuth } from "@/lib/context/authContext";
+import Link from "next/link";
+import EditClientDetails from "./bills/EditClientDetails";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -65,6 +69,8 @@ interface DynamicFormProps {
   formCategory?: string;
   redirectRules?: RedirectRules;
   resetOnSubmit: boolean;
+  isAdminOnly?: boolean;
+  adminEditRules?: AdminOnlyEdit;
 }
 
 export function DynamicForm({
@@ -77,6 +83,8 @@ export function DynamicForm({
   formCategory,
   redirectRules,
   resetOnSubmit = true,
+  isAdminOnly = false,
+  adminEditRules,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -91,6 +99,7 @@ export function DynamicForm({
   const initialDataRef = React.useRef(initialData);
   const formCardRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -680,7 +689,11 @@ export function DynamicForm({
     }
     if (redirectRules && redirectRules.shouldRedirect) {
       setIsRedirecting(true);
-      router.push(redirectRules.redirectPath);
+      if (redirectRules.redirectOnMemberId) {
+        router.push(`${redirectRules.redirectPath}/${values.memberId}`);
+      } else {
+        router.push(redirectRules.redirectPath);
+      }
     }
   };
 
@@ -1243,57 +1256,70 @@ export function DynamicForm({
       );
     }
   };
-
   return (
-    <Card
-      ref={formCardRef}
-      className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none"
-    >
-      <CardHeader className="relative bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>{config.title}</CardTitle>
-      </CardHeader>
-      <CardContent className="relative">
-        {(initialData === null || isRedirecting) && (
-          <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
-            <SpinnerTick color="#1a0f2b" />
-          </div>
-        )}
-        <Form {...form}>
-          <form
-            onSubmit={(event) => {
-              event.stopPropagation();
-              event.preventDefault();
-              form.handleSubmit(onSubmit)(event);
-            }}
-            className="space-y-6"
-            id={formId}
-          >
-            {config.groups ? (
-              config.groups.map(renderGroup)
-            ) : (
-              <div
-                className={`${
-                  shouldFlex
-                    ? "grid grid-cols-1 md:grid-cols-2 auto-rows-auto"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
-                } gap-6`}
-              >
-                {config.fields.map(renderField)}
-              </div>
-            )}
-            <div className="relative w-full flex justify-end items-center">
-              <Button
-                type="submit"
-                size={"lg"}
-                form={formId}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <SpinnerTick color="#fff" /> : submitBtnText}
-              </Button>
+    <div className="relative flex flex-col space-y-4">
+      {adminEditRules && (
+        <EditClientDetails adminEditRules={adminEditRules} user={user} />
+      )}
+      <Card
+        ref={formCardRef}
+        className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none"
+      >
+        <CardHeader className="relative bg-primary text-white mb-5 shadow-sm">
+          <CardTitle>{config.title}</CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          {(initialData === null || isRedirecting) && (
+            <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
+              <SpinnerTick color="#1a0f2b" />
             </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          )}
+          <Form {...form}>
+            <form
+              onSubmit={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                form.handleSubmit(onSubmit)(event);
+              }}
+              className="space-y-6"
+              id={formId}
+            >
+              {config.groups ? (
+                config.groups.map(renderGroup)
+              ) : (
+                <div
+                  className={`${
+                    shouldFlex
+                      ? "grid grid-cols-1 md:grid-cols-2 auto-rows-auto"
+                      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
+                  } gap-6`}
+                >
+                  {config.fields.map(renderField)}
+                </div>
+              )}
+              {
+                <div className="relative w-full flex justify-end items-center">
+                  {(!isAdminOnly ||
+                    (isAdminOnly && user && user.role === "admin")) && (
+                    <Button
+                      type="submit"
+                      size={"lg"}
+                      form={formId}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <SpinnerTick color="#fff" />
+                      ) : (
+                        submitBtnText
+                      )}
+                    </Button>
+                  )}
+                </div>
+              }
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { showToast } from "@/lib/helper/toast";
 import {
   AddtionalFormFieldsConfig,
   FieldsToRemoveConfig,
+  RedirectRules,
   SelectApiData,
 } from "@/types/form";
 import { StatusResponse } from "@/types/query";
@@ -212,9 +213,10 @@ export default function GroupClassBill() {
     fetchInitialData();
   }, [user]);
 
-  const redirectRules = {
+  const redirectRules: RedirectRules = {
     shouldRedirect: true,
-    redirectPath: `/group-class-bill/${initialData?.memberId}`,
+    redirectPath: `/group-class-bill`,
+    redirectOnMemberId: true,
   };
 
   return (
@@ -226,6 +228,7 @@ export default function GroupClassBill() {
         apiData={apiConfig}
         redirectRules={redirectRules}
         resetOnSubmit={true}
+        isAdminOnly={true}
       />
     </div>
   );

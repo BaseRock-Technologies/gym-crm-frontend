@@ -1,6 +1,7 @@
 interface SigninResponse {
     status: string,
     message: string,
+    role: string,
     authToken: string
 }
 
@@ -16,6 +17,7 @@ interface StatusResponse {
 interface User {
     userName: string,
     authToken: string,
+    role: string,
   }
   
 export type {

@@ -2,6 +2,11 @@ import type { Config } from "tailwindcss";
 
 export default {
     darkMode: ["class"],
+	safelist: [
+		{
+		  pattern: /^bg-(white|black|red|blue|green|yellow|gray|purple|pink|indigo|teal|cyan)\/(10|20|30|40|50|60|70|80|90)$/,
+		},
+	  ],
     content: [
         "./pages/**/*.{js,ts,jsx,tsx,mdx}",
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,6 +16,8 @@ export default {
     	extend: {
     		colors: {
     			background: 'var(--background)',
+				backgroundWhiteOverlay: 'rgba(255, 255, 255, 0.5)',
+				backgroundBlackOverlay: 'rgba(0, 0, 0, 0.5)',
     			backgroundSupport: 'var(--background-support)',
     			backgroudOverlay: 'var(--backgroundOverlay)',
     			foreground: 'var(--foreground)',
@@ -101,7 +108,7 @@ export default {
     		animation: {
     			'accordion-down': 'accordion-down 0.2s ease-out',
     			'accordion-up': 'accordion-up 0.2s ease-out'
-    		}
+    		},
     	}
     },
     plugins: [require("tailwindcss-animate")],

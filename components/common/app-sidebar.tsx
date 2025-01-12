@@ -32,6 +32,14 @@ import {
   CollapsibleContent,
 } from "../ui/collapsible";
 import { useAuth } from "@/lib/context/authContext";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@radix-ui/react-dropdown-menu";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -91,7 +99,13 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { loading, user } = useAuth();
+  const { loading, user, setLoading } = useAuth();
+  const router = useRouter();
+  function logoutUser() {
+    setLoading(true);
+    Cookies.remove("user");
+    router.push("/signin");
+  }
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -152,10 +166,26 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <User2 /> {!loading && user && user.userName}
-              <CircleArrowOutUpRight className="relative flex justify-center items-center w-6 h-6 ml-auto text-primary" />
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <User2 /> {!loading && user && user.userName}
+                  <CircleArrowOutUpRight className="relative flex justify-center items-center w-6 h-6 ml-auto text-primary" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                align="center"
+                className="w-[--radix-popper-anchor-width] bg-white border-2 border-backgroundSupport rounded-md shadow-md mb-4 p-2"
+              >
+                <DropdownMenuItem
+                  onClick={logoutUser}
+                  className="outline-none border-none text-primary transition cursor-pointer"
+                >
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

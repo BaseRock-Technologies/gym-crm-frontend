@@ -5,7 +5,9 @@ import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import {
   AddtionalFormFieldsConfig,
+  AdminOnlyEdit,
   FieldsToRemoveConfig,
+  RedirectRules,
   SelectApiData,
 } from "@/types/form";
 import { StatusResponse } from "@/types/query";
@@ -207,9 +209,10 @@ export default function PersonalTrainingBill() {
     fetchInitialData();
   }, [user]);
 
-  const redirectRules = {
+  const redirectRules: RedirectRules = {
     shouldRedirect: true,
-    redirectPath: `/personal-training-bill/${initialData?.memberId}`,
+    redirectPath: `/personal-training-bill`,
+    redirectOnMemberId: true,
   };
 
   return (
@@ -221,6 +224,7 @@ export default function PersonalTrainingBill() {
         apiData={apiConfig}
         redirectRules={redirectRules}
         resetOnSubmit={true}
+        isAdminOnly={true}
       />
     </div>
   );
