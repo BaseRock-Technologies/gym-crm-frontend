@@ -77,16 +77,17 @@ export type FieldsToAddInOptions = Record<string, string[]>;
 
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
-  allowAddCustomOption: true; 
-  addCustomOptionForm: FormConfig; 
-  primaryFieldValues: string[];
+  allowAddCustomOption: true;
+  customAddOptionsGroups?: string[];
+  addCustomOptionForm: Record<string, FormConfig>;
+  primaryFieldValues: Record<string, string[]>;
   apiConfig?: SelectApiData;
   fieldsToAddInOptions?: FieldsToAddInOptions;
 }
-
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
-  allowAddCustomOption?: false; 
-  addCustomOptionForm?: never; 
+  allowAddCustomOption?: false;
+  customAddOptionsGroups?: never;
+  addCustomOptionForm?:never;
   primaryFieldValues?: never;
   apiConfig?: never;
   fieldsToAddInOptions?: never;

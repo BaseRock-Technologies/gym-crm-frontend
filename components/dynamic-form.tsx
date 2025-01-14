@@ -78,7 +78,7 @@ export function DynamicForm({
   storeFormValues,
   submitBtnText = "Submit",
   initialData,
-  shouldFlex,
+  shouldFlex = false,
   apiData,
   formCategory,
   redirectRules,
@@ -419,6 +419,64 @@ export function DynamicForm({
             });
           break;
         case "image":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (val instanceof File) {
+                // Convert File to base64
+                return new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    resolve(reader.result as string);
+                  };
+                  reader.readAsDataURL(val);
+                });
+              }
+              if (typeof val === "string" && val.startsWith("data:image/")) {
+                return val;
+              }
+              return undefined;
+            }, z.union([z.string(), z.undefined()]))
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val && typeof val === "string") {
+                const format = val.split(";")[0].split("/")[1];
+                const acceptedFormats =
+                  field.formatsAccepted?.map((type) => type.split("/")[1]) ||
+                  [];
+
+                if (
+                  field.formatsAccepted &&
+                  !acceptedFormats.includes(format)
+                ) {
+                  const acceptedPlaceholder =
+                    field.formatsAcceptedPlaceholder || [];
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid image format. Accepted formats: ${acceptedPlaceholder.join(
+                      ", "
+                    )}`,
+                  });
+                }
+
+                if (field.maxSize) {
+                  const base64Size = Math.round((val.length * 3) / 4);
+                  if (base64Size > field.maxSize) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message: `Image size exceeds the maximum limit of ${
+                        field.maxSize / 1024 / 1024
+                      }MB`,
+                    });
+                  }
+                }
+              }
+            });
+          break;
         case "file":
           fieldSchema = z
             .preprocess((val) => {
@@ -713,7 +771,6 @@ export function DynamicForm({
         showToast("info", "No changes made");
         return;
       }
-
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
@@ -871,7 +928,6 @@ export function DynamicForm({
               <FormControl>
                 {field.type === "select" ? (
                   <CustomSelect
-                    primaryFields={field.primaryFieldValues}
                     options={options}
                     value={formField.value}
                     fieldsInOptions={field.fieldsToAddInOptions}
@@ -881,13 +937,15 @@ export function DynamicForm({
                     }}
                     placeholder={field.placeholder}
                     allowAddCustomOption={field.allowAddCustomOption}
+                    customAddOptionsGroups={field.customAddOptionsGroups}
                     addCustomOptionForm={field.addCustomOptionForm}
+                    primaryFields={field.primaryFieldValues}
                     onAddCustomOption={(
                       fields: string[],
                       value: string[],
                       group: string,
                       fieldsInOptions: FieldsToAddInOptions,
-                      additionalFieldsToFoucs: Array<String>,
+                      additionalFieldsToFocus: Array<String>,
                       additionalValuesToFocus: Array<String | Number>
                     ) =>
                       handleAddCustomOption(
@@ -895,14 +953,11 @@ export function DynamicForm({
                         value,
                         group,
                         fieldsInOptions,
-                        additionalFieldsToFoucs,
+                        additionalFieldsToFocus,
                         additionalValuesToFocus
                       )
                     }
                     disabled={field.editable === false}
-                    shouldAskGroup={
-                      field.options ? field.options?.length > 1 : false
-                    }
                     apiData={field.apiConfig ?? null}
                   />
                 ) : field.type === "multi-select" &&
@@ -1027,7 +1082,7 @@ export function DynamicForm({
                   />
                 ) : field.type === "image" ? (
                   <Card
-                    className="w-full h-40 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
+                    className="w-full h-32 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, field.name)}
                   >
@@ -1055,12 +1110,12 @@ export function DynamicForm({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <>
+                        <div className="flex flex-col justify-center items-center gap-2 p-2">
                           <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
                           <span className="text-xs text-muted-foreground text-center w-3/">
                             Click to upload or drag and drop
                           </span>
-                        </>
+                        </div>
                       )}
                     </label>
                   </Card>
@@ -1215,7 +1270,7 @@ export function DynamicForm({
           ) : (
             <div>
               <div
-                className={`grid gap-1 place-content-end ${
+                className={`grid gap-4 place-content-end ${
                   group.layout === "row"
                     ? "grid-flow-col"
                     : group.layout === "grid"
@@ -1257,7 +1312,7 @@ export function DynamicForm({
     }
   };
   return (
-    <div className="relative flex flex-col space-y-4">
+    <div className="relative flex flex-col space-y-4 w-full">
       {adminEditRules && (
         <EditClientDetails adminEditRules={adminEditRules} user={user} />
       )}

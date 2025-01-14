@@ -24,9 +24,14 @@ const EditClientDetails: React.FC<EditClientDetailsProps> = ({
       : adminEditRules.redirectPath;
 
     return (
-      <p>
-        <Link href={redirectPath}>Edit Client Details</Link> -{" "}
-        <span>only admin can edit</span>
+      <p className="font-bold">
+        <span className="text-red-500">Only admin can edit - </span>
+        <Link
+          href={redirectPath}
+          className="border-b-2 border-red-500 text-red-500"
+        >
+          Edit Client Details
+        </Link>
       </p>
     );
   }

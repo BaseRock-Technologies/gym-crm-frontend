@@ -6,7 +6,10 @@ export default {
 		{
 		  pattern: /^bg-(white|black|red|blue|green|yellow|gray|purple|pink|indigo|teal|cyan)\/(10|20|30|40|50|60|70|80|90)$/,
 		},
-	  ],
+		{
+			pattern: /^z-\[.*\]$/,
+		},
+	],
     content: [
         "./pages/**/*.{js,ts,jsx,tsx,mdx}",
         "./components/**/*.{js,ts,jsx,tsx,mdx}",

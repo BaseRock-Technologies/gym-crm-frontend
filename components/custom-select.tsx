@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { DynamicForm } from "./dynamic-form";
 import {
@@ -32,26 +31,27 @@ import {
 } from "../types/form";
 
 interface CustomSelectProps {
-  primaryFields?: string[];
+  primaryFields?: Record<string, string[]>;
   fieldsInOptions?: FieldsToAddInOptions;
   options?: GroupedSelectOption[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   allowAddCustomOption?: boolean;
-  addCustomOptionForm?: FormConfig;
+  addCustomOptionForm?: Record<string, FormConfig>;
   onAddCustomOption?: (
     fields: string[],
     value: string[],
     group: string,
     fieldsInOptions: FieldsToAddInOptions,
-    additionalFieldsToFoucs: Array<String>,
-    additionalValuesToFocus: Array<String | Number>
+    additionalFieldsToFocus: Array<string>,
+    additionalValuesToFocus: Array<string | number>
   ) => void;
   error?: string;
   disabled: boolean;
   shouldAskGroup?: boolean;
   apiData?: SelectApiData | null;
+  customAddOptionsGroups?: string[];
 }
 
 export function CustomSelect({
@@ -68,12 +68,25 @@ export function CustomSelect({
   disabled,
   shouldAskGroup,
   apiData,
+  customAddOptionsGroups,
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-
   const [customOptionGroupDialog, setCustomOptionGroupDialog] =
-    React.useState<string>(options.length === 1 ? options[0].group : "");
+    React.useState<string>("");
+  const [selectedGroup, setSelectedGroup] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (options.length === 1) {
+      setCustomOptionGroupDialog(options[0].group);
+    }
+  }, [options]);
+
+  React.useEffect(() => {
+    if (customAddOptionsGroups && customAddOptionsGroups.length === 1) {
+      setSelectedGroup(customAddOptionsGroups[0]);
+    }
+  }, [customAddOptionsGroups]);
 
   const selectOptionsGroups = options
     .filter((element) => element.group && element.group !== "default")
@@ -82,41 +95,33 @@ export function CustomSelect({
   const selectTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   const handleAddCustomOption = (value: Record<string, any>) => {
-    if (primaryFields && onAddCustomOption && allowAddCustomOption) {
-      const primaryValues = primaryFields.map((field) => value[field]);
-      let additionalFieldsToFoucs: String[] = [];
-      let additionalValuesToFocus: Array<String> = [];
+    if (
+      onAddCustomOption &&
+      allowAddCustomOption &&
+      selectedGroup &&
+      primaryFields
+    ) {
+      const fields = primaryFields[selectedGroup] || [];
+      const primaryValues = fields.map((field: string) => value[field]);
+      let additionalFieldsToFocus: string[] = [];
+      let additionalValuesToFocus: Array<string | number> = [];
       if (fieldsInOptions) {
-        additionalFieldsToFoucs = Object.keys(fieldsInOptions);
-        additionalValuesToFocus = additionalFieldsToFoucs.map(
-          (field: any) => value[field]
+        additionalFieldsToFocus = Object.keys(fieldsInOptions);
+        additionalValuesToFocus = additionalFieldsToFocus.map(
+          (field: string) => value[field]
         );
       }
-      if (shouldAskGroup) {
-        onAddCustomOption(
-          primaryFields,
-          primaryValues,
-          customOptionGroupDialog,
-          fieldsInOptions ?? {},
-          additionalFieldsToFoucs,
-          additionalValuesToFocus
-        );
-      } else {
-        const optionsGroup = options[0] ? options[0].group : "default";
-        onAddCustomOption(
-          primaryFields,
-          primaryValues,
-          optionsGroup,
-          fieldsInOptions ?? {},
-          additionalFieldsToFoucs,
-          additionalValuesToFocus
-        );
-      }
+      onAddCustomOption(
+        fields,
+        primaryValues,
+        selectedGroup,
+        fieldsInOptions ?? {},
+        additionalFieldsToFocus,
+        additionalValuesToFocus
+      );
     }
     setDialogOpen(false);
-    if (shouldAskGroup) {
-      setCustomOptionGroupDialog("");
-    }
+    setSelectedGroup(null);
   };
 
   const selectedOptionLabel = React.useMemo(() => {
@@ -164,37 +169,36 @@ export function CustomSelect({
             <CommandInput placeholder="Search an option" />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              {options.length && options.length > 0
-                ? options.map((selectGroups) => (
-                    <CommandGroup
-                      key={selectGroups.group}
-                      heading={options.length > 1 ? selectGroups.group : ""}
-                    >
-                      {selectGroups.options &&
-                        selectGroups.options.length > 0 &&
-                        selectGroups.options.map((option) => (
-                          <CommandItem
-                            key={option.value}
-                            value={option.value}
-                            onSelect={() => {
-                              onChange(option.value);
-                              setOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                value === option.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  ))
-                : null}
+              {options.length > 0 &&
+                options.map((selectGroups) => (
+                  <CommandGroup
+                    key={selectGroups.group}
+                    heading={options.length > 1 ? selectGroups.group : ""}
+                  >
+                    {selectGroups.options &&
+                      selectGroups.options.length > 0 &&
+                      selectGroups.options.map((option) => (
+                        <CommandItem
+                          key={option.value}
+                          value={option.value}
+                          onSelect={() => {
+                            onChange(option.value);
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              value === option.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {option.label}
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                ))}
               {allowAddCustomOption && addCustomOptionForm && (
                 <CommandGroup>
                   <CommandItem className="px-0 py-0 text-white mt-1">
@@ -206,6 +210,12 @@ export function CustomSelect({
                         e.stopPropagation();
                         setDialogOpen(true);
                         setOpen(false);
+                        if (
+                          customAddOptionsGroups &&
+                          customAddOptionsGroups.length === 1
+                        ) {
+                          setSelectedGroup(customAddOptionsGroups[0]);
+                        }
                       }}
                     >
                       <Plus />
@@ -224,40 +234,59 @@ export function CustomSelect({
           open={dialogOpen}
           onOpenChange={(open) => {
             setDialogOpen(open);
-            if (!open && shouldAskGroup) {
+            if (!open) {
+              setSelectedGroup(null);
               setCustomOptionGroupDialog("");
             }
           }}
         >
-          <DialogContent className="bg-backgroundSupport">
+          <DialogContent
+            className={cn(
+              "bg-backgroundSupport",
+              selectedGroup &&
+                addCustomOptionForm &&
+                addCustomOptionForm[selectedGroup].fields.length > 8
+                ? "max-w-4xl"
+                : ""
+            )}
+          >
             <DialogHeader>
               <DialogTitle>
-                {shouldAskGroup && !customOptionGroupDialog && "Select Group"}
+                {customAddOptionsGroups &&
+                customAddOptionsGroups.length > 1 &&
+                !selectedGroup
+                  ? "Select Group"
+                  : ""}
               </DialogTitle>
             </DialogHeader>
-            {shouldAskGroup && !customOptionGroupDialog ? (
+            {customAddOptionsGroups &&
+            customAddOptionsGroups.length > 1 &&
+            !selectedGroup ? (
               <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                {selectOptionsGroups.map((group) => (
+                {customAddOptionsGroups.map((group) => (
                   <Button
                     key={group}
                     variant="default"
                     size="lg"
-                    onClick={() => setCustomOptionGroupDialog(group)}
+                    onClick={() => setSelectedGroup(group)}
                   >
                     {group}
                   </Button>
                 ))}
               </div>
             ) : (
-              <DynamicForm
-                submitBtnText="Add"
-                storeFormValues={handleAddCustomOption}
-                config={addCustomOptionForm}
-                shouldFlex={true}
-                apiData={apiData ?? null}
-                formCategory={customOptionGroupDialog}
-                resetOnSubmit={true}
-              />
+              selectedGroup &&
+              addCustomOptionForm && (
+                <DynamicForm
+                  submitBtnText="Add"
+                  storeFormValues={handleAddCustomOption}
+                  config={addCustomOptionForm[selectedGroup]}
+                  shouldFlex={true}
+                  apiData={apiData ?? null}
+                  formCategory={selectedGroup}
+                  resetOnSubmit={true}
+                />
+              )
             )}
           </DialogContent>
         </Dialog>
