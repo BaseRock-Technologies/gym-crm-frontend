@@ -3,16 +3,25 @@
 import { useState, useEffect, SetStateAction } from "react";
 import { DataTable } from "@/components/data-table";
 import type { TableConfig, TableState } from "@/types/table";
+import { SelectApiData } from "@/types/form";
+import { post } from "@/lib/helper/steroid";
+import { showToast } from "@/lib/helper/toast";
+import { StatusResponse } from "@/types/query";
 
 interface DataTableWrapperProps {
   config: TableConfig;
-  initialData: any[];
+  apiConfig: SelectApiData;
   setSelectedRow?: React.Dispatch<SetStateAction<Record<string, boolean>>>;
+}
+
+interface PageData {
+  data: any[];
+  total: number;
 }
 
 export function DataTableWrapper({
   config,
-  initialData,
+  apiConfig,
   setSelectedRow,
 }: DataTableWrapperProps) {
   const [tableState, setTableState] = useState<TableState>({
@@ -21,22 +30,41 @@ export function DataTableWrapper({
     filters: {},
     sorting: [],
   });
-  const [data, setData] = useState<any[]>([]);
-  const [total, setTotal] = useState(0);
+  const [pageData, setPageData] = useState<Record<number, PageData>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, [tableState]);
 
-  const getFilteredData = async () => {
+  useEffect(() => {
+    // Clear stored data when filters change
+    if (Object.keys(tableState.filters).length > 0) {
+      setPageData({});
+    }
+  }, [tableState.filters]);
+
+  const getFilteredData = async (): Promise<PageData | undefined> => {
     setIsLoading(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    let filtered = [...initialData];
+    const res: StatusResponse = await post(
+      { filters: tableState.filters },
+      `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${
+        tableState.pageSize
+      }`
+    );
+    if (res.status === "error") {
+      showToast("error", "Failed to fetch records", {
+        toastId: "12cd9ad6-9e34-4012-b514-72d3f0a1a4e7",
+      });
+      setIsLoading(false);
+      return;
+    }
 
-    // Apply filters
+    const { data } = res;
+
+    let filtered: any[] = data.records;
+
     if (tableState.filters.search) {
       const searchTerm = tableState.filters.search.toLowerCase();
       filtered = filtered.filter((item) =>
@@ -59,28 +87,36 @@ export function DataTableWrapper({
       );
     }
 
-    // Apply pagination
-    const start = (tableState.page - 1) * tableState.pageSize;
-    const paginatedData = filtered.slice(start, start + tableState.pageSize);
-
     setIsLoading(false);
     return {
-      data: paginatedData,
-      total: filtered.length,
+      data: filtered,
+      total: data.totalData,
     };
   };
 
   const fetchData = async () => {
-    const { data, total } = await getFilteredData();
-    setData(data);
-    setTotal(total);
+    const currentPage = tableState.page;
+    if (pageData[currentPage]) {
+      // Data for this page is already available
+      return;
+    }
+
+    const result = await getFilteredData();
+    if (result) {
+      setPageData((prevPageData) => ({
+        ...prevPageData,
+        [currentPage]: result,
+      }));
+    }
   };
+
+  const currentPageData = pageData[tableState.page] || { data: [], total: 0 };
 
   return (
     <DataTable
       config={config}
-      data={data}
-      total={total}
+      data={currentPageData.data}
+      total={currentPageData.total}
       tableState={tableState}
       onStateChange={(newState) =>
         setTableState((prevState) => ({ ...prevState, ...newState }))

@@ -31,6 +31,7 @@ import {
 } from "../types/form";
 
 interface CustomSelectProps {
+  fieldName: string;
   primaryFields?: Record<string, string[]>;
   fieldsInOptions?: FieldsToAddInOptions;
   options?: GroupedSelectOption[];
@@ -40,6 +41,7 @@ interface CustomSelectProps {
   allowAddCustomOption?: boolean;
   addCustomOptionForm?: Record<string, FormConfig>;
   onAddCustomOption?: (
+    fieldName: string,
     fields: string[],
     value: string[],
     group: string,
@@ -49,12 +51,12 @@ interface CustomSelectProps {
   ) => void;
   error?: string;
   disabled: boolean;
-  shouldAskGroup?: boolean;
   apiData?: SelectApiData | null;
   customAddOptionsGroups?: string[];
 }
 
 export function CustomSelect({
+  fieldName,
   options = [],
   fieldsInOptions,
   primaryFields,
@@ -66,7 +68,6 @@ export function CustomSelect({
   onAddCustomOption,
   error,
   disabled,
-  shouldAskGroup,
   apiData,
   customAddOptionsGroups,
 }: CustomSelectProps) {
@@ -112,6 +113,7 @@ export function CustomSelect({
         );
       }
       onAddCustomOption(
+        fieldName,
         fields,
         primaryValues,
         selectedGroup,
@@ -246,7 +248,7 @@ export function CustomSelect({
               selectedGroup &&
                 addCustomOptionForm &&
                 addCustomOptionForm[selectedGroup].fields.length > 8
-                ? "max-w-4xl"
+                ? "max-w-5xl  max-h-[80vh] overflow-y-auto scrollbar-thin"
                 : ""
             )}
           >
@@ -262,7 +264,7 @@ export function CustomSelect({
             {customAddOptionsGroups &&
             customAddOptionsGroups.length > 1 &&
             !selectedGroup ? (
-              <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              <div className="relative flex flex-wrap gap-2">
                 {customAddOptionsGroups.map((group) => (
                   <Button
                     key={group}

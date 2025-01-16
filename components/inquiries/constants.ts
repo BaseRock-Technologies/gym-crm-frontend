@@ -54,8 +54,8 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           {
             group: "Gender",
             options: [
-              { label: "Male", value: "male" },
-              { label: "Female", value: "female" },
+              { label: "Male", value: "Male" },
+              { label: "Female", value: "Female" },
             ],
           },
         ],
@@ -95,9 +95,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           {
             group: "Status",
             options: [
-              { label: "Pending", value: "pending" },
-              { label: "Close", value: "close" },
-              { label: "Converted", value: "converted" },
+              { label: "Pending", value: "Pending" },
+              { label: "Close", value: "Close" },
+              { label: "Converted", value: "Converted" },
             ],
           },
         ],
@@ -116,7 +116,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
             "default": EmployeeCustomAddOptionForm,
         },
         primaryFieldValues: {
-            "default": ["firstName"]
+            "default": ["fullName"]
         },
         apiConfig: {
             apiPath: "others/employee/create",
@@ -130,11 +130,11 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           {
             group: "Convertibility",
             options: [
-              { label: "Hot", value: "hot" },
-              { label: "Warm", value: "warm" },
-              { label: "Cold", value: "cold" },
-              { label: "Expected Amount", value: "expected-amount" },
-              { label: "Successfull Followup", value: "successfull-followup" },
+              { label: "Hot", value: "Hot" },
+              { label: "Warm", value: "Warm" },
+              { label: "Cold", value: "Cold" },
+              { label: "Expected Amount", value: "Expected Amount" },
+              { label: "Successfull Followup", value: "Successful Follow Up" },
             ],
           },
         ],

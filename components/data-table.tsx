@@ -104,7 +104,7 @@ export function DataTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
+              <TableHead className="w-[50px]" key="checkbox-header">
                 <Checkbox
                   onCheckedChange={(checked: boolean) =>
                     handleSelectAll(checked)
@@ -116,16 +116,18 @@ export function DataTable({
                   {column.header}
                 </TableHead>
               ))}
-              {config.actions && <TableHead>Action</TableHead>}
+              {config.actions && (
+                <TableHead key="actions-header">Action</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {!isLoading ? (
               <>
                 {data.length > 0 ? (
-                  data.map((row) => (
+                  data.map((row, index) => (
                     <TableRow
-                      key={row.id}
+                      key={`row-${index}`}
                       onClick={() => handleSelectRow(row.id)}
                       className="cursor-pointer"
                     >
@@ -135,8 +137,8 @@ export function DataTable({
                           onCheckedChange={() => handleSelectRow(row.id)}
                         />
                       </TableCell>
-                      {config.columns.map((column) => (
-                        <TableCell key={column.id}>
+                      {config.columns.map((column, index) => (
+                        <TableCell key={`column-${index}`}>
                           {column.cell
                             ? column.cell(row)
                             : row[column.accessorKey]}

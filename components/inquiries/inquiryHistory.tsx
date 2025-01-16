@@ -6,7 +6,6 @@ interface InquiryHistoryProps {
 }
 
 const InquiryHistory: React.FC<InquiryHistoryProps> = ({ selectedInquiry }) => {
-  console.log(selectedInquiry);
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">

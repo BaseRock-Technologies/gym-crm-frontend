@@ -11,6 +11,7 @@ import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
+import { FilterOptions } from "./types";
 
 export default function InquiryHome() {
   const [selectedInquiry, setSelectedInquiry] = useState<
@@ -18,14 +19,14 @@ export default function InquiryHome() {
   >({});
 
   const { user } = useAuth();
-  const [initialData, setInitialData] = useState<Record<string, any> | null>(
-    null
-  );
+  const [inquiryFormInitialData, setInquiryFormInitialData] = useState<Record<
+    string,
+    any
+  > | null>(null);
 
   const apiConfig: SelectApiData = {
-    apiPath: "bills/create",
+    apiPath: "inquiry/create",
     method: "POST",
-    billType: "gym-membership",
   };
 
   useEffect(() => {
@@ -51,13 +52,13 @@ export default function InquiryHome() {
 
           updateFormConfigOptions(
             InquiryFormConfig,
-            "clientSource",
+            "sourceOfInquiry",
             clientSourceDetails,
             "clientSource"
           );
           updateFormConfigOptions(
             InquiryFormConfig,
-            "packageName",
+            "inquiryFor",
             packageDetails,
             "package"
           );
@@ -67,7 +68,7 @@ export default function InquiryHome() {
             employeeDetails,
             "fullName"
           );
-          setInitialData(data);
+          setInquiryFormInitialData(data);
         }
       } catch (error) {
         console.error(
@@ -81,6 +82,21 @@ export default function InquiryHome() {
     fetchInitialData();
   }, [user]);
 
+  const filtersOptions: FilterOptions = {
+    convertibility:
+      InquiryFormConfig.fields
+        .find((field) => field.name === "convertibility")
+        ?.options?.flatMap((option) => option.options) ?? [],
+    status:
+      InquiryFormConfig.fields
+        .find((field) => field.name === "status")
+        ?.options?.flatMap((option) => option.options) ?? [],
+    attendedByOptions:
+      InquiryFormConfig.fields
+        .find((field) => field.name === "attendedBy")
+        ?.options?.flatMap((option) => option.options) ?? [],
+  };
+
   return (
     <div className="relative p-6 flex flex-col gap-6">
       <div className="relative flex md:flex-row flex-col gap-6 justify-stretch items-stretch">
@@ -90,7 +106,7 @@ export default function InquiryHome() {
             submitBtnText="CREATE INQUIRY"
             apiData={apiConfig}
             resetOnSubmit={true}
-            initialData={initialData}
+            initialData={inquiryFormInitialData}
           />
         </div>
         <div className="relative md:w-1/4 w-full flex">
@@ -98,7 +114,10 @@ export default function InquiryHome() {
         </div>
       </div>
       <div>
-        <InquiryRecords setSelectedRow={setSelectedInquiry} />
+        <InquiryRecords
+          filtersOptions={filtersOptions}
+          setSelectedRow={setSelectedInquiry}
+        />
       </div>
     </div>
   );

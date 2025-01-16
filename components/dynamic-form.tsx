@@ -790,6 +790,7 @@ export function DynamicForm({
   };
 
   const handleAddCustomOption = (
+    fieldName: string,
     primaryFields: string[],
     primaryValues: string[],
     group: string,
@@ -798,21 +799,21 @@ export function DynamicForm({
     additionalValuesToFocus: Array<String | Number>
   ) => {
     try {
-      primaryFields.forEach((field, index) => {
+      primaryFields.forEach((_, index) => {
         const currentValue = primaryValues[index];
         if (currentValue) {
           const fieldType = config.fields.find(
-            (fieldDetails) => fieldDetails.name === field
+            (fieldDetails) => fieldDetails.name === fieldName
           )?.type;
           if (fieldType) {
             if (fieldType === "multi-select" || fieldType === "select") {
               let fieldNewOptions: GroupedSelectOption[] = [];
               setCustomOptions((prev) => {
                 const updatedOptions = { ...prev };
-                if (!updatedOptions[field]) {
-                  updatedOptions[field] = [];
+                if (!updatedOptions[fieldName]) {
+                  updatedOptions[fieldName] = [];
                 }
-                const existingGroup = updatedOptions[field].find(
+                const existingGroup = updatedOptions[fieldName].find(
                   (g) => g.group === group
                 );
                 const newOptions: SelectOption = {
@@ -828,7 +829,7 @@ export function DynamicForm({
                         ];
                       if (sourceValue) {
                         targetFields.forEach((targetField) => {
-                          if (targetField === field) {
+                          if (targetField === fieldName) {
                             newOptions[sourceField] = sourceValue;
                           }
                         });
@@ -844,7 +845,7 @@ export function DynamicForm({
                     existingGroup.options.push(newOptions);
                   }
                 } else {
-                  updatedOptions[field].push({
+                  updatedOptions[fieldName].push({
                     group,
                     options: [newOptions],
                   });
@@ -857,7 +858,7 @@ export function DynamicForm({
                 ];
                 return updatedOptions;
               });
-              handleFieldChange(field, currentValue, fieldNewOptions);
+              handleFieldChange(fieldName, currentValue, fieldNewOptions);
             }
           }
         }
@@ -928,6 +929,7 @@ export function DynamicForm({
               <FormControl>
                 {field.type === "select" ? (
                   <CustomSelect
+                    fieldName={field.name}
                     options={options}
                     value={formField.value}
                     fieldsInOptions={field.fieldsToAddInOptions}
@@ -941,6 +943,7 @@ export function DynamicForm({
                     addCustomOptionForm={field.addCustomOptionForm}
                     primaryFields={field.primaryFieldValues}
                     onAddCustomOption={(
+                      fieldName: string,
                       fields: string[],
                       value: string[],
                       group: string,
@@ -949,6 +952,7 @@ export function DynamicForm({
                       additionalValuesToFocus: Array<String | Number>
                     ) =>
                       handleAddCustomOption(
+                        fieldName,
                         fields,
                         value,
                         group,
@@ -993,7 +997,7 @@ export function DynamicForm({
                     disabled={field.editable === false}
                   />
                 ) : field.type === "date" ? (
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -1187,7 +1191,7 @@ export function DynamicForm({
         >
           <AccordionItem value={group.id}>
             <AccordionContent className="transition-all duration-300 ease-in-out">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {group.fields.map((fieldName) => {
                   const field = config.fields.find((f) => f.name === fieldName);
                   return field ? renderField(field) : null;
@@ -1205,12 +1209,12 @@ export function DynamicForm({
     } else if (group.type === "background") {
       return (
         <div
-          className={`rounded-md ${
-            group.backgroundColor
-          } ${group.additionalClass!}`}
+          className={`rounded-md ${group.backgroundColor ?? ""} ${
+            group.additionalClass! ?? ""
+          }`}
           key={group.id}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1301,7 +1305,7 @@ export function DynamicForm({
     } else {
       return (
         <div key={group.id}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1312,18 +1316,18 @@ export function DynamicForm({
     }
   };
   return (
-    <div className="relative flex flex-col space-y-4 w-full">
+    <div className="relative flex flex-col space-y-4 w-full h-full overflow-y-auto scrollbar-thin">
       {adminEditRules && (
         <EditClientDetails adminEditRules={adminEditRules} user={user} />
       )}
       <Card
         ref={formCardRef}
-        className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none"
+        className="relative w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none"
       >
-        <CardHeader className="relative bg-primary text-white mb-5 shadow-sm">
+        <CardHeader className="relative bg-primary text-white shadow-sm">
           <CardTitle>{config.title}</CardTitle>
         </CardHeader>
-        <CardContent className="relative">
+        <CardContent className="relative p-0 w-full h-full">
           {(initialData === null || isRedirecting) && (
             <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
               <SpinnerTick color="#1a0f2b" />
@@ -1336,7 +1340,7 @@ export function DynamicForm({
                 event.preventDefault();
                 form.handleSubmit(onSubmit)(event);
               }}
-              className="space-y-6"
+              className="relative p-6 w-full h-full overflow-y-auto scrollbar-thin space-y-6"
               id={formId}
             >
               {config.groups ? (
