@@ -42,8 +42,9 @@ export function TableFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="10">Show 10 entries</SelectItem>
-            <SelectItem value="25">Show 25 entries</SelectItem>
-            <SelectItem value="50">Show 50 entries</SelectItem>
+            <SelectItem value="20">Show 20 entries</SelectItem>
+            <SelectItem value="40">Show 40 entries</SelectItem>
+            <SelectItem value="100">Show 100 entries</SelectItem>
           </SelectContent>
         </Select>
         {filters.map((filter) => {

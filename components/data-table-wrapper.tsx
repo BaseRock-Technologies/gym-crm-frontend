@@ -34,25 +34,40 @@ export function DataTableWrapper({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setPageData({});
     fetchData();
-  }, [tableState]);
+  }, [tableState.filters, tableState.page, tableState.pageSize]);
 
   useEffect(() => {
-    // Clear stored data when filters change
-    if (Object.keys(tableState.filters).length > 0) {
+    const currentPage = tableState.page;
+    if (pageData[currentPage]) {
+      return;
+    } else {
       setPageData({});
+      fetchData();
     }
-  }, [tableState.filters]);
+  }, [tableState.page]);
 
   const getFilteredData = async (): Promise<PageData | undefined> => {
     setIsLoading(true);
 
+    const payload = {
+      filters: { ...tableState.filters },
+      searchConfig: tableState.filters.search
+        ? {
+            searchTerm: tableState.filters.search,
+            searchableColumns: config.searchableColumns,
+          }
+        : undefined,
+    };
+    delete payload.filters.search;
     const res: StatusResponse = await post(
-      { filters: tableState.filters },
+      payload,
       `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${
         tableState.pageSize
       }`
     );
+
     if (res.status === "error") {
       showToast("error", "Failed to fetch records", {
         toastId: "12cd9ad6-9e34-4012-b514-72d3f0a1a4e7",
@@ -63,27 +78,18 @@ export function DataTableWrapper({
 
     const { data } = res;
 
-    let filtered: any[] = data.records;
-
-    if (tableState.filters.search) {
-      const searchTerm = tableState.filters.search.toLowerCase();
-      filtered = filtered.filter((item) =>
-        config.searchableColumns?.some((column) =>
-          item[column].toLowerCase().includes(searchTerm)
-        )
-      );
-    }
+    let filtered = data.records;
 
     if (tableState.filters.employee && tableState.filters.employee !== "all") {
       filtered = filtered.filter(
-        (item) =>
+        (item: any) =>
           item.representative.toLowerCase() === tableState.filters.employee
       );
     }
 
     if (tableState.filters.type && tableState.filters.type !== "all") {
       filtered = filtered.filter(
-        (item) => item.type.toLowerCase() === tableState.filters.type
+        (item: any) => item.type.toLowerCase() === tableState.filters.type
       );
     }
 
@@ -96,11 +102,6 @@ export function DataTableWrapper({
 
   const fetchData = async () => {
     const currentPage = tableState.page;
-    if (pageData[currentPage]) {
-      // Data for this page is already available
-      return;
-    }
-
     const result = await getFilteredData();
     if (result) {
       setPageData((prevPageData) => ({
