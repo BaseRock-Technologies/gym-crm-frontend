@@ -22,15 +22,23 @@ export function AnimatedSearchInput({
   const [isPending, startTransition] = useTransition();
   // const [currentIndex, setCurrentIndex] = useState(0);
 
+  // New handlers for input change and key press
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInputValue(value);
-      startTransition(() => {
-        onSearch(value);
-      });
+      setInputValue(e.target.value);
     },
-    [onSearch]
+    []
+  );
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        startTransition(() => {
+          onSearch(inputValue);
+        });
+      }
+    },
+    [inputValue, onSearch]
   );
 
   // Commented out animation logic
@@ -52,6 +60,7 @@ export function AnimatedSearchInput({
         <Input
           value={deferredInputValue}
           onChange={handleInputChange}
+          onKeyDown={handleKeyPress}
           className={`pl-9 pr-4 h-9 bg-white ${isPending ? "opacity-50" : ""}`}
         />
         {!deferredInputValue && (

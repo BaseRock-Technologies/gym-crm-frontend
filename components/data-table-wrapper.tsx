@@ -62,7 +62,7 @@ export function DataTableWrapper({
     };
     delete payload.filters.search;
     const res: StatusResponse = await post(
-      payload,
+      { ...apiConfig.postData, ...payload },
       `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${
         tableState.pageSize
       }`

@@ -138,10 +138,22 @@ export function DataTable({
                         />
                       </TableCell>
                       {config.columns.map((column, index) => (
-                        <TableCell key={`column-${index}`}>
-                          {column.cell
-                            ? column.cell(row)
-                            : row[column.accessorKey]}
+                        <TableCell
+                          key={`column-${index}`}
+                          className="max-w-[200px]"
+                        >
+                          <div
+                            className="truncate"
+                            title={
+                              column.cell
+                                ? column.cell(row).toString()
+                                : row[column.accessorKey]?.toString()
+                            }
+                          >
+                            {column.cell
+                              ? column.cell(row)
+                              : row[column.accessorKey]}
+                          </div>
                         </TableCell>
                       ))}
                       {(config.actions || config.outOfActions) && (

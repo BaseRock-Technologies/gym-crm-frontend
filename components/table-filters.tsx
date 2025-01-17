@@ -9,6 +9,7 @@ import {
 import { BulkActionConfig, BulkActions, FilterConfig } from "../types/table";
 import { AnimatedSearchInput } from "@/components/common/animatedSearchInput";
 import { DatePickerWithRange } from "./ui/date-range-picker";
+import { cn } from "@/lib/utils";
 
 interface TableFiltersProps {
   filters: FilterConfig[];
@@ -31,8 +32,15 @@ export function TableFilters({
 }: TableFiltersProps) {
   const hasSearchFilter = filters.find((filter) => filter.type === "search");
   return (
-    <div className="relative w-full flex flex-col gap-4">
-      <div className="relative w-full flex flex-wrap justify-start items-center gap-4 ">
+    <div
+      className={cn(
+        "relative w-full flex gap-4",
+        filters.length > 2
+          ? "flex-col"
+          : "flex-row justify-between items-center"
+      )}
+    >
+      <div className="relative flex flex-wrap justify-start items-center gap-4 ">
         <Select
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -42,8 +50,8 @@ export function TableFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="10">Show 10 entries</SelectItem>
-            <SelectItem value="20">Show 20 entries</SelectItem>
-            <SelectItem value="40">Show 40 entries</SelectItem>
+            <SelectItem value="25">Show 25 entries</SelectItem>
+            <SelectItem value="50">Show 50 entries</SelectItem>
             <SelectItem value="100">Show 100 entries</SelectItem>
           </SelectContent>
         </Select>
@@ -87,19 +95,21 @@ export function TableFilters({
             onSearch={(value) => onFilterChange(hasSearchFilter.id, value)}
           />
         )}
-        <div className="relative flex flex-wrap sm:gap-4 gap-2 justify-center items-center ml-auto">
-          {ctaActions.map((btn: BulkActionConfig) => (
-            <Button
-              key={btn.id}
-              variant={btn.btnVariant}
-              className="ml-auto"
-              onClick={() => onBulkAction(btn.id)}
-            >
-              {btn.icon && <btn.icon className="text-white" />}
-              {btn.label}
-            </Button>
-          ))}
-        </div>
+        {ctaActions && ctaActions.length > 0 && (
+          <div className="relative flex flex-wrap sm:gap-4 gap-2 justify-center items-center ml-auto">
+            {ctaActions.map((btn: BulkActionConfig) => (
+              <Button
+                key={btn.id}
+                variant={btn.btnVariant}
+                className="ml-auto"
+                onClick={() => onBulkAction(btn.id)}
+              >
+                {btn.icon && <btn.icon className="text-white" />}
+                {btn.label}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
