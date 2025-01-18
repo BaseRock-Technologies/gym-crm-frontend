@@ -1,7 +1,8 @@
+import PersonalTrainingBill from "@/components/bills/PersonalTrainingBill";
 import React from "react";
 
-const PersonalTrainingBill = () => {
-  return <div>PersonalTrainingBill</div>;
+const GymBill = () => {
+  return <PersonalTrainingBill />;
 };
 
-export default PersonalTrainingBill;
+export default GymBill;

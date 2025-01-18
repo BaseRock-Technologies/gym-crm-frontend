@@ -1,8 +1,8 @@
-import GymPackageWithId from "@/components/bills/GymPackageWithId";
+import GymMembershipBillWithId from "@/components/bills/GymMembershipWithId";
 import React from "react";
 
 const page = () => {
-  return <GymPackageWithId />;
+  return <GymMembershipBillWithId />;
 };
 
 export default page;

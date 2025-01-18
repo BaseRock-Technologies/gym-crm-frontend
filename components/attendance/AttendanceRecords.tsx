@@ -3,6 +3,7 @@
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { SelectApiData } from "@/types/form";
 
 interface AttendanceRecordsProps {}
 
@@ -12,9 +13,9 @@ const tableConfig: TableConfig = {
   columns: [
     { id: "no", header: "SNO", accessorKey: "no" },
     {
-      id: "clientId",
+      id: "biometricId",
       header: "Biometric / Client ID",
-      accessorKey: "clientId",
+      accessorKey: "biometricId",
     },
     { id: "name", header: "Name", accessorKey: "name" },
     { id: "memberId", header: "Member ID", accessorKey: "memberId" },
@@ -57,6 +58,11 @@ const tableConfig: TableConfig = {
   searchableColumns: ["name"],
 };
 
+const apiConfig: SelectApiData = {
+  apiPath: "attendance/records",
+  method: "POST",
+};
+
 const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
@@ -64,7 +70,7 @@ const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
         <CardTitle>Attendance</CardTitle>
       </CardHeader>
       <CardContent className="container">
-        <DataTableWrapper config={tableConfig} initialData={mockData} />
+        <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
       </CardContent>
     </Card>
   );

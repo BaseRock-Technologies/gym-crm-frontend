@@ -38,5 +38,6 @@ const tableConfig: TableConfig = {
 };
 
 export default function Anniversary() {
-  return <DataTableWrapper config={tableConfig} initialData={mockData} />;
+  // return <DataTableWrapper config={tableConfig} initialData={mockData} />;
+  return <div>To be implemented</div>;
 }

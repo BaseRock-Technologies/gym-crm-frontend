@@ -9,14 +9,15 @@ import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Download } from "lucide-react";
+import { SelectApiData } from "@/types/form";
 
 const tableConfig: TableConfig = {
   columns: [
     { id: "date", header: "Date", accessorKey: "date" },
     {
-      id: "customerName",
+      id: "name",
       header: "Customer Name",
-      accessorKey: "customerName",
+      accessorKey: "name",
     },
     { id: "email", header: "Email", accessorKey: "email" },
     {
@@ -53,9 +54,24 @@ const tableConfig: TableConfig = {
 };
 
 const ClientFormIndex = () => {
-  const [selected, setSelected] = useState("personal-training");
-  const [tableData, setTableData] = useState([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selected, setSelected] = useState("physical-activity");
+  const [apiConfig, setApiConfig] = useState<SelectApiData>({
+    apiPath: "client-form/records",
+    method: "POST",
+    postData: {
+      category: selected,
+    },
+  });
+
+  useEffect(() => {
+    setApiConfig({
+      apiPath: "client-form/records",
+      method: "POST",
+      postData: {
+        category: selected,
+      },
+    });
+  }, [selected]);
 
   const getTitle = (selected: string) => {
     switch (selected) {
@@ -69,32 +85,6 @@ const ClientFormIndex = () => {
         return "Client Forms";
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/posts?_limit=10`
-        );
-        const data = await response.json();
-
-        const transformedData = data.map((item: any, index: any) => ({
-          id: `${selected} ${index}`,
-          date: "12-12-2024",
-          customerName: `Customer ${item.id}`,
-          email: `customer${item.id}@example.com`,
-          documentName: `Document ${item.id}`,
-        }));
-        setTableData(transformedData);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [selected]);
 
   const labelClassName =
     "rounded-md px-6 py-2 cursor-pointer transition-colors text-primary bg-white peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-white uppercase text-sm font-medium whitespace-nowrap";
@@ -144,9 +134,11 @@ const ClientFormIndex = () => {
           <CardTitle>{getTitle(selected)}</CardTitle>
         </CardHeader>
         <CardContent className="container">
-          {!isLoading && (
-            <DataTableWrapper config={tableConfig} initialData={tableData} />
-          )}
+          <DataTableWrapper
+            config={tableConfig}
+            apiConfig={apiConfig}
+            key={selected}
+          />
         </CardContent>
       </Card>
     </div>

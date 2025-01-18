@@ -3,13 +3,13 @@ import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
-import { SelectApiData } from "@/types/form";
+import { RedirectRules, SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
 import { formConfig } from "./constant";
 
-export default function GymPackage() {
+export default function GymMembershipBill() {
   const { user } = useAuth();
   const [initialData, setInitialData] = React.useState<Record<
     string,
@@ -49,8 +49,23 @@ export default function GymPackage() {
             invoiceDate: currentDate,
             joiningDate: currentDate,
             endDate: currentDate,
-            clientSource: "Flyers",
           };
+
+          const membeIdField = formConfig.fields.find(
+            (field) => field.name === "memberId"
+          );
+          if (membeIdField) {
+            membeIdField.dependsOn = {
+              field: "clientName",
+              formula: (values, options) => {
+                return (
+                  options?.find((opt) => opt.value === values.clientName)
+                    ?.memberId ?? data.memberId
+                );
+              },
+            };
+          }
+
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -98,13 +113,14 @@ export default function GymPackage() {
         showToast("error", "Failed to load data");
       }
     };
-
+    formConfig.title = "Create new bill for Gym Membership";
     fetchInitialData();
   }, [user]);
 
-  const redirectRules = {
+  const redirectRules: RedirectRules = {
     shouldRedirect: true,
-    redirectPath: `/gym-bill/${initialData?.memberId}`,
+    redirectPath: `/gym-bill`,
+    redirectOnMemberId: true,
   };
 
   return (

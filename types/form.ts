@@ -19,7 +19,14 @@ export interface MultiSelectOption {
 
 export interface RedirectRules {
   shouldRedirect: boolean,
-  redirectPath: string
+  redirectPath: string,
+  redirectOnMemberId?: boolean,
+}
+
+export interface AdminOnlyEdit {
+  adminOnlyEdit: boolean,
+  redirectPath: string,
+  memberId?: string,
 }
 
 export interface FieldDependency {
@@ -70,16 +77,17 @@ export type FieldsToAddInOptions = Record<string, string[]>;
 
 
 export interface FormFieldWithCustomOptions extends FormFieldBase {
-  allowAddCustomOption: true; 
-  addCustomOptionForm: FormConfig; 
-  primaryFieldValues: string[];
+  allowAddCustomOption: true;
+  customAddOptionsGroups?: string[];
+  addCustomOptionForm: Record<string, FormConfig>;
+  primaryFieldValues: Record<string, string[]>;
   apiConfig?: SelectApiData;
   fieldsToAddInOptions?: FieldsToAddInOptions;
 }
-
 export interface FormFieldWithoutCustomOptions extends FormFieldBase {
-  allowAddCustomOption?: false; 
-  addCustomOptionForm?: never; 
+  allowAddCustomOption?: false;
+  customAddOptionsGroups?: never;
+  addCustomOptionForm?:never;
   primaryFieldValues?: never;
   apiConfig?: never;
   fieldsToAddInOptions?: never;
@@ -91,7 +99,7 @@ export interface FormGroup {
   id: string;
   title: string;
   accordianOpenTitle?: string;
-  type: 'accordion' | 'background' | 'default' | 'action-group';
+  type: 'accordion' | 'background' | 'default' | 'action-group'| 'card-form';
   backgroundColor?: string;
   fields: string[];
   className?: string;
@@ -99,7 +107,10 @@ export interface FormGroup {
   layout?: 'row' | 'col' | 'grid';
   additionalClass?: string;
 }
-
+export interface AddtionalFormFieldsConfigGroup {
+  id: string;
+  fields: { name: string; position: number }[]; 
+}
 export interface FormConfig {
   id: string;
   title: string;
@@ -107,3 +118,16 @@ export interface FormConfig {
   fields: FormField[];
 }
 
+export interface AddtionalFormFieldsConfig {
+  groups?: AddtionalFormFieldsConfigGroup[];
+  fields: FormField[];
+}
+
+export interface FieldsToRemoveConfigGroup {
+  id: string;
+  fields: string[];
+}
+
+export interface FieldsToRemoveConfig {
+  groups: FieldsToRemoveConfigGroup[];
+}

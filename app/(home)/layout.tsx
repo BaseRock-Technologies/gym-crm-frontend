@@ -25,7 +25,7 @@ export default function RootLayout({
             <AppSidebar />
             <main className="relative w-full max-h-screen overflow-hidden bg-backgroundSupport">
               <BreadCrumbs />
-              <div className="relative pt-12 w-full h-full overflow-y-auto">
+              <div className=" pt-12 w-full h-full overflow-y-auto">
                 {children}
                 <ToastContainer limit={3} stacked />
               </div>

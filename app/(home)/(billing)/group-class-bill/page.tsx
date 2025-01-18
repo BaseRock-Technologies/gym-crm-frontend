@@ -1,7 +1,6 @@
+import GroupClassBill from "@/components/bills/GroupClassBill";
 import React from "react";
 
-const GroupClassBill = () => {
-  return <div>GroupClassBill</div>;
-};
-
-export default GroupClassBill;
+export default function page() {
+  return <GroupClassBill />;
+}

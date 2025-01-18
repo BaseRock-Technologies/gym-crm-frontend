@@ -1,6 +1,6 @@
 export const backendApiPath = assertValue(
-  process.env.NEXT_PUBLIC_BACKEND_PATH,
-  "Missing environment variable: NEXT_PUBLIC_BACKEND_PATH",
+  process.env.NEXT_PUBLIC_API_URL,
+  "Missing environment variable: NEXT_PUBLIC_API_URL",
 );
 
 

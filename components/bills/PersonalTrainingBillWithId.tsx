@@ -2,7 +2,7 @@
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
-import { SelectApiData } from "@/types/form";
+import { AdminOnlyEdit, SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import { useParams } from "next/navigation";
@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { DynamicForm } from "../dynamic-form";
 import { formConfig } from "./constant";
 
-const GymPackageWithId = () => {
-  const { id } = useParams();
+const PersonalTrainingBillWithId = ({}) => {
+  const { id } = useParams<{ id: string }>();
   const [initialData, setInitialData] = useState<Record<string, any> | null>(
     null
   );
@@ -20,7 +20,7 @@ const GymPackageWithId = () => {
   const apiConfig: SelectApiData = {
     apiPath: `bills/update`,
     method: "PATCH",
-    billType: "gym-membership",
+    billType: "personal-training",
     postData: {
       billId: id,
     },
@@ -30,12 +30,13 @@ const GymPackageWithId = () => {
     const fetchInitialData = async () => {
       try {
         const billSelectOptions: StatusResponse = await post(
-          { billType: "gym-membership" },
+          { billType: "personal-training" },
           "bills/options",
           "Failed to fetch bill options"
         );
         if (billSelectOptions.status === "success" && billSelectOptions.data) {
           const {
+            billId,
             clientDetails,
             clientSourceDetails,
             packageDetails,
@@ -43,6 +44,23 @@ const GymPackageWithId = () => {
             paymentMethod,
             trainersDetails,
           } = billSelectOptions.data;
+
+          const membeIdField = formConfig.fields.find(
+            (field) => field.name === "memberId"
+          );
+          if (membeIdField) {
+            membeIdField.dependsOn = {
+              field: "clientName",
+              formula: (values, options) => {
+                console.log(values);
+                return (
+                  options?.find((opt) => opt.value === values.clientName)
+                    ?.memberId ?? billId
+                );
+              },
+            };
+          }
+
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -86,7 +104,7 @@ const GymPackageWithId = () => {
           return;
         }
         const billDetails: StatusResponse = await post(
-          { billType: "gym-membership", billId: id },
+          { billType: "personal-training", billId: id },
           `bills/details`,
           "Failed to fetch bill details"
         );
@@ -102,6 +120,7 @@ const GymPackageWithId = () => {
               data[field] = formatTimestamp(data[field]);
             }
           });
+          console.log(data);
           setInitialData(data);
         }
       } catch (error) {
@@ -109,8 +128,22 @@ const GymPackageWithId = () => {
         showToast("error", "Failed to load data");
       }
     };
-    fetchInitialData();
+    formConfig.title = "Update Personal Training Bill";
+    if (user) {
+      const { role } = user;
+      if (role === "admin") {
+        fetchInitialData();
+      } else {
+        setInitialData({});
+      }
+    }
   }, [user]);
+
+  const adminEditRules: AdminOnlyEdit = {
+    adminOnlyEdit: true,
+    redirectPath: `/manage-customer`,
+    memberId: id,
+  };
 
   return (
     <div className="relative p-6 flex flex-col gap-6">
@@ -120,9 +153,11 @@ const GymPackageWithId = () => {
         initialData={initialData}
         apiData={apiConfig}
         resetOnSubmit={false}
+        isAdminOnly={true}
+        adminEditRules={adminEditRules}
       />
     </div>
   );
 };
 
-export default GymPackageWithId;
+export default PersonalTrainingBillWithId;

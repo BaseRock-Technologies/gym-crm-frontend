@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
 import {
+  AdminOnlyEdit,
   FieldsToAddInOptions,
   FormConfig,
   FormField as FormFieldType,
@@ -54,6 +55,9 @@ import { showToast } from "@/lib/helper/toast";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { formatTimestamp } from "@/utils/date-utils";
+import { useAuth } from "@/lib/context/authContext";
+import Link from "next/link";
+import EditClientDetails from "./bills/EditClientDetails";
 
 interface DynamicFormProps {
   config: FormConfig;
@@ -65,6 +69,8 @@ interface DynamicFormProps {
   formCategory?: string;
   redirectRules?: RedirectRules;
   resetOnSubmit: boolean;
+  isAdminOnly?: boolean;
+  adminEditRules?: AdminOnlyEdit;
 }
 
 export function DynamicForm({
@@ -72,11 +78,13 @@ export function DynamicForm({
   storeFormValues,
   submitBtnText = "Submit",
   initialData,
-  shouldFlex,
+  shouldFlex = false,
   apiData,
   formCategory,
   redirectRules,
   resetOnSubmit = true,
+  isAdminOnly = false,
+  adminEditRules,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -91,6 +99,7 @@ export function DynamicForm({
   const initialDataRef = React.useRef(initialData);
   const formCardRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -410,6 +419,64 @@ export function DynamicForm({
             });
           break;
         case "image":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (val instanceof File) {
+                // Convert File to base64
+                return new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    resolve(reader.result as string);
+                  };
+                  reader.readAsDataURL(val);
+                });
+              }
+              if (typeof val === "string" && val.startsWith("data:image/")) {
+                return val;
+              }
+              return undefined;
+            }, z.union([z.string(), z.undefined()]))
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+              if (val && typeof val === "string") {
+                const format = val.split(";")[0].split("/")[1];
+                const acceptedFormats =
+                  field.formatsAccepted?.map((type) => type.split("/")[1]) ||
+                  [];
+
+                if (
+                  field.formatsAccepted &&
+                  !acceptedFormats.includes(format)
+                ) {
+                  const acceptedPlaceholder =
+                    field.formatsAcceptedPlaceholder || [];
+                  ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: `Invalid image format. Accepted formats: ${acceptedPlaceholder.join(
+                      ", "
+                    )}`,
+                  });
+                }
+
+                if (field.maxSize) {
+                  const base64Size = Math.round((val.length * 3) / 4);
+                  if (base64Size > field.maxSize) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message: `Image size exceeds the maximum limit of ${
+                        field.maxSize / 1024 / 1024
+                      }MB`,
+                    });
+                  }
+                }
+              }
+            });
+          break;
         case "file":
           fieldSchema = z
             .preprocess((val) => {
@@ -575,11 +642,12 @@ export function DynamicForm({
                 ...(fieldFromConfig.options || []),
                 ...(newValues[fieldFromConfig.name]?.options || []),
                 ...customOptionsOfField,
-              ]
-                .flatMap((item) => item.options)
-                .filter(Boolean);
+              ];
             }
           });
+          fieldOptions = fieldOptions
+            .flatMap((item) => item.options)
+            .filter(Boolean);
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
             newValues,
@@ -679,7 +747,11 @@ export function DynamicForm({
     }
     if (redirectRules && redirectRules.shouldRedirect) {
       setIsRedirecting(true);
-      router.push(redirectRules.redirectPath);
+      if (redirectRules.redirectOnMemberId) {
+        router.push(`${redirectRules.redirectPath}/${values.memberId}`);
+      } else {
+        router.push(redirectRules.redirectPath);
+      }
     }
   };
 
@@ -699,7 +771,6 @@ export function DynamicForm({
         showToast("info", "No changes made");
         return;
       }
-
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
@@ -719,6 +790,7 @@ export function DynamicForm({
   };
 
   const handleAddCustomOption = (
+    fieldName: string,
     primaryFields: string[],
     primaryValues: string[],
     group: string,
@@ -727,21 +799,21 @@ export function DynamicForm({
     additionalValuesToFocus: Array<String | Number>
   ) => {
     try {
-      primaryFields.forEach((field, index) => {
+      primaryFields.forEach((_, index) => {
         const currentValue = primaryValues[index];
         if (currentValue) {
           const fieldType = config.fields.find(
-            (fieldDetails) => fieldDetails.name === field
+            (fieldDetails) => fieldDetails.name === fieldName
           )?.type;
           if (fieldType) {
             if (fieldType === "multi-select" || fieldType === "select") {
               let fieldNewOptions: GroupedSelectOption[] = [];
               setCustomOptions((prev) => {
                 const updatedOptions = { ...prev };
-                if (!updatedOptions[field]) {
-                  updatedOptions[field] = [];
+                if (!updatedOptions[fieldName]) {
+                  updatedOptions[fieldName] = [];
                 }
-                const existingGroup = updatedOptions[field].find(
+                const existingGroup = updatedOptions[fieldName].find(
                   (g) => g.group === group
                 );
                 const newOptions: SelectOption = {
@@ -757,7 +829,7 @@ export function DynamicForm({
                         ];
                       if (sourceValue) {
                         targetFields.forEach((targetField) => {
-                          if (targetField === field) {
+                          if (targetField === fieldName) {
                             newOptions[sourceField] = sourceValue;
                           }
                         });
@@ -773,7 +845,7 @@ export function DynamicForm({
                     existingGroup.options.push(newOptions);
                   }
                 } else {
-                  updatedOptions[field].push({
+                  updatedOptions[fieldName].push({
                     group,
                     options: [newOptions],
                   });
@@ -786,7 +858,7 @@ export function DynamicForm({
                 ];
                 return updatedOptions;
               });
-              handleFieldChange(field, currentValue, fieldNewOptions);
+              handleFieldChange(fieldName, currentValue, fieldNewOptions);
             }
           }
         }
@@ -845,7 +917,11 @@ export function DynamicForm({
             <FormItem>
               {(!field.labelPos ||
                 (field.labelPos && field.labelPos === "right")) && (
-                <FormLabel className={`${!field.label && "h-6 flex"}`}>
+                <FormLabel
+                  className={`${
+                    !field.label && "h-6 flex"
+                  } text-helper-secondary`}
+                >
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </FormLabel>
@@ -853,7 +929,7 @@ export function DynamicForm({
               <FormControl>
                 {field.type === "select" ? (
                   <CustomSelect
-                    primaryFields={field.primaryFieldValues}
+                    fieldName={field.name}
                     options={options}
                     value={formField.value}
                     fieldsInOptions={field.fieldsToAddInOptions}
@@ -863,28 +939,29 @@ export function DynamicForm({
                     }}
                     placeholder={field.placeholder}
                     allowAddCustomOption={field.allowAddCustomOption}
+                    customAddOptionsGroups={field.customAddOptionsGroups}
                     addCustomOptionForm={field.addCustomOptionForm}
+                    primaryFields={field.primaryFieldValues}
                     onAddCustomOption={(
+                      fieldName: string,
                       fields: string[],
                       value: string[],
                       group: string,
                       fieldsInOptions: FieldsToAddInOptions,
-                      additionalFieldsToFoucs: Array<String>,
+                      additionalFieldsToFocus: Array<String>,
                       additionalValuesToFocus: Array<String | Number>
                     ) =>
                       handleAddCustomOption(
+                        fieldName,
                         fields,
                         value,
                         group,
                         fieldsInOptions,
-                        additionalFieldsToFoucs,
+                        additionalFieldsToFocus,
                         additionalValuesToFocus
                       )
                     }
                     disabled={field.editable === false}
-                    shouldAskGroup={
-                      field.options ? field.options?.length > 1 : false
-                    }
                     apiData={field.apiConfig ?? null}
                   />
                 ) : field.type === "multi-select" &&
@@ -920,7 +997,7 @@ export function DynamicForm({
                     disabled={field.editable === false}
                   />
                 ) : field.type === "date" ? (
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -1009,7 +1086,7 @@ export function DynamicForm({
                   />
                 ) : field.type === "image" ? (
                   <Card
-                    className="w-full h-40 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
+                    className="w-full h-32 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, field.name)}
                   >
@@ -1037,12 +1114,12 @@ export function DynamicForm({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <>
+                        <div className="flex flex-col justify-center items-center gap-2 p-2">
                           <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
                           <span className="text-xs text-muted-foreground text-center w-3/">
                             Click to upload or drag and drop
                           </span>
-                        </>
+                        </div>
                       )}
                     </label>
                   </Card>
@@ -1070,7 +1147,7 @@ export function DynamicForm({
                 )}
               </FormControl>
               {field.labelPos === "left" && (
-                <FormLabel className="ml-2">
+                <FormLabel className="ml-2 text-helper-secondary">
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </FormLabel>
@@ -1114,7 +1191,7 @@ export function DynamicForm({
         >
           <AccordionItem value={group.id}>
             <AccordionContent className="transition-all duration-300 ease-in-out">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {group.fields.map((fieldName) => {
                   const field = config.fields.find((f) => f.name === fieldName);
                   return field ? renderField(field) : null;
@@ -1132,12 +1209,12 @@ export function DynamicForm({
     } else if (group.type === "background") {
       return (
         <div
-          className={`rounded-md ${
-            group.backgroundColor
-          } ${group.additionalClass!}`}
+          className={`rounded-md ${group.backgroundColor ?? ""} ${
+            group.additionalClass! ?? ""
+          }`}
           key={group.id}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1197,7 +1274,7 @@ export function DynamicForm({
           ) : (
             <div>
               <div
-                className={`grid gap-1 place-content-end ${
+                className={`grid gap-4 place-content-end ${
                   group.layout === "row"
                     ? "grid-flow-col"
                     : group.layout === "grid"
@@ -1214,10 +1291,21 @@ export function DynamicForm({
           )}
         </div>
       );
+    } else if (group.type === "card-form") {
+      return (
+        <div key={group.id}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {group.fields.map((fieldName) => {
+              const field = config.fields.find((f) => f.name === fieldName);
+              return field ? renderField(field) : null;
+            })}
+          </div>
+        </div>
+      );
     } else {
       return (
         <div key={group.id}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1227,57 +1315,70 @@ export function DynamicForm({
       );
     }
   };
-
   return (
-    <Card
-      ref={formCardRef}
-      className="relative w-full mx-auto border-none rounded-md overflow-hidden shadow-none"
-    >
-      <CardHeader className="relative bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>{config.title}</CardTitle>
-      </CardHeader>
-      <CardContent className="relative">
-        {(initialData === null || isRedirecting) && (
-          <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
-            <SpinnerTick color="#1a0f2b" />
-          </div>
-        )}
-        <Form {...form}>
-          <form
-            onSubmit={(event) => {
-              event.stopPropagation();
-              event.preventDefault();
-              form.handleSubmit(onSubmit)(event);
-            }}
-            className="space-y-6"
-            id={formId}
-          >
-            {config.groups ? (
-              config.groups.map(renderGroup)
-            ) : (
-              <div
-                className={`${
-                  shouldFlex
-                    ? "grid grid-cols-1 md:grid-cols-2 auto-rows-auto"
-                    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
-                } gap-6`}
-              >
-                {config.fields.map(renderField)}
-              </div>
-            )}
-            <div className="relative w-full flex justify-end items-center">
-              <Button
-                type="submit"
-                size={"lg"}
-                form={formId}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <SpinnerTick color="#fff" /> : submitBtnText}
-              </Button>
+    <div className="relative flex flex-col space-y-4 w-full h-full overflow-y-auto scrollbar-thin">
+      {adminEditRules && (
+        <EditClientDetails adminEditRules={adminEditRules} user={user} />
+      )}
+      <Card
+        ref={formCardRef}
+        className="relative w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none"
+      >
+        <CardHeader className="relative bg-primary text-white shadow-sm">
+          <CardTitle>{config.title}</CardTitle>
+        </CardHeader>
+        <CardContent className="relative p-0 w-full h-full">
+          {(initialData === null || isRedirecting) && (
+            <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
+              <SpinnerTick color="#1a0f2b" />
             </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          )}
+          <Form {...form}>
+            <form
+              onSubmit={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                form.handleSubmit(onSubmit)(event);
+              }}
+              className="relative p-6 w-full h-full overflow-y-auto scrollbar-thin space-y-6"
+              id={formId}
+            >
+              {config.groups ? (
+                config.groups.map(renderGroup)
+              ) : (
+                <div
+                  className={`${
+                    shouldFlex
+                      ? "grid grid-cols-1 md:grid-cols-2 auto-rows-auto"
+                      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-auto"
+                  } gap-6`}
+                >
+                  {config.fields.map(renderField)}
+                </div>
+              )}
+              {
+                <div className="relative w-full flex justify-end items-center">
+                  {(!isAdminOnly ||
+                    (isAdminOnly && user && user.role === "admin")) && (
+                    <Button
+                      type="submit"
+                      size={"lg"}
+                      form={formId}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <SpinnerTick color="#fff" />
+                      ) : (
+                        submitBtnText
+                      )}
+                    </Button>
+                  )}
+                </div>
+              }
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

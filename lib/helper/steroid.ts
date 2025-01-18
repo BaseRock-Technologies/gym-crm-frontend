@@ -1,7 +1,7 @@
 import { backendApiPath } from "@/env";
 import Cookies from "js-cookie";
 import { showToast } from "./toast";
-import { FormConfig, FormField, GroupedSelectOption } from "@/types/form";
+import { FieldDependency, FormConfig, FormField, GroupedSelectOption } from "@/types/form";
 
 
 type customObject = { [key: string]: any };
@@ -62,6 +62,60 @@ const post = async (postData: customObject, apiPath: string,  errorMsg: string =
       return { status: 'error', message: 'Failed to fetch' };
   }
 };
+
+const formDatapost = async (
+  postData: customObject, 
+  apiPath: string, 
+  errorMsg: string = "Failed to process data", 
+  validateResponse: boolean = true
+) => {
+  try {
+    const formData = new FormData();
+
+    Object.keys(postData).forEach((key) => {
+      const value = postData[key];
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => formData.append(key, item));
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    const response = await fetch(`${backendApiPath}/${apiPath}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        Cookies.remove('user');
+        setTimeout(() => {
+          window.location.href = "/signin";
+        }, 6000);
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+
+    if (validateResponse && responseData.status === 'unauthorized') {
+      Cookies.remove('user');
+      showToast("error", "Access Denied");
+    }
+
+    if (responseData.status === "error") {
+      showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e" });
+    }
+
+    return responseData;
+  } catch (error) {
+    console.error('Error:', error);
+    return { status: 'error', message: 'Failed to fetch' };
+  }
+};
+
 
 const patch = async (postData: customObject, apiPath: string, errorMsg: string = "Failed to process data", validateResponse: boolean = true) => {
   try {
@@ -153,7 +207,7 @@ const updateFormConfigOptions = (
   const field: FormField | undefined = formConfig.fields.find((item) => item.name === fieldName);
   if (field) {
     const tempOptions: GroupedSelectOption[] = [];
-
+    
     for (const group in options) {
       if (options.hasOwnProperty(group)) {
         const groupOptions = options[group].map(option => {
@@ -182,7 +236,7 @@ const updateFormConfigOptions = (
         });
       }
     }
-
+    
     field.options = tempOptions;
   }
 };
@@ -213,5 +267,6 @@ export {
   get,
   patch,
   updateFormConfigOptions,
-  deepEqualObjs
+  deepEqualObjs,
+  formDatapost
 }

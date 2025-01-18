@@ -88,5 +88,6 @@ const tableConfig: TableConfig = {
 };
 
 export default function PendingInquiries() {
-  return <DataTableWrapper config={tableConfig} initialData={mockData} />;
+  // return <DataTableWrapper config={tableConfig} initialData={mockData} />;
+  return <div>To be implemented</div>;
 }
