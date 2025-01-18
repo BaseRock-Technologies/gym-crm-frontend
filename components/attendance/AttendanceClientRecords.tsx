@@ -4,10 +4,12 @@ import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData } from "@/types/form";
+import { useId } from "react";
 
-interface AttendanceRecordsProps {}
-
-const mockData: any[] = [];
+interface AttendanceClientRecordsProps {
+  title: string;
+  apiConfig: SelectApiData;
+}
 
 const tableConfig: TableConfig = {
   columns: [
@@ -39,17 +41,6 @@ const tableConfig: TableConfig = {
       },
     },
     {
-      id: "role",
-      label: "Select Role",
-      type: "select",
-      options: [
-        { label: "Clients", value: "clients" },
-        { label: "Employees", value: "employees" },
-        { label: "Trainer", value: "trainer" },
-        { label: "Unauthorized", value: "unauthorized" },
-      ],
-    },
-    {
       id: "search",
       label: "Search",
       type: "search",
@@ -58,16 +49,17 @@ const tableConfig: TableConfig = {
   searchableColumns: ["name"],
 };
 
-const apiConfig: SelectApiData = {
-  apiPath: "attendance/records",
-  method: "POST",
-};
-
-const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
+const AttendanceClientRecords: React.FC<AttendanceClientRecordsProps> = ({
+  title,
+  apiConfig,
+}) => {
+  const id = useId();
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Attendance</CardTitle>
+        <CardTitle>
+          {title.charAt(0).toUpperCase() + title.slice(1).toLowerCase()}
+        </CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
@@ -76,4 +68,4 @@ const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
   );
 };
 
-export default AttendanceRecords;
+export default AttendanceClientRecords;

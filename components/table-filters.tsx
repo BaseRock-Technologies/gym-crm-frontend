@@ -37,7 +37,7 @@ export function TableFilters({
         "relative w-full flex gap-4",
         filters.length > 2
           ? "flex-col"
-          : "flex-row justify-between items-center"
+          : "min-[440px]:flex-row flex-col min-[440px]:justify-between justify-start min-[440px]:items-center items-start"
       )}
     >
       <div className="relative flex flex-wrap justify-start items-center gap-4 ">
@@ -87,7 +87,7 @@ export function TableFilters({
           }
         })}
       </div>
-      <div className="relative flex flex-wrap justify-between items-center gap-4">
+      <div className="relative flex flex-wrap justify-between items-center gap-4 max-[440px]:w-full">
         {hasSearchFilter && (
           <AnimatedSearchInput
             key={hasSearchFilter.id}

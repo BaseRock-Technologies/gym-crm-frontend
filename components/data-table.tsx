@@ -76,7 +76,6 @@ export function DataTable({
       default:
         break;
     }
-    console.log("Selected rows:", selectedRows);
   };
 
   return (

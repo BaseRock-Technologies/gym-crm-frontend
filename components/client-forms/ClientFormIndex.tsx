@@ -63,16 +63,6 @@ const ClientFormIndex = () => {
     },
   });
 
-  useEffect(() => {
-    setApiConfig({
-      apiPath: "client-form/records",
-      method: "POST",
-      postData: {
-        category: selected,
-      },
-    });
-  }, [selected]);
-
   const getTitle = (selected: string) => {
     switch (selected) {
       case "physical-activity":
@@ -89,12 +79,23 @@ const ClientFormIndex = () => {
   const labelClassName =
     "rounded-md px-6 py-2 cursor-pointer transition-colors text-primary bg-white peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-white uppercase text-sm font-medium whitespace-nowrap";
 
+  const handleValueChange = (value: string) => {
+    setSelected(value);
+    setApiConfig({
+      apiPath: "client-form/records",
+      method: "POST",
+      postData: {
+        category: value,
+      },
+    });
+  };
+
   return (
     <div className="relative w-full h-full flex flex-col space-y-2 px-6 py-8">
       <RadioGroup
         defaultValue={selected}
-        onValueChange={setSelected}
-        className="flex gap-4 py-4"
+        onValueChange={handleValueChange}
+        className="flex flex-row flex-wrap gap-4 py-4"
       >
         <div className="flex items-center">
           <RadioGroupItem

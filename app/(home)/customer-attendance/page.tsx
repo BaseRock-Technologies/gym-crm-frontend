@@ -1,10 +1,10 @@
-import AttendanceRecords from "@/components/attendance/AttendanceRecords";
+import AttendanceIndex from "@/components/attendance/AttendanceIndex";
 import React from "react";
 
 const CustomerAttendence = () => {
   return (
     <div className="relative w-full p-6 flex">
-      <AttendanceRecords />;
+      <AttendanceIndex />;
     </div>
   );
 };
