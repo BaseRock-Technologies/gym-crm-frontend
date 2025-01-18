@@ -167,14 +167,15 @@ const tableConfig: TableConfig = {
 
 const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
   return (
-    <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
-      <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Inquiry Records</CardTitle>
-      </CardHeader>
-      <CardContent className="container">
-        <DataTableWrapper config={tableConfig} initialData={mockData} />
-      </CardContent>
-    </Card>
+    // <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
+    //   <CardHeader className="bg-primary text-white mb-5 shadow-sm">
+    //     <CardTitle>Inquiry Records</CardTitle>
+    //   </CardHeader>
+    //   <CardContent className="container">
+    //     <DataTableWrapper config={tableConfig}  />
+    //   </CardContent>
+    // </Card>
+    <div>To be implemented</div>
   );
 };
 
