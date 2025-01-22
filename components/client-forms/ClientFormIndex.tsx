@@ -13,6 +13,7 @@ import { SelectApiData } from "@/types/form";
 
 const tableConfig: TableConfig = {
   columns: [
+    { id: "sno", header: "SNO", accessorKey: "sno" },
     { id: "date", header: "Date", accessorKey: "date" },
     {
       id: "name",
@@ -91,7 +92,7 @@ const ClientFormIndex = () => {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col space-y-2 px-6 py-8">
+    <div className="relative w-full h-full flex flex-col space-y-2  sm:px-6 px-2 sm:py-8 py-3">
       <RadioGroup
         defaultValue={selected}
         onValueChange={handleValueChange}

@@ -40,7 +40,7 @@ export function TableFilters({
           : "min-[440px]:flex-row flex-col min-[440px]:justify-between justify-start min-[440px]:items-center items-start"
       )}
     >
-      <div className="relative flex flex-wrap justify-start items-center gap-4 ">
+      <div className="relative w-full flex flex-wrap justify-start items-center gap-4 ">
         <Select
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}

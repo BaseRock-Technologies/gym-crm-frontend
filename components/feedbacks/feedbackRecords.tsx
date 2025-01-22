@@ -11,6 +11,7 @@ const mockData: any[] = [];
 
 const tableConfig: TableConfig = {
   columns: [
+    { id: "sno", header: "SNO", accessorKey: "sno" },
     { id: "date", header: "Date", accessorKey: "date" },
     { id: "name", header: "Name", accessorKey: "name" },
     {

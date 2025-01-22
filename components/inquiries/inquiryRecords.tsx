@@ -19,6 +19,7 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
 }) => {
   const tableConfig: TableConfig = {
     columns: [
+      { id: "sno", header: "SNO", accessorKey: "sno" },
       { id: "name", header: "Name", accessorKey: "name" },
       { id: "contactNumber", header: "Number", accessorKey: "contactNumber" },
       { id: "inquiryFor", header: "For", accessorKey: "inquiryFor" },

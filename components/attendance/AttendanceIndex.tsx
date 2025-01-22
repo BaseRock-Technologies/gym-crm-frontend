@@ -13,23 +13,23 @@ const ClientFormIndex = () => {
   const [selected, setSelected] = useState("clients");
 
   const [apiConfig, setApiConfig] = useState<SelectApiData>({
-    apiPath: "attendance/records",
+    apiPath: "attendance/client/records",
     method: "POST",
     postData: {
       category: selected,
     },
   });
 
-  const getTitle = (selected: string) => {
+  const getApiPath = (selected: string) => {
     switch (selected) {
       case "clients":
-        return "clients";
+        return "attendance/client/records";
       case "employees":
-        return "employees";
+        return "attendance/employee/records";
       case "trainers":
-        return "trainers";
+        return "attendance/employee/records";
       default:
-        return "clients";
+        return "attendance/client/records";
     }
   };
 
@@ -39,7 +39,7 @@ const ClientFormIndex = () => {
   const handleValueChange = (value: string) => {
     setSelected(value);
     setApiConfig({
-      apiPath: "attendance/records",
+      apiPath: getApiPath(value),
       method: "POST",
       postData: {
         category: value,
@@ -48,7 +48,7 @@ const ClientFormIndex = () => {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col space-y-2 px-6 py-8">
+    <div className="relative w-full h-full flex flex-col space-y-2 sm:px-6 px-2 sm:py-8 py-3">
       <RadioGroup
         defaultValue={selected}
         onValueChange={handleValueChange}
@@ -89,22 +89,13 @@ const ClientFormIndex = () => {
       </RadioGroup>
 
       {selected === "clients" && (
-        <AttendanceClientRecords
-          title={getTitle(selected)}
-          apiConfig={apiConfig}
-        />
+        <AttendanceClientRecords apiConfig={apiConfig} />
       )}
       {selected === "employees" && (
-        <AttendanceEmployeeRecords
-          title={getTitle(selected)}
-          apiConfig={apiConfig}
-        />
+        <AttendanceEmployeeRecords apiConfig={apiConfig} />
       )}
       {selected === "trainers" && (
-        <AttendanceEmployeeRecords
-          title={getTitle(selected)}
-          apiConfig={apiConfig}
-        />
+        <AttendanceEmployeeRecords apiConfig={apiConfig} />
       )}
     </div>
   );

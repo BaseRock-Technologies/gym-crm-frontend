@@ -7,13 +7,12 @@ import { SelectApiData } from "@/types/form";
 import { useId } from "react";
 
 interface AttendanceClientRecordsProps {
-  title: string;
   apiConfig: SelectApiData;
 }
 
 const tableConfig: TableConfig = {
   columns: [
-    { id: "no", header: "SNO", accessorKey: "no" },
+    { id: "sno", header: "SNO", accessorKey: "sno" },
     {
       id: "biometricId",
       header: "Biometric / Client ID",
@@ -50,16 +49,13 @@ const tableConfig: TableConfig = {
 };
 
 const AttendanceClientRecords: React.FC<AttendanceClientRecordsProps> = ({
-  title,
   apiConfig,
 }) => {
   const id = useId();
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>
-          {title.charAt(0).toUpperCase() + title.slice(1).toLowerCase()}
-        </CardTitle>
+        <CardTitle>Attendance</CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
