@@ -73,15 +73,7 @@ export function CustomSelect({
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [customOptionGroupDialog, setCustomOptionGroupDialog] =
-    React.useState<string>("");
   const [selectedGroup, setSelectedGroup] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (options.length === 1) {
-      setCustomOptionGroupDialog(options[0].group);
-    }
-  }, [options]);
 
   React.useEffect(() => {
     if (customAddOptionsGroups && customAddOptionsGroups.length === 1) {
@@ -238,7 +230,6 @@ export function CustomSelect({
             setDialogOpen(open);
             if (!open) {
               setSelectedGroup(null);
-              setCustomOptionGroupDialog("");
             }
           }}
         >

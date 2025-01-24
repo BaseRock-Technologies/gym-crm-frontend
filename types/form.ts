@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file';
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file'  | 'products' ;
 
 export interface SelectOption {
   label: string;
@@ -99,7 +99,11 @@ export interface FormGroup {
   id: string;
   title: string;
   accordianOpenTitle?: string;
-  type: 'accordion' | 'background' | 'default' | 'action-group'| 'card-form';
+  type: "accordion" | "background" | "default" | "action-group" | "card-form" | "single-line"
+  addMoreConfig?: {
+    buttonText: string
+    fields: string[],
+  }
   backgroundColor?: string;
   fields: string[];
   className?: string;

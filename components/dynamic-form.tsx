@@ -58,7 +58,7 @@ import { formatTimestamp } from "@/utils/date-utils";
 import { useAuth } from "@/lib/context/authContext";
 import Link from "next/link";
 import EditClientDetails from "./bills/EditClientDetails";
-
+import { AddProduct } from "./pos/AddProduct";
 interface DynamicFormProps {
   config: FormConfig;
   storeFormValues?: (value: Record<string, any>) => void;
@@ -108,6 +108,17 @@ export function DynamicForm({
       let fieldSchema: z.ZodTypeAny;
 
       switch (field.type) {
+        case "products":
+          fieldSchema = z.array(
+            z.object({
+              id: z.string(),
+              product: z.string(),
+              price: z.string(),
+              quantity: z.string(),
+              total: z.string(),
+            })
+          );
+          break;
         case "text":
         case "textarea":
           fieldSchema = z
@@ -621,13 +632,17 @@ export function DynamicForm({
     form.setValue(name, value);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
-    // Handle dependent fields
+
     config.fields.forEach((field) => {
       if (field.dependsOn) {
         const dependentFields = field.dependsOn.field
           .split(",")
           .map((f) => f.trim());
-        if (dependentFields.includes(name)) {
+        const [tempFieldName, fieldIndex] = name.split(".");
+        if (
+          dependentFields.includes(name) ||
+          (fieldIndex && dependentFields.includes(tempFieldName))
+        ) {
           let fieldOptions: SelectOption[] = [];
           dependentFields.forEach((depField) => {
             const fieldFromConfig = config.fields.find(
@@ -915,7 +930,7 @@ export function DynamicForm({
           name={field.name}
           render={({ field: formField }) => (
             <FormItem>
-              {(!field.labelPos ||
+              {((field.label && !field.labelPos) ||
                 (field.labelPos && field.labelPos === "right")) && (
                 <FormLabel
                   className={`${
@@ -927,7 +942,12 @@ export function DynamicForm({
                 </FormLabel>
               )}
               <FormControl>
-                {field.type === "select" ? (
+                {field.type === "products" ? (
+                  <AddProduct
+                    value={formField.value || []}
+                    options={field.options ?? []}
+                  />
+                ) : field.type === "select" ? (
                   <CustomSelect
                     fieldName={field.name}
                     options={options}
@@ -1146,7 +1166,7 @@ export function DynamicForm({
                   />
                 )}
               </FormControl>
-              {field.labelPos === "left" && (
+              {field.label && field.labelPos === "left" && (
                 <FormLabel className="ml-2 text-helper-secondary">
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
@@ -1191,7 +1211,7 @@ export function DynamicForm({
         >
           <AccordionItem value={group.id}>
             <AccordionContent className="transition-all duration-300 ease-in-out">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
                 {group.fields.map((fieldName) => {
                   const field = config.fields.find((f) => f.name === fieldName);
                   return field ? renderField(field) : null;
@@ -1214,7 +1234,7 @@ export function DynamicForm({
           }`}
           key={group.id}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1302,10 +1322,21 @@ export function DynamicForm({
           </div>
         </div>
       );
+    } else if (group.type === "single-line") {
+      return (
+        <div key={group.id}>
+          <div className="grid grid-cols-1">
+            {group.fields.map((fieldName) => {
+              const field = config.fields.find((f) => f.name === fieldName);
+              return field ? renderField(field) : null;
+            })}
+          </div>
+        </div>
+      );
     } else {
       return (
         <div key={group.id}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;

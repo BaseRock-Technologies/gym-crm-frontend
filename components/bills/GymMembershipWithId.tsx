@@ -52,7 +52,6 @@ const GymMembershipBillWithId = () => {
             membeIdField.dependsOn = {
               field: "clientName",
               formula: (values, options) => {
-                console.log(values);
                 return (
                   options?.find((opt) => opt.value === values.clientName)
                     ?.memberId ?? billId

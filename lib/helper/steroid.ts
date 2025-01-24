@@ -241,6 +241,41 @@ const updateFormConfigOptions = (
   }
 };
 
+const returnUpdatedOptions = (
+  options: Record<string, any[]>,
+  labelField: string,
+  fieldsToDelete?: string[]
+) => {
+  const tempOptions: Record<string, GroupedSelectOption[]> = {};
+
+  for (const group in options) {
+    if (options.hasOwnProperty(group)) {
+      const groupOptions = options[group].map(option => {
+        const { ...filteredOption } = option;
+        const data = {
+          label: filteredOption[labelField],
+          value: filteredOption[labelField],
+        };
+        delete filteredOption[labelField];
+
+        if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
+          fieldsToDelete.forEach(fieldToDelete => {
+            delete filteredOption[fieldToDelete];
+          });
+        }
+        return { ...data, ...filteredOption };
+      });
+
+      const uniqueGroupOptions = Array.from(new Set(groupOptions.map(item => item.value)))
+        .map(value => groupOptions.find(item => item.value === value));
+
+      tempOptions[group] = uniqueGroupOptions;
+    }
+  }
+
+  return tempOptions;
+};
+
 function deepEqualObjs(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
 
@@ -268,5 +303,6 @@ export {
   patch,
   updateFormConfigOptions,
   deepEqualObjs,
-  formDatapost
+  formDatapost,
+  returnUpdatedOptions,
 }
