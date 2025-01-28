@@ -22,10 +22,6 @@ const PosIndex = () => {
     any
   > | null>(null);
 
-  const [productOptions, setProductOptions] = useState<GroupedSelectOption[]>(
-    []
-  );
-
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -63,7 +59,6 @@ const PosIndex = () => {
             productDetails,
             "productName"
           );
-          setProductOptions(productDetails);
           setInitialData(data);
         }
       } catch (error) {

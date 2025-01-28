@@ -73,6 +73,14 @@ interface DynamicFormProps {
   adminEditRules?: AdminOnlyEdit;
 }
 
+interface Product {
+  id: string;
+  product: string;
+  price: string;
+  quantity: string;
+  total: string;
+}
+
 export function DynamicForm({
   config,
   storeFormValues,
@@ -100,6 +108,7 @@ export function DynamicForm({
   const formCardRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuth();
+  const [productsData, setProductsData] = React.useState<Product[]>([]);
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -629,21 +638,19 @@ export function DynamicForm({
     value: any,
     customOptionsOfField: GroupedSelectOption[] = []
   ) => {
-    form.setValue(name, value);
+    console.log(name, value, customOptionsOfField);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
 
     config.fields.forEach((field) => {
       if (field.dependsOn) {
+        const fieldName = field.name;
+
         const dependentFields = field.dependsOn.field
           .split(",")
           .map((f) => f.trim());
-        const [tempFieldName, fieldIndex] = name.split(".");
-        if (
-          dependentFields.includes(name) ||
-          (fieldIndex && dependentFields.includes(tempFieldName))
-        ) {
-          let fieldOptions: SelectOption[] = [];
+        if (dependentFields.includes(name)) {
+          let fieldOptions: GroupedSelectOption[] = [];
           dependentFields.forEach((depField) => {
             const fieldFromConfig = config.fields.find(
               (item) => item.name === depField
@@ -658,17 +665,19 @@ export function DynamicForm({
                 ...(newValues[fieldFromConfig.name]?.options || []),
                 ...customOptionsOfField,
               ];
+            } else if (fieldFromConfig?.type === "products") {
+              fieldOptions = [...fieldOptions, ...customOptionsOfField];
             }
           });
-          fieldOptions = fieldOptions
+
+          const fieldSelectOptions: SelectOption[] = fieldOptions
             .flatMap((item) => item.options)
             .filter(Boolean);
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
             newValues,
-            fieldOptions
+            fieldSelectOptions
           );
-          const fieldName = field.name;
           if (calculatedValue !== undefined) {
             newValues[fieldName] = calculatedValue;
             form.setValue(fieldName, calculatedValue);
@@ -678,6 +687,8 @@ export function DynamicForm({
           }
           fieldsUpdated = true;
         }
+      } else {
+        form.setValue(name, value);
       }
     });
 
@@ -788,6 +799,9 @@ export function DynamicForm({
       }
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
+
+      if (productsData && productsData.length > 0)
+        filteredValues["products"] = productsData;
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
@@ -944,8 +958,10 @@ export function DynamicForm({
               <FormControl>
                 {field.type === "products" ? (
                   <AddProduct
+                    fieldName={field.name}
                     value={formField.value || []}
                     options={field.options ?? []}
+                    handleFieldChange={handleFieldChange}
                   />
                 ) : field.type === "select" ? (
                   <CustomSelect

@@ -1,4 +1,4 @@
-import type { FormConfig } from "@/types/form"
+import type { FormConfig, Product } from "@/types/form"
 import { ClientCustomAddOptionForm } from "../custom-form-options-constants"
 
 export const ProductFormConfig: FormConfig = {
@@ -51,6 +51,17 @@ export const ProductFormConfig: FormConfig = {
       type: "decimal",
       editable: false,
       defaultValue: "0.00",
+      dependsOn: {
+        field: "productDetails",
+        formula: (_, options) => {
+          const calculatedValue = options?.reduce(
+            (acc: number, product: any) =>
+              acc + parseFloat(product.total || "0"),
+            0
+          );
+          return calculatedValue ?? 0;
+        },
+      }
     },
     {
       name: "discount",
@@ -100,7 +111,7 @@ export const ProductFormConfig: FormConfig = {
       editable: false,
       defaultValue: "0.00",
       dependsOn: {
-        field: "misc, taxName, discount, subTotal",
+        field: "misc, taxName, discount, subTotal, productDetails",
         formula: (values, options) => {
           const taxPercentage = options?.find((opt) => opt.value === values.taxName)
           ?.chargesPercentage ?? 0
@@ -116,7 +127,7 @@ export const ProductFormConfig: FormConfig = {
       name: "amountPaid",
       label: "Amount paid",
       type: "decimal",
-      defaultValue: "0.00",
+      placeholder: "0.00",
       validation: {
         min: 0,
       },
@@ -135,9 +146,10 @@ export const ProductFormConfig: FormConfig = {
       editable: false,
       defaultValue: "0.00",
       dependsOn: {
-        field: "totalAmount, amountPaid",
+        field: "misc, taxName, discount, subTotal, totalAmount, amountPaid, productDetails",
         formula: (values, _) => {
-            return (values.totalAmount - values.amountPaid).toFixed(2)
+          console.log(values)
+            return (Number.parseInt(values.totalAmount || "0") - Number.parseInt(values.amountPaid || "0")).toFixed(2)
         },
       }
     },

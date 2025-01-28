@@ -1,6 +1,7 @@
 export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file'  | 'products' ;
 
 export interface SelectOption {
+  id?: string
   label: string;
   value: string;
   [key: string]: any;
@@ -29,9 +30,17 @@ export interface AdminOnlyEdit {
   memberId?: string,
 }
 
+export interface Product {
+  id: string;
+  product: string;
+  price: string;
+  quantity: string;
+  total: string;
+}
+
 export interface FieldDependency {
   field: string;
-  formula: (values: Record<string, any>, options?: SelectOption[]) => any; 
+  formula: (values: Record<string, any>, options?: SelectOption[] ) => any; 
 }
 
 

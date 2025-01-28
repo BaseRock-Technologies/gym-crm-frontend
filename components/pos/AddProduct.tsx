@@ -3,82 +3,108 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { CustomSelect } from "../custom-select";
-import type { GroupedSelectOption } from "@/types/form";
+import { GroupedSelectOption, SelectOption } from "@/types/form";
 
-interface Product {
-  id: string;
-  product: string;
-  price: string;
-  quantity: string;
-  total: string;
-}
-
-interface AddProductProps {
-  value: Product[];
+export interface AddProductProps {
+  fieldName: string;
+  value: SelectOption[];
   options: GroupedSelectOption[];
+  handleFieldChange: (
+    fieldName: string,
+    value: any,
+    customOptionsOfField: GroupedSelectOption[]
+  ) => void;
 }
 
-export function AddProduct({ value = [], options = [] }: AddProductProps) {
-  const [products, setProducts] = useState<Product[]>(
+export function AddProduct({
+  fieldName,
+  value = [],
+  options = [],
+  handleFieldChange,
+}: AddProductProps) {
+  const [products, setProducts] = useState<SelectOption[]>(
     value.length
       ? value
       : [
           {
-            id: "1",
-            product: "",
-            price: "",
-            quantity: "",
-            total: "",
+            id: crypto.randomUUID(),
+            label: "",
+            value: "",
+            price: "0",
+            quantity: "0",
+            total: "0",
           },
         ]
   );
 
+  const handleTheUpdatedValue = (updatedOptions: SelectOption[]) => {
+    handleFieldChange(fieldName, "", [
+      { group: "default", options: updatedOptions },
+    ]);
+  };
+
   const handleAddProduct = () => {
-    const newProduct = {
-      id: `product-${products.length + 1}`,
-      product: "",
-      price: "",
-      quantity: "",
-      total: "",
+    const newProduct: SelectOption = {
+      id: crypto.randomUUID(),
+      label: "",
+      value: "",
+      price: "0",
+      quantity: "0",
+      total: "0",
     };
     const updatedProducts = [...products, newProduct];
     setProducts(updatedProducts);
+    handleTheUpdatedValue(updatedProducts);
   };
 
-  const handleRemoveProduct = (id: string) => {
-    const updatedProducts = products.filter((p) => p.id !== id);
+  const handleRemoveProduct = (label: string) => {
+    const updatedProducts = products.filter((p) => p.label !== label);
     setProducts(updatedProducts);
+    handleTheUpdatedValue(updatedProducts);
   };
 
   const handleProductChange = (
-    id: string,
-    field: keyof Product,
-    value: string
+    label: string,
+    field: keyof SelectOption,
+    newValue: string
   ) => {
-    const updatedProducts = products.map((p) => {
-      if (p.id === id) {
-        const updatedProduct = { ...p, [field]: value };
+    const updatedProducts = products.map((p, index) => {
+      if (p.label === label) {
+        const updatedProduct = { ...p, [field]: newValue };
         if (field === "price" || field === "quantity") {
           const price =
-            Number.parseFloat(field === "price" ? value : p.price) || 0;
+            field === "price"
+              ? Number.parseFloat(newValue) || 0
+              : Number.parseFloat(p.price) || 0;
           const quantity =
-            Number.parseInt(field === "quantity" ? value : p.quantity) || 0;
+            field === "quantity"
+              ? Number.parseInt(newValue, 10) || 0
+              : Number.parseInt(p.quantity, 10) || 0;
           updatedProduct.total = (price * quantity).toFixed(2);
         }
-        if (field === "product") {
-          const salesPrice =
-            options
-              .flatMap((option) => option.options)
-              .find((ele) => ele.value === value)?.productSalesPrice || 0;
-          updatedProduct.price = salesPrice;
-          updatedProduct.quantity = "1";
-          updatedProduct.total = (salesPrice * 1).toFixed(2);
+        if (field === "value") {
+          const selectedProduct = options
+            .flatMap((option) => option.options)
+            .find((ele) => ele.value === newValue);
+          if (selectedProduct) {
+            const productSalesPrice = selectedProduct.productSalesPrice ?? "0";
+            updatedProduct.label = `${
+              selectedProduct.label
+            }-${crypto.randomUUID()}`;
+            updatedProduct.value = selectedProduct.value;
+            updatedProduct.price = productSalesPrice;
+            updatedProduct.quantity = "1";
+            updatedProduct.total = (
+              Number.parseFloat(productSalesPrice) * 1
+            ).toFixed(2);
+          }
         }
         return updatedProduct;
       }
       return p;
     });
     setProducts(updatedProducts);
+    handleTheUpdatedValue(updatedProducts);
   };
 
   return (
@@ -93,15 +119,15 @@ export function AddProduct({ value = [], options = [] }: AddProductProps) {
 
       {products.map((product, index) => (
         <div
-          key={product.id}
+          key={product.label || index}
           className="w-full grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-center px-4"
         >
           <CustomSelect
-            fieldName={`product-${product.id}`}
+            fieldName={`product-${product.label}`}
             options={options}
-            value={product.product}
+            value={product.value}
             onChange={(value) =>
-              handleProductChange(product.id, "product", value)
+              handleProductChange(product.label, "value", value)
             }
             placeholder="Select Product"
             disabled={false}
@@ -110,7 +136,7 @@ export function AddProduct({ value = [], options = [] }: AddProductProps) {
             type="number"
             value={product.price}
             onChange={(e) =>
-              handleProductChange(product.id, "price", e.target.value)
+              handleProductChange(product.label, "price", e.target.value)
             }
             className="text-left"
             readOnly
@@ -120,7 +146,7 @@ export function AddProduct({ value = [], options = [] }: AddProductProps) {
             type="number"
             value={product.quantity}
             onChange={(e) =>
-              handleProductChange(product.id, "quantity", e.target.value)
+              handleProductChange(product.label, "quantity", e.target.value)
             }
             className="text-left"
             placeholder="0"
@@ -137,7 +163,7 @@ export function AddProduct({ value = [], options = [] }: AddProductProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleRemoveProduct(product.id)}
+                onClick={() => handleRemoveProduct(product.label)}
                 className="text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
