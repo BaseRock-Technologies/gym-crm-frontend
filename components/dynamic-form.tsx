@@ -56,7 +56,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { formatTimestamp } from "@/utils/date-utils";
 import { useAuth } from "@/lib/context/authContext";
-import Link from "next/link";
 import EditClientDetails from "./bills/EditClientDetails";
 import { AddProduct } from "./pos/AddProduct";
 interface DynamicFormProps {
@@ -108,7 +107,6 @@ export function DynamicForm({
   const formCardRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuth();
-  const [productsData, setProductsData] = React.useState<Product[]>([]);
 
   const generateZodSchema = (fields: FormFieldType[]) => {
     const schema: Record<string, z.ZodTypeAny> = {};
@@ -118,15 +116,35 @@ export function DynamicForm({
 
       switch (field.type) {
         case "products":
-          fieldSchema = z.array(
-            z.object({
-              id: z.string(),
-              product: z.string(),
-              price: z.string(),
-              quantity: z.string(),
-              total: z.string(),
-            })
-          );
+          fieldSchema = z
+            .preprocess(
+              (val) => {
+                console.log(val);
+                if (typeof val === "string") {
+                  return [];
+                }
+                return val;
+              },
+              z.array(
+                z.object({
+                  name: z.string(),
+                  salesPrice: z.number(),
+                  quantity: z.number(),
+                  total: z.number(),
+                })
+              )
+            )
+            .default([])
+            .nullable()
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+                return z.NEVER;
+              }
+            });
           break;
         case "text":
         case "textarea":
@@ -606,9 +624,12 @@ export function DynamicForm({
   }, [formValues]);
 
   React.useEffect(() => {
-    const { isSubmitting, errors } = form.formState;
-    if (isSubmitting && Object.keys(errors).length) {
-      showToast("error", "Please check all your data");
+    const { errors } = form.formState;
+    console.log(errors);
+    if (Object.keys(errors).length) {
+      showToast("error", "Please check all your data", {
+        toastId: "3912f12f-8cb4-45f8-a152-91a2dbb78549",
+      });
 
       if (formCardRef.current) {
         formCardRef.current.scrollIntoView({
@@ -638,10 +659,9 @@ export function DynamicForm({
     value: any,
     customOptionsOfField: GroupedSelectOption[] = []
   ) => {
-    console.log(name, value, customOptionsOfField);
+    form.setValue(name, value);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
-
     config.fields.forEach((field) => {
       if (field.dependsOn) {
         const fieldName = field.name;
@@ -687,8 +707,6 @@ export function DynamicForm({
           }
           fieldsUpdated = true;
         }
-      } else {
-        form.setValue(name, value);
       }
     });
 
@@ -719,7 +737,9 @@ export function DynamicForm({
   ) => {
     const handleResponse = (res: StatusResponse) => {
       const { status, message } = res;
-      showToast(status, message);
+      showToast(status, message, {
+        toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
+      });
       return status !== "error";
     };
     if (data.billType) {
@@ -760,7 +780,9 @@ export function DynamicForm({
       }
       return handleResponse(res);
     } catch (error) {
-      showToast("error", "Failed to send data");
+      showToast("error", "Failed to send data", {
+        toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
+      });
       return false;
     }
   };
@@ -794,14 +816,16 @@ export function DynamicForm({
       );
 
       if (deepEqualObjs(filteredValues, initialData)) {
-        showToast("info", "No changes made");
+        showToast("info", "No changes made", {
+          toastId: "518e4231-27b5-4825-8229-83b68c343ef4",
+        });
         return;
       }
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
-      if (productsData && productsData.length > 0)
-        filteredValues["products"] = productsData;
+      // if (productsData && productsData.length > 0)
+      //   filteredValues["products"] = productsData;
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
@@ -812,7 +836,10 @@ export function DynamicForm({
         resetForm(filteredValues);
       }
     } catch (error) {
-      showToast("error", "Failed to submit form");
+      console.log(error);
+      showToast("error", "Failed to submit form", {
+        toastId: "51ee18d3-9042-4d7e-9838-acc0fc0f1d65",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -828,8 +855,14 @@ export function DynamicForm({
     additionalValuesToFocus: Array<String | Number>
   ) => {
     try {
+      const shouldCombinePrimaryFieldValues =
+        config.fields.find((ele) => ele.name === fieldName)
+          ?.combinePrimaryFields || false;
       primaryFields.forEach((_, index) => {
-        const currentValue = primaryValues[index];
+        let currentValue = primaryValues[index];
+        if (shouldCombinePrimaryFieldValues) {
+          currentValue = primaryValues.join("-");
+        }
         if (currentValue) {
           const fieldType = config.fields.find(
             (fieldDetails) => fieldDetails.name === fieldName

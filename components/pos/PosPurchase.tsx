@@ -1,18 +1,18 @@
 "use client";
 import { SelectApiData } from "@/types/form";
 import { DynamicForm } from "../dynamic-form";
-import { ProductFormConfig } from "./constants";
+import { PosPurchaseFormConfig } from "./constants";
 import PosNavigation from "./PosNavigation";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
-import React, { useState } from "react";
+import React from "react";
 
-const PosIndex = () => {
+const PosPurchase = () => {
   const apiConfig: SelectApiData = {
-    apiPath: "pos/bill/create",
+    apiPath: "pos/purchase/create",
     method: "POST",
   };
 
@@ -27,34 +27,32 @@ const PosIndex = () => {
       try {
         const res: StatusResponse = await post(
           {},
-          "pos/bill/options",
+          "pos/purchase/options",
           "Failed to fetch bill options"
         );
         if (res.status === "success" && res.data) {
-          const { invoiceNo, clientDetails, paymentMethod, productDetails } =
-            res.data;
+          const { vendorDetails, paymentMethod, productDetails } = res.data;
           const currentDate = formatTimestamp(
             Math.floor(new Date().getTime() / 1000)
           );
           const data = {
-            invoiceNo: invoiceNo.toString(),
-            billDate: currentDate,
+            purchaseDate: currentDate,
           };
 
           updateFormConfigOptions(
-            ProductFormConfig,
-            "clientName",
-            clientDetails,
-            "clientName"
-          );
-          updateFormConfigOptions(
-            ProductFormConfig,
+            PosPurchaseFormConfig,
             "paymentMode",
             paymentMethod,
             "paymentMode"
           );
           updateFormConfigOptions(
-            ProductFormConfig,
+            PosPurchaseFormConfig,
+            "vendorName",
+            vendorDetails,
+            "vendorName"
+          );
+          updateFormConfigOptions(
+            PosPurchaseFormConfig,
             "productDetails",
             productDetails,
             "productName"
@@ -62,7 +60,10 @@ const PosIndex = () => {
           setInitialData(data);
         }
       } catch (error) {
-        console.error("Error fetching initial data in Pos Bill:", error);
+        console.error(
+          "Error fetching initial data in Pos Purchase Bill:",
+          error
+        );
         showToast("error", "Failed to load data");
       }
     };
@@ -73,7 +74,7 @@ const PosIndex = () => {
       <PosNavigation />
       <DynamicForm
         initialData={initialData}
-        config={ProductFormConfig}
+        config={PosPurchaseFormConfig}
         apiData={apiConfig}
         resetOnSubmit={true}
         submitBtnText="CREATE BILL"
@@ -82,4 +83,4 @@ const PosIndex = () => {
   );
 };
 
-export default PosIndex;
+export default PosPurchase;

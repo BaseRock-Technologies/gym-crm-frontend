@@ -18,7 +18,6 @@ const routes: Route[] = [
 
 const PosNavigation = () => {
   const pathname = usePathname();
-
   const filteredRoutes = routes.filter((route) => route.routePath !== pathname);
 
   return (

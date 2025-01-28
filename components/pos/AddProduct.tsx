@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { CustomSelect } from "../custom-select";
-import { GroupedSelectOption, SelectOption } from "@/types/form";
+import {
+  type FieldsToAddInOptions,
+  type GroupedSelectOption,
+  Product,
+  type SelectOption,
+} from "@/types/form";
+import { productCustomAddOptionForm } from "./constants";
 
 export interface AddProductProps {
   fieldName: string;
@@ -38,7 +44,13 @@ export function AddProduct({
   );
 
   const handleTheUpdatedValue = (updatedOptions: SelectOption[]) => {
-    handleFieldChange(fieldName, "", [
+    const val = updatedOptions.map((product) => ({
+      name: product.value,
+      salesPrice: Number.parseFloat(product.price),
+      quantity: Number.parseFloat(product.quantity),
+      total: Number.parseFloat(product.total),
+    }));
+    handleFieldChange(fieldName, val, [
       { group: "default", options: updatedOptions },
     ]);
   };
@@ -107,71 +119,118 @@ export function AddProduct({
     handleTheUpdatedValue(updatedProducts);
   };
 
-  return (
-    <div className="relative w-full space-y-4 shadow-md pb-4 rounded-md">
-      <div className="w-full grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-center bg-primary text-white p-4 rounded-t-md">
-        <div className="font-bold">Product</div>
-        <div className="font-bold">Price</div>
-        <div className="font-bold">Quantity</div>
-        <div className="font-bold">Total</div>
-        <div className="w-8"></div>
-      </div>
+  const handleAddCustomOption = (fields: string[], value: string[]) => {
+    const fieldsObject = fields.reduce((acc, field, index) => {
+      acc[field] = value[index];
+      return acc;
+    }, {} as Record<string, string>);
+    const id = crypto.randomUUID();
+    const newProduct: SelectOption = {
+      id,
+      label: `${fieldsObject.productName}-${id}`,
+      value: fieldsObject.productName,
+      price: fieldsObject.productSalesPrice.toString(),
+      quantity: "1",
+      total: fieldsObject.productSalesPrice.toString(),
+    };
+    const updatedProducts = [...products, newProduct];
+    setProducts(updatedProducts);
+    handleTheUpdatedValue(updatedProducts);
+  };
 
-      {products.map((product, index) => (
-        <div
-          key={product.label || index}
-          className="w-full grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-4 items-center px-4"
-        >
-          <CustomSelect
-            fieldName={`product-${product.label}`}
-            options={options}
-            value={product.value}
-            onChange={(value) =>
-              handleProductChange(product.label, "value", value)
-            }
-            placeholder="Select Product"
-            disabled={false}
-          />
-          <Input
-            type="number"
-            value={product.price}
-            onChange={(e) =>
-              handleProductChange(product.label, "price", e.target.value)
-            }
-            className="text-left"
-            readOnly
-            placeholder="0.00"
-          />
-          <Input
-            type="number"
-            value={product.quantity}
-            onChange={(e) =>
-              handleProductChange(product.label, "quantity", e.target.value)
-            }
-            className="text-left"
-            placeholder="0"
-          />
-          <Input
-            type="text"
-            value={product.total}
-            readOnly
-            className="text-left"
-            placeholder="0.00"
-          />
-          <div className="w-8">
-            {products.length > 1 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoveProduct(product.label)}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+  return (
+    <div className="relative w-full space-y-4 shadow-md pb-4 rounded-md overflow-hidden">
+      <div className="overflow-x-auto scrollbar-none">
+        <div className="w-full min-w-[640px] grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center bg-tertriary text-white p-4 rounded-t-md">
+          <div className="font-bold">Product</div>
+          <div className="font-bold">Price</div>
+          <div className="font-bold">Quantity</div>
+          <div className="font-bold">Total</div>
+          <div className="w-8"></div>
         </div>
-      ))}
+
+        {products.map((product, index) => (
+          <div
+            key={product.label || index}
+            className="w-full min-w-[640px] grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-4 py-2 mt-4"
+          >
+            <CustomSelect
+              fieldName={`product-${product.label}`}
+              options={options}
+              value={product.value}
+              onChange={(value) =>
+                handleProductChange(product.label, "value", value)
+              }
+              placeholder="Select Product"
+              disabled={false}
+              allowAddCustomOption={true}
+              customAddOptionsGroups={["default"]}
+              addCustomOptionForm={{
+                default: productCustomAddOptionForm,
+              }}
+              primaryFields={{
+                default: [
+                  "productName",
+                  "productMrp",
+                  "productSalesPrice",
+                  "productBarcode",
+                ],
+              }}
+              apiData={{
+                apiPath: "product/create",
+                method: "POST",
+              }}
+              onAddCustomOption={(
+                fieldName: string,
+                fields: string[],
+                value: string[],
+                group: string,
+                fieldsInOptions: FieldsToAddInOptions,
+                additionalFieldsToFocus: Array<string>,
+                additionalValuesToFocus: Array<string | number>
+              ) => handleAddCustomOption(fields, value)}
+            />
+            <Input
+              type="number"
+              value={product.price}
+              onChange={(e) =>
+                handleProductChange(product.label, "price", e.target.value)
+              }
+              className="text-left"
+              readOnly
+              placeholder="0.00"
+            />
+            <Input
+              type="number"
+              value={product.quantity}
+              onChange={(e) =>
+                handleProductChange(product.label, "quantity", e.target.value)
+              }
+              className="text-left"
+              placeholder="0"
+            />
+            <Input
+              type="text"
+              value={product.total}
+              readOnly
+              className="text-left"
+              placeholder="0.00"
+            />
+            <div className="w-8">
+              {products.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveProduct(product.label)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
       <div className="relative w-full flex justify-end items-center px-4">
         <Button
           type="button"

@@ -90,6 +90,7 @@ export interface FormFieldWithCustomOptions extends FormFieldBase {
   customAddOptionsGroups?: string[];
   addCustomOptionForm: Record<string, FormConfig>;
   primaryFieldValues: Record<string, string[]>;
+  combinePrimaryFields?: Boolean;
   apiConfig?: SelectApiData;
   fieldsToAddInOptions?: FieldsToAddInOptions;
 }
@@ -98,6 +99,7 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   customAddOptionsGroups?: never;
   addCustomOptionForm?:never;
   primaryFieldValues?: never;
+  combinePrimaryFields?: never;
   apiConfig?: never;
   fieldsToAddInOptions?: never;
 }
