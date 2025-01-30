@@ -21,7 +21,7 @@ const PosNavigation = () => {
   const filteredRoutes = routes.filter((route) => route.routePath !== pathname);
 
   return (
-    <nav className="relative flex flex-wrap w-full justify-end items-center sm:gap-3 gap-2 sm:mb-6 mb-4">
+    <nav className="relative flex flex-wrap w-full justify-end items-center sm:gap-3 gap-2">
       {filteredRoutes.map((route) => (
         <Link
           href={route.routePath}

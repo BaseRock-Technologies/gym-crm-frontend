@@ -1,14 +1,15 @@
 "use client";
 import { SelectApiData } from "@/types/form";
-import { DynamicForm } from "../dynamic-form";
-import { PosPurchaseFormConfig } from "./constants";
-import PosNavigation from "./PosNavigation";
+import { DynamicForm } from "../../dynamic-form";
+import { PosPurchaseFormConfig } from "../constants";
+import PosNavigation from "../PosNavigation";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { StatusResponse } from "@/types/query";
 import { formatTimestamp } from "@/utils/date-utils";
 import React from "react";
+import PurchaseRecords from "./PurchaseRecords";
 
 const PosPurchase = () => {
   const apiConfig: SelectApiData = {
@@ -69,16 +70,20 @@ const PosPurchase = () => {
     };
     fetchInitialData();
   }, [user]);
+
   return (
-    <div className="relative w-full space-y-3">
+    <div className="relative w-full flex flex-col space-y-2 sm:space-y-4">
       <PosNavigation />
-      <DynamicForm
-        initialData={initialData}
-        config={PosPurchaseFormConfig}
-        apiData={apiConfig}
-        resetOnSubmit={true}
-        submitBtnText="CREATE BILL"
-      />
+      <div className="relative w-full space-y-3">
+        <DynamicForm
+          initialData={initialData}
+          config={PosPurchaseFormConfig}
+          apiData={apiConfig}
+          resetOnSubmit={true}
+          submitBtnText="CREATE BILL"
+        />
+      </div>
+      <PurchaseRecords />
     </div>
   );
 };

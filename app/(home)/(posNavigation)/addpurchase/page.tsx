@@ -1,5 +1,5 @@
 import PosIndex from "@/components/pos/PosIndex";
-import PosPurchase from "@/components/pos/PosPurchase";
+import PosPurchase from "@/components/pos/Purchase/PosPurchase";
 import React from "react";
 
 const Pos = () => {

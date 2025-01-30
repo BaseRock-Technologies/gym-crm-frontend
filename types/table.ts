@@ -20,7 +20,7 @@ export interface ColumnDef {
 export interface ActionConfig {
   id: string
   label: string
-  icon?: string
+  icon?: LucideIcon
   onClick: (row: any) => void
 }
 
@@ -38,8 +38,9 @@ interface OutOfActionsBtnConfig {
   label: string
   icon: LucideIcon,
   customClass?: string,
-  btnType: "icon" | "btn"
+  btnType: "icon" | "btn" | "icon-btn"
   onClick: (row: any) => void
+  showLabel?: boolean
 }
 
 export type OutOfActionsConfig = OutOfActionsLinkConfig | OutOfActionsBtnConfig;

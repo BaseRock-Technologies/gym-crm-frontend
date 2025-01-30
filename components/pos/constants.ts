@@ -58,21 +58,18 @@ export const purchaseCustomAddOptionForm: FormConfig = {
       name: "email",
       label: "Email",
       type: "email",
-      required: true,
       placeholder: "Email",
     },
     {
       name: "address",
       label: "Address",
       type: "text",
-      required: true,
       placeholder: "Address",
     },
     {
       name: "gstNumber",
       label: "GST Number",
       type: "text",
-      required: true,
       placeholder: "GST Number",
     },
     {
@@ -498,3 +495,113 @@ export const PosPurchaseFormConfig: FormConfig = {
   ],
 }
 
+export const CreateNewProductFormConfig: FormConfig = {
+  id: "new-product-form",
+  title: "Add New Product",
+  fields: [
+    {
+      name: "productName",
+      label: "Product Name",
+      required: true,
+      type: "text",
+      placeholder: "product Name",
+    },
+    {
+      name: "productImage",
+      label: "Product Image",
+      type: "image",
+      maxSize: 5 * 1024 * 1024,
+    },
+    {
+      name: "productMrp",
+      label: "MRP Price",
+      required: true,
+      type: "number",
+      placeholder: "5000",
+    },
+    {
+      name: "productMrpImage",
+      label: "MRP Image",
+      type: "image",
+      maxSize: 5 * 1024 * 1024,
+    },
+    {
+      name: "productSalesPrice",
+      label: "Sales Price",
+      required: true,
+      type: "number",
+      placeholder: "5000",
+    },
+    {
+      name: "productSalesImage",
+      label: "Sales Price Image",
+      type: "image",
+      maxSize: 5 * 1024 * 1024,
+    },
+    {
+      name: "productBarcode",
+      label: "Barcode",
+      required: true,
+      type: "text",
+      placeholder: "5000",
+    },
+    {
+      name: "productBarcodeImage",
+      label: "Barcode Image",
+      type: "image",
+      maxSize: 5 * 1024 * 1024,
+    },
+    {
+      name: "description",
+      label: "description",
+      type: "textarea",
+    },
+    {
+      name: "manageInventory",
+      label: "Manage Inventory",
+      type: "checkbox",
+      defaultValue: true,
+      labelPos: "left"
+    },
+  ],
+  groups: [
+    {
+      id: "productPrice",
+      title: "Price Details",
+      type: "background",
+      backgroundColor: "bg-transparent",
+      fields: [
+        "productName",
+        "productMrp",
+        "productSalesPrice",
+        "productBarcode",
+      ],
+    },
+    {
+      id: "description",
+      title: "Description",
+      type: "single-line",
+      fields: ["description"],
+    },
+    {
+      id: "productPriceImages",
+      title: "Price Image Details",
+      type: "background",
+      backgroundColor: "bg-transparent",
+      fields: [
+        "productImage",
+        "productMrpImage",
+        "productSalesImage",
+        "productBarcodeImage",
+      ],
+    },
+    {
+      id: "action",
+      title: "manageInventory",
+      type: "action-group",
+      fields: [
+        "manageInventory",
+      ],
+    },
+  ],
+}
