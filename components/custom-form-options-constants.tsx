@@ -146,6 +146,15 @@ const ClientCustomAddOptionForm: FormConfig = {
       type: "email",
       placeholder: "email",
     },
+    {
+      name: "clientId",
+      label: "Client Id",
+      type: "text",
+      editable: false,
+      isHidden: true,
+      placeholder: "client Id",
+      defaultValue: crypto.randomUUID(),
+    },
   ],
 };
 

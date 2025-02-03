@@ -10,6 +10,7 @@ import { BulkActionConfig, BulkActions, FilterConfig } from "../types/table";
 import { AnimatedSearchInput } from "@/components/common/animatedSearchInput";
 import { DatePickerWithRange } from "./ui/date-range-picker";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface TableFiltersProps {
   filters: FilterConfig[];
@@ -66,11 +67,23 @@ export function TableFilters({
                   <SelectTrigger className="w-full sm:min-w-[200px] sm:max-w-[200px]">
                     <SelectValue placeholder={filter.label} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {filter.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
+                  <SelectContent className="sm:max-h-72 max-h-60 overflow-auto">
+                    {filter.options?.map((group) => (
+                      <React.Fragment key={group.group}>
+                        {filter.options && filter.options.length > 1 && (
+                          <div className="text-xs my-2 pl-1 text-gray-500">
+                            {group.group}
+                          </div>
+                        )}
+                        {group.options.map((option, index) => (
+                          <SelectItem
+                            key={option.value + index}
+                            value={option.value}
+                          >
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
                     ))}
                   </SelectContent>
                 </Select>

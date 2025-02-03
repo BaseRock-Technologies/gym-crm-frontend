@@ -2,6 +2,7 @@ import { backendApiPath } from "@/env";
 import Cookies from "js-cookie";
 import { showToast } from "./toast";
 import { FieldDependency, FormConfig, FormField, GroupedSelectOption } from "@/types/form";
+import { TableConfig } from "@/types/table";
 
 
 type customObject = { [key: string]: any };
@@ -297,6 +298,37 @@ function deepEqualObjs(obj1: any, obj2: any): boolean {
   return true;
 }
 
+const updateFilterOptions = (
+  tableConfig: TableConfig,
+  fieldName: string,
+  options: Record<string, any[]>,
+  labelField: string
+) => {
+  const filterField = tableConfig.filters?.find((item) => item.id === fieldName);
+  if (filterField) {
+    const tempOptions: GroupedSelectOption[] = [];
+
+    for (const group in options) {
+      if (options.hasOwnProperty(group)) {
+        const groupOptions = options[group].map(option => {
+          const data = {
+            label: option[labelField],
+            value: option[labelField],
+          };
+          return data;
+        });
+
+        tempOptions.push({
+          group,
+          options: groupOptions,
+        });
+      }
+    }
+
+    filterField.options = tempOptions;
+  }
+};
+
 export {
   post,
   get,
@@ -305,4 +337,5 @@ export {
   deepEqualObjs,
   formDatapost,
   returnUpdatedOptions,
+  updateFilterOptions,
 }

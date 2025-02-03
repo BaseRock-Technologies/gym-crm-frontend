@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react"
+import { GroupedSelectOption } from "./form"
 
 export interface TableConfig {
   columns: ColumnDef[]
@@ -64,7 +65,7 @@ export interface FilterConfig {
     from: Date;
     to: Date;
   };
-  options?: { label: string; value: string }[];
+  options?: GroupedSelectOption[] | [];
 }
 
 export interface TableState {

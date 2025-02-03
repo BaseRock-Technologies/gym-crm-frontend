@@ -80,6 +80,7 @@ export interface FormFieldBase {
   editable?: boolean;
   conditionalFields?: Record<string, FormField[]>;
   alias?: string;
+  isHidden?: boolean;
 }
 
 export type FieldsToAddInOptions = Record<string, string[]>;

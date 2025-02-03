@@ -3,38 +3,48 @@
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { Send } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ImageCell } from "../image-cell";
+import {
+  post,
+  updateFormConfigOptions,
+  updateFilterOptions,
+} from "@/lib/helper/steroid";
+import { showToast } from "@/lib/helper/toast";
+import { StatusResponse } from "@/types/query";
+import { formatTimestamp } from "@/utils/date-utils";
+import { InquiryFormConfig } from "../inquiries/constants";
+import { useAuth } from "@/lib/context/authContext";
+import { SelectApiData } from "@/types/form";
 
 interface CustomerRecordsProps {}
 
 // const mockData: any[] = [];
 
-const mockData = Array.from({ length: 50 }, (_, i) => ({
-  id: i + 1,
-  photo: <ImageCell />,
-  clientName: "Regular",
-  gender: `+1234567${i.toString().padStart(4, "0")}`,
-  registration: "2024-12-08",
-  package: "Admin",
-  expiration: "Active",
-}));
-
 const tableConfig: TableConfig = {
   columns: [
-    { id: "id", header: "Cliend ID/Biometric ID", accessorKey: "id" },
     {
-      id: "photo",
+      id: "memberId",
+      header: "Cliend ID/Biometric ID",
+      accessorKey: "memberId",
+    },
+    {
+      id: "clientPicture",
       header: "Photo",
       cell: (props) => <ImageCell {...props} />,
-      accessorKey: "photo",
+      accessorKey: "clientPicture",
     },
     { id: "clientName", header: "Client Name", accessorKey: "clientName" },
+    {
+      id: "contactNumber",
+      header: "Client Name",
+      accessorKey: "contactNumber",
+    },
     { id: "gender", header: "Gender", accessorKey: "gender" },
-    { id: "registration", header: "Registration", accessorKey: "registration" },
-    { id: "package", header: "Package", accessorKey: "package" },
-    { id: "expiration", header: "Expiration", accessorKey: "expiration" },
+    { id: "joiningDate", header: "Registration", accessorKey: "joiningDate" },
+    { id: "packageName", header: "Package", accessorKey: "packageName" },
+    { id: "endDate", header: "Expiration", accessorKey: "endDate" },
   ],
   actions: [
     {
@@ -111,39 +121,55 @@ const tableConfig: TableConfig = {
       label: "Select Gender",
       type: "select",
       options: [
-        { label: "Male", value: "male" },
-        { label: "Female", value: "female" },
+        {
+          group: "default",
+          options: [
+            { label: "Male", value: "male" },
+            { label: "Female", value: "female" },
+          ],
+        },
       ],
     },
     {
-      id: "packages",
+      id: "packageName",
       label: "All Packages",
       type: "select",
-      options: [
-        // from db
-      ],
+      options: [],
     },
 
     {
-      id: "membership",
+      id: "billType",
       label: "Select Membership",
       type: "select",
       options: [
-        { label: "Gym Membership", value: "gym-membership" },
-        { label: "Personal Training", value: "personal-training" },
-        { label: "Group Classes", value: "group-classes" },
+        {
+          group: "default",
+          options: [
+            { label: "Gym Membership", value: "gym-membership" },
+            { label: "Personal Training", value: "personal-training" },
+            { label: "Group Classes", value: "group-class" },
+          ],
+        },
       ],
     },
     {
-      id: "clientTypes",
+      id: "clientStatus",
       label: "Select Client Type",
       type: "select",
       options: [
-        { label: "Live Clients", value: "live-clients" },
-        { label: "Inactive Clients", value: "inactive-clients" },
-        { label: "Manual inactive Clients", value: "manual-inactive-clients" },
-        { label: "New Clients", value: "new-clients" },
-        { label: "Deleted Clients", value: "deleted-clients" },
+        {
+          group: "default",
+          options: [
+            { label: "Live Clients", value: "active" },
+            { label: "Inactive Clients", value: "inactive" },
+            {
+              label: "Manual inactive Clients",
+              value: "manual-inactive",
+            },
+            { label: "New Clients", value: "new-clients" },
+            { label: "Deleted Clients", value: "deleted" },
+          ],
+        },
       ],
     },
     {
@@ -152,7 +178,7 @@ const tableConfig: TableConfig = {
       type: "search",
     },
   ],
-  searchableColumns: ["name", "number"],
+  searchableColumns: ["clientName", "contactNumber"],
 
   bulkActions: [
     {
@@ -166,16 +192,51 @@ const tableConfig: TableConfig = {
 };
 
 const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
+  const { user } = useAuth();
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const res: StatusResponse = await post(
+          {},
+          "package/options",
+          "Failed to fetch package options"
+        );
+        if (res.status === "success" && res.data) {
+          const { packageDetails } = res.data;
+
+          updateFilterOptions(
+            tableConfig,
+            "packageName",
+            packageDetails,
+            "package"
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching initial data in Gym Package Bill:",
+          error
+        );
+        showToast("error", "Failed to load data");
+      }
+    };
+    InquiryFormConfig.title = "Create new bill for Gym Membership";
+    fetchInitialData();
+  }, [user]);
+
+  const apiConfig: SelectApiData = {
+    apiPath: "client/records",
+    method: "POST",
+  };
+  console.log(tableConfig);
   return (
-    // <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
-    //   <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-    //     <CardTitle>Inquiry Records</CardTitle>
-    //   </CardHeader>
-    //   <CardContent className="container">
-    //     <DataTableWrapper config={tableConfig}  />
-    //   </CardContent>
-    // </Card>
-    <div>To be implemented</div>
+    <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
+      <CardHeader className="bg-primary text-white mb-5 shadow-sm">
+        <CardTitle>Client(s)</CardTitle>
+      </CardHeader>
+      <CardContent className="container">
+        <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
+      </CardContent>
+    </Card>
   );
 };
 

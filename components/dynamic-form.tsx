@@ -858,24 +858,24 @@ export function DynamicForm({
       const shouldCombinePrimaryFieldValues =
         config.fields.find((ele) => ele.name === fieldName)
           ?.combinePrimaryFields || false;
-      primaryFields.forEach((_, index) => {
+      primaryFields.forEach((field, index) => {
         let currentValue = primaryValues[index];
         if (shouldCombinePrimaryFieldValues) {
           currentValue = primaryValues.join("-");
         }
         if (currentValue) {
           const fieldType = config.fields.find(
-            (fieldDetails) => fieldDetails.name === fieldName
+            (fieldDetails) => fieldDetails.name === field
           )?.type;
           if (fieldType) {
             if (fieldType === "multi-select" || fieldType === "select") {
               let fieldNewOptions: GroupedSelectOption[] = [];
               setCustomOptions((prev) => {
                 const updatedOptions = { ...prev };
-                if (!updatedOptions[fieldName]) {
-                  updatedOptions[fieldName] = [];
+                if (!updatedOptions[field]) {
+                  updatedOptions[field] = [];
                 }
-                const existingGroup = updatedOptions[fieldName].find(
+                const existingGroup = updatedOptions[field].find(
                   (g) => g.group === group
                 );
                 const newOptions: SelectOption = {
@@ -891,7 +891,7 @@ export function DynamicForm({
                         ];
                       if (sourceValue) {
                         targetFields.forEach((targetField) => {
-                          if (targetField === fieldName) {
+                          if (targetField === field) {
                             newOptions[sourceField] = sourceValue;
                           }
                         });
@@ -907,7 +907,7 @@ export function DynamicForm({
                     existingGroup.options.push(newOptions);
                   }
                 } else {
-                  updatedOptions[fieldName].push({
+                  updatedOptions[field].push({
                     group,
                     options: [newOptions],
                   });
@@ -920,7 +920,9 @@ export function DynamicForm({
                 ];
                 return updatedOptions;
               });
-              handleFieldChange(fieldName, currentValue, fieldNewOptions);
+              handleFieldChange(field, currentValue, fieldNewOptions);
+            } else {
+              handleFieldChange(field, currentValue);
             }
           }
         }
@@ -943,12 +945,18 @@ export function DynamicForm({
     e.stopPropagation();
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
-      form.setValue(fieldName, file);
-      handleFieldChange(fieldName, file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        form.setValue(fieldName, base64String);
+        handleFieldChange(fieldName, base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const renderField = (field: FormFieldType) => {
+    if (field.isHidden) return;
     let options: GroupedSelectOption[];
     if (field.options) {
       if (field.type === "select" || field.type === "multi-select") {
@@ -977,7 +985,7 @@ export function DynamicForm({
           name={field.name}
           render={({ field: formField }) => (
             <FormItem>
-              {((field.label && !field.labelPos) ||
+              {((Object.keys(field).includes("label") && !field.labelPos) ||
                 (field.labelPos && field.labelPos === "right")) && (
                 <FormLabel
                   className={`${
@@ -1167,8 +1175,13 @@ export function DynamicForm({
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          formField.onChange(file);
-                          handleFieldChange(field.name, file);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            const base64String = reader.result as string;
+                            formField.onChange(base64String);
+                            handleFieldChange(field.name, base64String);
+                          };
+                          reader.readAsDataURL(file);
                         }
                       }}
                     />
@@ -1178,12 +1191,12 @@ export function DynamicForm({
                     >
                       {formField.value ? (
                         <img
-                          src={URL.createObjectURL(formField.value)}
+                          src={formField.value}
                           alt="Uploaded image"
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="flex flex-col justify-center items-center gap-2 p-2">
+                        <div className="flex flex-col justify-center items-center gap-2 p-2 cursor-pointer">
                           <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
                           <span className="text-xs text-muted-foreground text-center w-3/">
                             Click to upload or drag and drop
@@ -1215,12 +1228,13 @@ export function DynamicForm({
                   />
                 )}
               </FormControl>
-              {field.label && field.labelPos === "left" && (
-                <FormLabel className="ml-2 text-helper-secondary">
-                  {field.label}
-                  {field.required && <span className="text-red-500">*</span>}
-                </FormLabel>
-              )}
+              {Object.keys(field).includes("label") &&
+                field.labelPos === "left" && (
+                  <FormLabel className="ml-2 text-helper-secondary">
+                    {field.label}
+                    {field.required && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                )}
               <FormMessage />
             </FormItem>
           )}

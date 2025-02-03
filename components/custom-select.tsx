@@ -35,7 +35,7 @@ interface CustomSelectProps {
   primaryFields?: Record<string, string[]>;
   fieldsInOptions?: FieldsToAddInOptions;
   options?: GroupedSelectOption[];
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   allowAddCustomOption?: boolean;
@@ -171,9 +171,9 @@ export function CustomSelect({
                   >
                     {selectGroups.options &&
                       selectGroups.options.length > 0 &&
-                      selectGroups.options.map((option) => (
+                      selectGroups.options.map((option, index) => (
                         <CommandItem
-                          key={option.value}
+                          key={option.value + index}
                           value={option.value}
                           onSelect={() => {
                             onChange(option.value);

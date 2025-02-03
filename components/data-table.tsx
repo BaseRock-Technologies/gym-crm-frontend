@@ -78,9 +78,21 @@ export function DataTable({
     }
   };
 
+  const handleClearFilters = () => {
+    onStateChange({
+      filters: {},
+      page: 1,
+    });
+  };
+
   return (
     <div className="w-full relative">
       <div className="flex items-center py-4 gap-4">
+        <div className="mb-4">
+          <Button onClick={handleClearFilters} variant="outline">
+            Clear Filters
+          </Button>
+        </div>
         <TableFilters
           filters={config.filters || []}
           ctaActions={config.bulkActions || []}
@@ -160,7 +172,7 @@ export function DataTable({
                         <TableCell
                           key={`column-${index}`}
                           className={`max-w-[200px] ${
-                            index < config.columns.length - 1
+                            index < config.columns.length
                               ? "border-r border-black/70"
                               : ""
                           }`}
@@ -181,11 +193,7 @@ export function DataTable({
                       ))}
                       {(config.actions || config.outOfActions) && (
                         <TableCell
-                          className={`flex gap-2 flex-wrap ${
-                            config.columns.length > 0
-                              ? "border-l border-black/70"
-                              : ""
-                          }`}
+                          className={`flex gap-2 flex-wrap`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {config.actions && config.actions.length > 0 && (
