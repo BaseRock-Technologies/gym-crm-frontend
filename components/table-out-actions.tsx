@@ -18,11 +18,19 @@ export function TableOutOfActions({ actions, row }: TableOutOfActionsProps) {
           switch (action.type) {
             case "link":
               return (
-                <Button key={action.id}>
+                <Button key={action.id} className="">
                   <Link
                     className={cn("gap-1 no-underline", action.customClass)}
                     key={action.id}
-                    href={action.href}
+                    href={
+                      action.getLinkFrom
+                        ? action.additionalHref
+                          ? `${action.additionalHref}/${
+                              row[action.getLinkFrom]
+                            }`
+                          : row[action.getLinkFrom]
+                        : action.href
+                    }
                   >
                     {action.icon && <action.icon />}
                     {action.label}

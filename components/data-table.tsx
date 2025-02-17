@@ -86,30 +86,23 @@ export function DataTable({
   };
 
   return (
-    <div className="w-full relative">
-      <div className="flex items-center py-4 gap-4">
-        <div className="mb-4">
-          <Button onClick={handleClearFilters} variant="outline">
-            Clear Filters
-          </Button>
-        </div>
-        <TableFilters
-          filters={config.filters || []}
-          ctaActions={config.bulkActions || []}
-          onFilterChange={(filterId, value) => {
-            onStateChange({
-              filters: { ...tableState.filters, [filterId]: value },
-              page: 1,
-            });
-          }}
-          onBulkAction={handleBulkAction}
-          searchableColumns={config.searchableColumns}
-          pageSize={tableState.pageSize}
-          onPageSizeChange={(value) =>
-            onStateChange({ pageSize: Number(value), page: 1 })
-          }
-        />
-      </div>
+    <div className="w-full relative space-y-6">
+      <TableFilters
+        filters={config.filters || []}
+        ctaActions={config.bulkActions || []}
+        onFilterChange={(filterId, value) => {
+          onStateChange({
+            filters: { ...tableState.filters, [filterId]: value },
+            page: 1,
+          });
+        }}
+        onBulkAction={handleBulkAction}
+        searchableColumns={config.searchableColumns}
+        pageSize={tableState.pageSize}
+        onPageSizeChange={(value) =>
+          onStateChange({ pageSize: Number(value), page: 1 })
+        }
+      />
 
       <div className="rounded-md border border-primary bg-white overflow-hidden">
         <Table>

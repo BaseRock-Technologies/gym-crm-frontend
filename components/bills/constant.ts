@@ -126,7 +126,7 @@ const formConfig: FormConfig = {
         fieldsToAddInOptions:{
           contactNumber: ["clientName"],
           email: ["clientName"],
-          clientId: ["clientName"],
+          clientCode: ["clientName"],
         },
         apiConfig: {
           apiPath: "client/create",
@@ -134,18 +134,18 @@ const formConfig: FormConfig = {
         },
       },
       {
-        name: "clientId",
-        label: "clientId",
+        name: "clientCode",
+        label: "clientCode",
         type: "text",
-        placeholder: "clientId",
+        placeholder: "clientCode",
         isHidden: true,
         dependsOn: {
           field: "clientName",
           formula: (values, options) => {
-            const clientId = options?.find(
+            const clientCode = options?.find(
               (opt) => opt.value === values.clientName
-            )?.clientId;
-            return clientId|| ''
+            )?.clientCode;
+            return clientCode|| ''
           },
         }
       },

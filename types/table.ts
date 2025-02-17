@@ -32,6 +32,8 @@ interface OutOfActionsLinkConfig {
   type: "link"
   icon?: LucideIcon
   customClass?: string,
+  getLinkFrom?: string,
+  additionalHref?: string,
 }
 interface OutOfActionsBtnConfig {
   id: string

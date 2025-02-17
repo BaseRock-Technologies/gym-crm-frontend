@@ -82,10 +82,6 @@ export default function SignInForm() {
           router.push("/dashboard");
           return;
         }
-
-        if (res.status === "error") {
-          showToast("error", res.message);
-        }
       } else {
         showToast("error", "Error Occured");
       }

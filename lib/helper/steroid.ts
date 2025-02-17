@@ -53,7 +53,7 @@ const post = async (postData: customObject, apiPath: string,  errorMsg: string =
       }
 
       if(responseData.status === "error") {
-        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+        showToast("error", responseData.message ?? errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
       }
 
 
