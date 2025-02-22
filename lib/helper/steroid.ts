@@ -49,11 +49,11 @@ const post = async (postData: customObject, apiPath: string,  errorMsg: string =
 
       if (validateResponse && responseData.status === 'unauthorized') {
           Cookies.remove('user');
-          showToast("error", "Access Denied");
-      }
+          showToast("error", "Access Denied", { toastId: "ba3ed155-c109-43a8-b7d1-7fda55c3f3f2"});
+        }
 
       if(responseData.status === "error") {
-        showToast("error", responseData.message ?? errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+        showToast("error", responseData.message ?? errorMsg, { toastId:"673d4655-3cde-46ae-90e0-a220d19c6026" } );
       }
 
 
@@ -103,11 +103,11 @@ const formDatapost = async (
 
     if (validateResponse && responseData.status === 'unauthorized') {
       Cookies.remove('user');
-      showToast("error", "Access Denied");
+      showToast("error", "Access Denied", { toastId: "ba3ed155-c109-43a8-b7d1-7fda55c3f3f2"});
     }
 
     if (responseData.status === "error") {
-      showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e" });
+      showToast("error", errorMsg, { toastId: "673d4655-3cde-46ae-90e0-a220d19c6026" });
     }
 
     return responseData;
@@ -149,7 +149,7 @@ const patch = async (postData: customObject, apiPath: string, errorMsg: string =
       }
 
       if(responseData.status === "error") {
-        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+        showToast("error", errorMsg, { toastId: "673d4655-3cde-46ae-90e0-a220d19c6026"});
       }
 
       return responseData;

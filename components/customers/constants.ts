@@ -20,11 +20,11 @@ const profileFormConfig: FormConfig = {
           "clientName",
           "contactNumber",
           "alternativeContact",
-          "membershipId",
-          "dateOfBirth",
+          "memberId",
+          "birthday",
           "gender",
           "anniversary",
-          "dateOfJoining",
+          "joiningDate",
           "profession",
           "email",
           "status"
@@ -53,31 +53,31 @@ const profileFormConfig: FormConfig = {
         label: "Profile Picture",
         type: "image",
         maxSize: 5 * 1024 * 1024,
+        editable: false,
       },
       {
         name: "clientName",
         label: "Client Name",
         type: "text",
+        editable: false,
       },
       {
         name: "contactNumber",
         label: "Contact Number",
-        type: "text",
+        type: "number",
+        editable: false,
       },
       {
         name: "alternativeContact",
         label: "Alternative Contact",
         type: "text",
+        editable: false,
       },
       {
-        name: "membershipId",
+        name: "memberId",
         label: "Membership ID",
-        type: "text",
-      },
-      {
-        name: "dateOfBirth",
-        label: "Date of Birth",
-        type: "date",
+        type: "number",
+        editable: false,
       },
       {
         name: "gender",
@@ -93,6 +93,7 @@ const profileFormConfig: FormConfig = {
         ],
         type: "select",
         placeholder: "Select gender",
+        editable: false,
       },
       {
         name: "status",
@@ -108,24 +109,35 @@ const profileFormConfig: FormConfig = {
         ],
         type: "select",
         placeholder: "Select status",
+        editable: false,
       },
       {
         name: "birthday",
         label: "Birthday",
         type: "date",
         placeholder: "birthday date",
+        editable: false,
       },
       {
         name: "anniversary",
         label: "Anniversary",
         type: "date",
         placeholder: "anniversary date",
+        editable: false,
+      },
+      {
+        name: "joiningDate",
+        label: "Date of Joining",
+        type: "date",
+        placeholder: "date of joining",
+        editable: false,
       },
       {
         name: "profession",
         label: "Profession",
         type: "text",
         placeholder: "profession",
+        editable: false,
       },
       {
         name: "address",
@@ -135,6 +147,7 @@ const profileFormConfig: FormConfig = {
         validation: {
           maxLength: 200,
         },
+        editable: false,
       },
       {
         name: "remarks",
@@ -143,12 +156,14 @@ const profileFormConfig: FormConfig = {
         validation: {
           maxLength: 200,
         },
+        editable: false,
       },
       {
         name: "joiningDate",
         label: "Joining Date",
         type: "date",
         placeholder: "joining date",
+        editable: false,
       },
     ],
   };

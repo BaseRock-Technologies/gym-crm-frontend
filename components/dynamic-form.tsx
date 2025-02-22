@@ -38,7 +38,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
 import { FileUpload } from "./file-upload";
 import { ImageIcon } from "lucide-react";
 import { TimePickerDetailed } from "./time-picker-detailed";
@@ -54,7 +53,7 @@ import { deepEqualObjs, get, patch, post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { formatTimestamp } from "@/utils/date-utils";
+import { formatDate, formatTimestamp } from "@/utils/date-utils";
 import { useAuth } from "@/lib/context/authContext";
 import EditClientDetails from "./bills/EditClientDetails";
 import { AddProduct } from "./pos/AddProduct";
@@ -70,14 +69,7 @@ interface DynamicFormProps {
   resetOnSubmit: boolean;
   isAdminOnly?: boolean;
   adminEditRules?: AdminOnlyEdit;
-}
-
-interface Product {
-  id: string;
-  product: string;
-  price: string;
-  quantity: string;
-  total: string;
+  canSaveTheForm?: boolean;
 }
 
 export function DynamicForm({
@@ -91,6 +83,7 @@ export function DynamicForm({
   redirectRules,
   resetOnSubmit = true,
   isAdminOnly = false,
+  canSaveTheForm = true,
   adminEditRules,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
@@ -367,11 +360,14 @@ export function DynamicForm({
               if (val instanceof Date) {
                 return Math.floor(val.getTime() / 1000);
               }
+              // if (typeof val === "number") {
+              //   return formatDate(new Date(val));
+              // }
               if (typeof val === "string" && !isNaN(Date.parse(val))) {
                 const date = new Date(val);
                 return Math.floor(date.getTime() / 1000);
               }
-              return null;
+              return val ? val : null;
             }, z.number().nullish())
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
@@ -625,7 +621,6 @@ export function DynamicForm({
 
   React.useEffect(() => {
     const { errors } = form.formState;
-    console.log(errors);
     if (Object.keys(errors).length) {
       showToast("error", "Please check all your data", {
         toastId: "3912f12f-8cb4-45f8-a152-91a2dbb78549",
@@ -814,7 +809,6 @@ export function DynamicForm({
           ([_, value]) => value !== null && value !== undefined && value !== ""
         )
       );
-
       if (deepEqualObjs(filteredValues, initialData)) {
         showToast("info", "No changes made", {
           toastId: "518e4231-27b5-4825-8229-83b68c343ef4",
@@ -824,11 +818,15 @@ export function DynamicForm({
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
-      // if (productsData && productsData.length > 0)
-      //   filteredValues["products"] = productsData;
+      // Create an object with only the changed values
+      const changedValues = Object.fromEntries(
+        Object.entries(filteredValues).filter(
+          ([key, value]) => !deepEqualObjs(value, initialData?.[key])
+        )
+      );
 
       if (apiData) {
-        const sentData: boolean = await sendApiRequest(apiData, filteredValues);
+        const sentData: boolean = await sendApiRequest(apiData, changedValues);
         if (sentData && resetOnSubmit) {
           resetForm(filteredValues);
         }
@@ -1084,7 +1082,7 @@ export function DynamicForm({
                         )}
                       >
                         {formField.value ? (
-                          format(formField.value, "MMM dd yyyy")
+                          formatDate(new Date(formField.value * 1000))
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -1095,8 +1093,11 @@ export function DynamicForm({
                         mode="single"
                         selected={formField.value}
                         onSelect={(value) => {
-                          formField.onChange(value);
-                          handleFieldChange(field.name, value);
+                          if (value) {
+                            const tempVal = Math.floor(value.getTime()) / 1000;
+                            formField.onChange(tempVal);
+                            handleFieldChange(field.name, tempVal);
+                          }
                         }}
                         initialFocus
                       />
@@ -1163,28 +1164,40 @@ export function DynamicForm({
                   />
                 ) : field.type === "image" ? (
                   <Card
-                    className="w-full h-32 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, field.name)}
+                    className={`w-full h-32 flex items-center justify-center border-primary rounded-md transition-colors overflow-hidden ${
+                      field.editable === false
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:bg-muted/50"
+                    }`}
+                    onDragOver={
+                      field.editable !== false ? handleDragOver : undefined
+                    }
+                    onDrop={
+                      field.editable !== false
+                        ? (e) => handleDrop(e, field.name)
+                        : undefined
+                    }
                   >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`${field.name}-upload`}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            const base64String = reader.result as string;
-                            formField.onChange(base64String);
-                            handleFieldChange(field.name, base64String);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
+                    {field.editable !== false && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id={`${field.name}-upload`}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const base64String = reader.result as string;
+                              formField.onChange(base64String);
+                              handleFieldChange(field.name, base64String);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    )}
                     <label
                       htmlFor={`${field.name}-upload`}
                       className="w-full h-full flex flex-col items-center justify-center"
@@ -1450,25 +1463,29 @@ export function DynamicForm({
                   {config.fields.map(renderField)}
                 </div>
               )}
-              {
-                <div className="relative w-full flex justify-end items-center">
-                  {(!isAdminOnly ||
-                    (isAdminOnly && user && user.role === "admin")) && (
-                    <Button
-                      type="submit"
-                      size={"lg"}
-                      form={formId}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <SpinnerTick color="#fff" />
-                      ) : (
-                        submitBtnText
+              {canSaveTheForm && (
+                <>
+                  {
+                    <div className="relative w-full flex justify-end items-center">
+                      {(!isAdminOnly ||
+                        (isAdminOnly && user && user.role === "admin")) && (
+                        <Button
+                          type="submit"
+                          size={"lg"}
+                          form={formId}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <SpinnerTick color="#fff" />
+                          ) : (
+                            submitBtnText
+                          )}
+                        </Button>
                       )}
-                    </Button>
-                  )}
-                </div>
-              }
+                    </div>
+                  }
+                </>
+              )}
             </form>
           </Form>
         </CardContent>

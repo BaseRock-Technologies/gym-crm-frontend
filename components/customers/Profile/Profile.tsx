@@ -2,8 +2,6 @@ import { useParams } from "next/navigation";
 import React from "react";
 import { profileFormConfig } from "../constants";
 import { DynamicForm } from "@/components/dynamic-form";
-import { formatTimestamp } from "@/utils/date-utils";
-import { formConfig } from "@/components/bills/constant";
 import { useAuth } from "@/lib/context/authContext";
 import { post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
@@ -11,7 +9,7 @@ import { SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
 
 const Profile = () => {
-  const { customerId } = useParams<{ customerId: string }>();
+  const { memberId } = useParams<{ memberId: string }>();
   const { user } = useAuth();
   const [initialData, setInitialData] = React.useState<Record<
     string,
@@ -21,13 +19,16 @@ const Profile = () => {
   const apiConfig: SelectApiData = {
     apiPath: "client/update",
     method: "POST",
+    postData: {
+      memberId: memberId,
+    },
   };
 
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const res: StatusResponse = await post(
-          { clientId: customerId },
+          { memberId: memberId },
           "client/profile",
           "Failed to fetch profile"
         );
@@ -39,7 +40,7 @@ const Profile = () => {
         showToast("error", "Failed to load data");
       }
     };
-    formConfig.title = "Profile Information";
+    profileFormConfig.title = "Profile Information";
     fetchInitialData();
   }, [user]);
 
@@ -51,6 +52,7 @@ const Profile = () => {
         initialData={initialData}
         apiData={apiConfig}
         resetOnSubmit={false}
+        canSaveTheForm={false}
       />
     </div>
   );

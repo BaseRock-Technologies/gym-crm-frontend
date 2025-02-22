@@ -25,9 +25,9 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
   const tableConfigRef = useRef<TableConfig>({
     columns: [
       {
-        id: "clientId",
+        id: "memberId",
         header: "Cliend ID/Biometric ID",
-        accessorKey: "clientId",
+        accessorKey: "memberId",
       },
       {
         id: "clientPicture",
@@ -38,7 +38,7 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
       { id: "clientName", header: "Client Name", accessorKey: "clientName" },
       {
         id: "contactNumber",
-        header: "Client Name",
+        header: "Contact Number",
         accessorKey: "contactNumber",
       },
       { id: "gender", header: "Gender", accessorKey: "gender" },
@@ -107,7 +107,7 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         label: "Profile",
         type: "link",
         href: "/dashboard",
-        getLinkFrom: "clientId",
+        getLinkFrom: "memberId",
         additionalHref: "/profile",
       },
       {
