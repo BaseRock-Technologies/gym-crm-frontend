@@ -818,15 +818,8 @@ export function DynamicForm({
       if (formCategory && formCategory.length > 0)
         filteredValues["category"] = formCategory;
 
-      // Create an object with only the changed values
-      const changedValues = Object.fromEntries(
-        Object.entries(filteredValues).filter(
-          ([key, value]) => !deepEqualObjs(value, initialData?.[key])
-        )
-      );
-
       if (apiData) {
-        const sentData: boolean = await sendApiRequest(apiData, changedValues);
+        const sentData: boolean = await sendApiRequest(apiData, filteredValues);
         if (sentData && resetOnSubmit) {
           resetForm(filteredValues);
         }
