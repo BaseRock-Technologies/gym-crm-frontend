@@ -19,6 +19,7 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
 }) => {
   const tableConfig: TableConfig = {
     columns: [
+      { id: "sno", header: "SNO", accessorKey: "sno" },
       { id: "name", header: "Name", accessorKey: "name" },
       { id: "contactNumber", header: "Number", accessorKey: "contactNumber" },
       { id: "inquiryFor", header: "For", accessorKey: "inquiryFor" },
@@ -42,19 +43,34 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
         id: "attendedBy",
         label: "Select AttendedBy",
         type: "select",
-        options: filtersOptions.attendedByOptions,
+        options: [
+          {
+            group: "default",
+            options: filtersOptions.attendedByOptions,
+          },
+        ],
       },
       {
         id: "convertibility",
         label: "Select Convertibility",
         type: "select",
-        options: filtersOptions.convertibility,
+        options: [
+          {
+            group: "default",
+            options: filtersOptions.convertibility,
+          },
+        ],
       },
       {
         id: "status",
         label: "Select Status",
         type: "select",
-        options: filtersOptions.status,
+        options: [
+          {
+            group: "default",
+            options: filtersOptions.status,
+          },
+        ],
       },
       {
         id: "search",

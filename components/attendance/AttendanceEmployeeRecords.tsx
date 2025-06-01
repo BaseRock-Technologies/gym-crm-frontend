@@ -5,25 +5,49 @@ import type { TableConfig } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData } from "@/types/form";
 
-interface AttendanceRecordsProps {}
-
-const mockData: any[] = [];
+interface AttendanceEmployeeRecordsProps {
+  apiConfig: SelectApiData;
+}
 
 const tableConfig: TableConfig = {
   columns: [
-    { id: "no", header: "SNO", accessorKey: "no" },
+    { id: "sno", header: "SNO", accessorKey: "sno" },
     {
-      id: "biometricId",
-      header: "Biometric / Client ID",
-      accessorKey: "biometricId",
+      id: "employeeId",
+      header: "Employee Id",
+      accessorKey: "employeeId",
     },
-    { id: "name", header: "Name", accessorKey: "name" },
-    { id: "memberId", header: "Member ID", accessorKey: "memberId" },
+
     {
-      id: "contactNumber",
-      header: "Contact Number",
-      accessorKey: "contactNumber",
+      id: "employeeName",
+      header: "Employee Name",
+      accessorKey: "employeeName",
     },
+
+    {
+      id: "employeeNumber",
+      header: "Employee Number",
+      accessorKey: "employeeNumber",
+    },
+
+    {
+      id: "employeeEmail",
+      header: "Employee Email",
+      accessorKey: "employeeEmail",
+    },
+
+    {
+      id: "employeeDesignation",
+      header: "Employee Designation",
+      accessorKey: "employeeDesignation",
+    },
+
+    {
+      id: "employeeSalary",
+      header: "Employee Salary",
+      accessorKey: "employeeSalary",
+    },
+
     { id: "inTime", header: "In Time", accessorKey: "inTime" },
     { id: "outTime", header: "Out Time", accessorKey: "outTime" },
     { id: "date", header: "Date", accessorKey: "date" },
@@ -39,17 +63,6 @@ const tableConfig: TableConfig = {
       },
     },
     {
-      id: "role",
-      label: "Select Role",
-      type: "select",
-      options: [
-        { label: "Clients", value: "clients" },
-        { label: "Employees", value: "employees" },
-        { label: "Trainer", value: "trainer" },
-        { label: "Unauthorized", value: "unauthorized" },
-      ],
-    },
-    {
       id: "search",
       label: "Search",
       type: "search",
@@ -58,12 +71,9 @@ const tableConfig: TableConfig = {
   searchableColumns: ["name"],
 };
 
-const apiConfig: SelectApiData = {
-  apiPath: "attendance/records",
-  method: "POST",
-};
-
-const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
+const AttendanceEmployeeRecords: React.FC<AttendanceEmployeeRecordsProps> = ({
+  apiConfig,
+}) => {
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
@@ -76,4 +86,4 @@ const AttendanceRecords: React.FC<AttendanceRecordsProps> = ({}) => {
   );
 };
 
-export default AttendanceRecords;
+export default AttendanceEmployeeRecords;

@@ -25,7 +25,10 @@ export function TableActions({ actions, row }: TableActionsProps) {
       <DropdownMenuContent align="end" className="w-[200px]">
         {actions.map((action) => (
           <DropdownMenuItem key={action.id} onClick={() => action.onClick(row)}>
-            {action.label}
+            <div className="flex flex-row gap-1">
+              {action.icon && <action.icon />}
+              {action.label}
+            </div>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

@@ -2,27 +2,37 @@
 
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData } from "@/types/form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-interface FeedbackRecordsProps {}
-
-const mockData: any[] = [];
+interface PurchaseRecordsProps {}
 
 const tableConfig: TableConfig = {
   columns: [
-    { id: "sno", header: "SNO", accessorKey: "sno" },
-    { id: "date", header: "Date", accessorKey: "date" },
-    { id: "name", header: "Name", accessorKey: "name" },
     {
-      id: "contactNumber",
-      header: "Contact Number",
-      accessorKey: "contactNumber",
+      id: "invoiceByVendor",
+      header: "Invoice",
+      accessorKey: "invoiceByVendor",
     },
     {
-      id: "feedback",
-      header: "Feedback / Suggestion",
-      accessorKey: "feedback",
+      id: "purchaseDate",
+      header: "Date of Purchase",
+      accessorKey: "purchaseDate",
+    },
+    {
+      id: "vendorName",
+      header: "Vendor",
+      accessorKey: "vendorName",
+    },
+    {
+      id: "totalCharges",
+      header: "Total",
+      accessorKey: "totalCharges",
+    },
+    {
+      id: "paymentMode",
+      header: "Payment Mode",
+      accessorKey: "paymentMode",
     },
   ],
   actions: [
@@ -39,19 +49,19 @@ const tableConfig: TableConfig = {
       type: "search",
     },
   ],
-  searchableColumns: ["name"],
+  searchableColumns: ["vendorName", "invoiceByVendor"],
 };
 
 const apiConfig: SelectApiData = {
-  apiPath: "feedback/records",
+  apiPath: "pos/purchase/records",
   method: "POST",
 };
 
-const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
+const PurchaseRecords: React.FC<PurchaseRecordsProps> = ({}) => {
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Customer Feedbacks</CardTitle>
+        <CardTitle>Purchase History</CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
@@ -60,4 +70,4 @@ const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
   );
 };
 
-export default FeedbackRecords;
+export default PurchaseRecords;

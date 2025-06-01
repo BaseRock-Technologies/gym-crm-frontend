@@ -2,6 +2,7 @@ import { backendApiPath } from "@/env";
 import Cookies from "js-cookie";
 import { showToast } from "./toast";
 import { FieldDependency, FormConfig, FormField, GroupedSelectOption } from "@/types/form";
+import { TableConfig } from "@/types/table";
 
 
 type customObject = { [key: string]: any };
@@ -48,11 +49,11 @@ const post = async (postData: customObject, apiPath: string,  errorMsg: string =
 
       if (validateResponse && responseData.status === 'unauthorized') {
           Cookies.remove('user');
-          showToast("error", "Access Denied");
-      }
+          showToast("error", "Access Denied", { toastId: "ba3ed155-c109-43a8-b7d1-7fda55c3f3f2"});
+        }
 
       if(responseData.status === "error") {
-        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+        showToast("error", responseData.message ?? errorMsg, { toastId:"673d4655-3cde-46ae-90e0-a220d19c6026" } );
       }
 
 
@@ -102,11 +103,11 @@ const formDatapost = async (
 
     if (validateResponse && responseData.status === 'unauthorized') {
       Cookies.remove('user');
-      showToast("error", "Access Denied");
+      showToast("error", "Access Denied", { toastId: "ba3ed155-c109-43a8-b7d1-7fda55c3f3f2"});
     }
 
     if (responseData.status === "error") {
-      showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e" });
+      showToast("error", errorMsg, { toastId: "673d4655-3cde-46ae-90e0-a220d19c6026" });
     }
 
     return responseData;
@@ -148,7 +149,7 @@ const patch = async (postData: customObject, apiPath: string, errorMsg: string =
       }
 
       if(responseData.status === "error") {
-        showToast("error", errorMsg, { toastId: "88f94e97-568d-4159-bd2d-a411c3407e9e"});
+        showToast("error", errorMsg, { toastId: "673d4655-3cde-46ae-90e0-a220d19c6026"});
       }
 
       return responseData;
@@ -241,6 +242,41 @@ const updateFormConfigOptions = (
   }
 };
 
+const returnUpdatedOptions = (
+  options: Record<string, any[]>,
+  labelField: string,
+  fieldsToDelete?: string[]
+) => {
+  const tempOptions: Record<string, GroupedSelectOption[]> = {};
+
+  for (const group in options) {
+    if (options.hasOwnProperty(group)) {
+      const groupOptions = options[group].map(option => {
+        const { ...filteredOption } = option;
+        const data = {
+          label: filteredOption[labelField],
+          value: filteredOption[labelField],
+        };
+        delete filteredOption[labelField];
+
+        if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
+          fieldsToDelete.forEach(fieldToDelete => {
+            delete filteredOption[fieldToDelete];
+          });
+        }
+        return { ...data, ...filteredOption };
+      });
+
+      const uniqueGroupOptions = Array.from(new Set(groupOptions.map(item => item.value)))
+        .map(value => groupOptions.find(item => item.value === value));
+
+      tempOptions[group] = uniqueGroupOptions;
+    }
+  }
+
+  return tempOptions;
+};
+
 function deepEqualObjs(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
 
@@ -262,11 +298,44 @@ function deepEqualObjs(obj1: any, obj2: any): boolean {
   return true;
 }
 
+const updateFilterOptions = (
+  tableConfig: TableConfig,
+  fieldName: string,
+  options: Record<string, any[]>,
+  labelField: string
+) => {
+  const filterField = tableConfig.filters?.find((item) => item.id === fieldName);
+  if (filterField) {
+    const tempOptions: GroupedSelectOption[] = [];
+
+    for (const group in options) {
+      if (options.hasOwnProperty(group)) {
+        const groupOptions = options[group].map(option => {
+          const data = {
+            label: option[labelField],
+            value: option[labelField],
+          };
+          return data;
+        });
+
+        tempOptions.push({
+          group,
+          options: groupOptions,
+        });
+      }
+    }
+
+    filterField.options = tempOptions;
+  }
+};
+
 export {
   post,
   get,
   patch,
   updateFormConfigOptions,
   deepEqualObjs,
-  formDatapost
+  formDatapost,
+  returnUpdatedOptions,
+  updateFilterOptions,
 }

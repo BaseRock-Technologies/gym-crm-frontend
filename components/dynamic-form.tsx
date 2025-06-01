@@ -38,7 +38,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
 import { FileUpload } from "./file-upload";
 import { ImageIcon } from "lucide-react";
 import { TimePickerDetailed } from "./time-picker-detailed";
@@ -54,11 +53,10 @@ import { deepEqualObjs, get, patch, post } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { formatTimestamp } from "@/utils/date-utils";
+import { formatDate, formatTimestamp } from "@/utils/date-utils";
 import { useAuth } from "@/lib/context/authContext";
-import Link from "next/link";
 import EditClientDetails from "./bills/EditClientDetails";
-
+import { AddProduct } from "./pos/AddProduct";
 interface DynamicFormProps {
   config: FormConfig;
   storeFormValues?: (value: Record<string, any>) => void;
@@ -71,6 +69,7 @@ interface DynamicFormProps {
   resetOnSubmit: boolean;
   isAdminOnly?: boolean;
   adminEditRules?: AdminOnlyEdit;
+  canSaveTheForm?: boolean;
 }
 
 export function DynamicForm({
@@ -84,6 +83,7 @@ export function DynamicForm({
   redirectRules,
   resetOnSubmit = true,
   isAdminOnly = false,
+  canSaveTheForm = true,
   adminEditRules,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
@@ -108,6 +108,37 @@ export function DynamicForm({
       let fieldSchema: z.ZodTypeAny;
 
       switch (field.type) {
+        case "products":
+          fieldSchema = z
+            .preprocess(
+              (val) => {
+                console.log(val);
+                if (typeof val === "string") {
+                  return [];
+                }
+                return val;
+              },
+              z.array(
+                z.object({
+                  name: z.string(),
+                  salesPrice: z.number(),
+                  quantity: z.number(),
+                  total: z.number(),
+                })
+              )
+            )
+            .default([])
+            .nullable()
+            .superRefine((val, ctx) => {
+              if (field.required && !val) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+                return z.NEVER;
+              }
+            });
+          break;
         case "text":
         case "textarea":
           fieldSchema = z
@@ -329,11 +360,14 @@ export function DynamicForm({
               if (val instanceof Date) {
                 return Math.floor(val.getTime() / 1000);
               }
+              // if (typeof val === "number") {
+              //   return formatDate(new Date(val));
+              // }
               if (typeof val === "string" && !isNaN(Date.parse(val))) {
                 const date = new Date(val);
                 return Math.floor(date.getTime() / 1000);
               }
-              return null;
+              return val ? val : null;
             }, z.number().nullish())
             .superRefine((val, ctx) => {
               if (field.required && (val === undefined || val === null)) {
@@ -586,9 +620,11 @@ export function DynamicForm({
   }, [formValues]);
 
   React.useEffect(() => {
-    const { isSubmitting, errors } = form.formState;
-    if (isSubmitting && Object.keys(errors).length) {
-      showToast("error", "Please check all your data");
+    const { errors } = form.formState;
+    if (Object.keys(errors).length) {
+      showToast("error", "Please check all your data", {
+        toastId: "3912f12f-8cb4-45f8-a152-91a2dbb78549",
+      });
 
       if (formCardRef.current) {
         formCardRef.current.scrollIntoView({
@@ -621,14 +657,15 @@ export function DynamicForm({
     form.setValue(name, value);
     const newValues = { ...formValues, [name]: value };
     let fieldsUpdated = false;
-    // Handle dependent fields
     config.fields.forEach((field) => {
       if (field.dependsOn) {
+        const fieldName = field.name;
+
         const dependentFields = field.dependsOn.field
           .split(",")
           .map((f) => f.trim());
         if (dependentFields.includes(name)) {
-          let fieldOptions: SelectOption[] = [];
+          let fieldOptions: GroupedSelectOption[] = [];
           dependentFields.forEach((depField) => {
             const fieldFromConfig = config.fields.find(
               (item) => item.name === depField
@@ -643,17 +680,19 @@ export function DynamicForm({
                 ...(newValues[fieldFromConfig.name]?.options || []),
                 ...customOptionsOfField,
               ];
+            } else if (fieldFromConfig?.type === "products") {
+              fieldOptions = [...fieldOptions, ...customOptionsOfField];
             }
           });
-          fieldOptions = fieldOptions
+
+          const fieldSelectOptions: SelectOption[] = fieldOptions
             .flatMap((item) => item.options)
             .filter(Boolean);
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
             newValues,
-            fieldOptions
+            fieldSelectOptions
           );
-          const fieldName = field.name;
           if (calculatedValue !== undefined) {
             newValues[fieldName] = calculatedValue;
             form.setValue(fieldName, calculatedValue);
@@ -693,7 +732,9 @@ export function DynamicForm({
   ) => {
     const handleResponse = (res: StatusResponse) => {
       const { status, message } = res;
-      showToast(status, message);
+      showToast(status, message, {
+        toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
+      });
       return status !== "error";
     };
     if (data.billType) {
@@ -734,7 +775,9 @@ export function DynamicForm({
       }
       return handleResponse(res);
     } catch (error) {
-      showToast("error", "Failed to send data");
+      showToast("error", "Failed to send data", {
+        toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
+      });
       return false;
     }
   };
@@ -766,9 +809,10 @@ export function DynamicForm({
           ([_, value]) => value !== null && value !== undefined && value !== ""
         )
       );
-
       if (deepEqualObjs(filteredValues, initialData)) {
-        showToast("info", "No changes made");
+        showToast("info", "No changes made", {
+          toastId: "518e4231-27b5-4825-8229-83b68c343ef4",
+        });
         return;
       }
       if (formCategory && formCategory.length > 0)
@@ -783,7 +827,10 @@ export function DynamicForm({
         resetForm(filteredValues);
       }
     } catch (error) {
-      showToast("error", "Failed to submit form");
+      console.log(error);
+      showToast("error", "Failed to submit form", {
+        toastId: "51ee18d3-9042-4d7e-9838-acc0fc0f1d65",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -799,21 +846,27 @@ export function DynamicForm({
     additionalValuesToFocus: Array<String | Number>
   ) => {
     try {
-      primaryFields.forEach((_, index) => {
-        const currentValue = primaryValues[index];
+      const shouldCombinePrimaryFieldValues =
+        config.fields.find((ele) => ele.name === fieldName)
+          ?.combinePrimaryFields || false;
+      primaryFields.forEach((field, index) => {
+        let currentValue = primaryValues[index];
+        if (shouldCombinePrimaryFieldValues) {
+          currentValue = primaryValues.join("-");
+        }
         if (currentValue) {
           const fieldType = config.fields.find(
-            (fieldDetails) => fieldDetails.name === fieldName
+            (fieldDetails) => fieldDetails.name === field
           )?.type;
           if (fieldType) {
             if (fieldType === "multi-select" || fieldType === "select") {
               let fieldNewOptions: GroupedSelectOption[] = [];
               setCustomOptions((prev) => {
                 const updatedOptions = { ...prev };
-                if (!updatedOptions[fieldName]) {
-                  updatedOptions[fieldName] = [];
+                if (!updatedOptions[field]) {
+                  updatedOptions[field] = [];
                 }
-                const existingGroup = updatedOptions[fieldName].find(
+                const existingGroup = updatedOptions[field].find(
                   (g) => g.group === group
                 );
                 const newOptions: SelectOption = {
@@ -829,7 +882,7 @@ export function DynamicForm({
                         ];
                       if (sourceValue) {
                         targetFields.forEach((targetField) => {
-                          if (targetField === fieldName) {
+                          if (targetField === field) {
                             newOptions[sourceField] = sourceValue;
                           }
                         });
@@ -845,7 +898,7 @@ export function DynamicForm({
                     existingGroup.options.push(newOptions);
                   }
                 } else {
-                  updatedOptions[fieldName].push({
+                  updatedOptions[field].push({
                     group,
                     options: [newOptions],
                   });
@@ -858,7 +911,9 @@ export function DynamicForm({
                 ];
                 return updatedOptions;
               });
-              handleFieldChange(fieldName, currentValue, fieldNewOptions);
+              handleFieldChange(field, currentValue, fieldNewOptions);
+            } else {
+              handleFieldChange(field, currentValue);
             }
           }
         }
@@ -881,12 +936,18 @@ export function DynamicForm({
     e.stopPropagation();
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
-      form.setValue(fieldName, file);
-      handleFieldChange(fieldName, file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        form.setValue(fieldName, base64String);
+        handleFieldChange(fieldName, base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const renderField = (field: FormFieldType) => {
+    if (field.isHidden) return;
     let options: GroupedSelectOption[];
     if (field.options) {
       if (field.type === "select" || field.type === "multi-select") {
@@ -915,7 +976,7 @@ export function DynamicForm({
           name={field.name}
           render={({ field: formField }) => (
             <FormItem>
-              {(!field.labelPos ||
+              {((Object.keys(field).includes("label") && !field.labelPos) ||
                 (field.labelPos && field.labelPos === "right")) && (
                 <FormLabel
                   className={`${
@@ -927,7 +988,14 @@ export function DynamicForm({
                 </FormLabel>
               )}
               <FormControl>
-                {field.type === "select" ? (
+                {field.type === "products" ? (
+                  <AddProduct
+                    fieldName={field.name}
+                    value={formField.value || []}
+                    options={field.options ?? []}
+                    handleFieldChange={handleFieldChange}
+                  />
+                ) : field.type === "select" ? (
                   <CustomSelect
                     fieldName={field.name}
                     options={options}
@@ -1007,7 +1075,7 @@ export function DynamicForm({
                         )}
                       >
                         {formField.value ? (
-                          format(formField.value, "MMM dd yyyy")
+                          formatDate(new Date(formField.value * 1000))
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -1018,8 +1086,11 @@ export function DynamicForm({
                         mode="single"
                         selected={formField.value}
                         onSelect={(value) => {
-                          formField.onChange(value);
-                          handleFieldChange(field.name, value);
+                          if (value) {
+                            const tempVal = Math.floor(value.getTime()) / 1000;
+                            formField.onChange(tempVal);
+                            handleFieldChange(field.name, tempVal);
+                          }
                         }}
                         initialFocus
                       />
@@ -1086,35 +1157,52 @@ export function DynamicForm({
                   />
                 ) : field.type === "image" ? (
                   <Card
-                    className="w-full h-32 flex items-center justify-center border-primary rounded-md cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, field.name)}
+                    className={`w-full h-32 flex items-center justify-center border-primary rounded-md transition-colors overflow-hidden ${
+                      field.editable === false
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:bg-muted/50"
+                    }`}
+                    onDragOver={
+                      field.editable !== false ? handleDragOver : undefined
+                    }
+                    onDrop={
+                      field.editable !== false
+                        ? (e) => handleDrop(e, field.name)
+                        : undefined
+                    }
                   >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`${field.name}-upload`}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          formField.onChange(file);
-                          handleFieldChange(field.name, file);
-                        }
-                      }}
-                    />
+                    {field.editable !== false && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id={`${field.name}-upload`}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const base64String = reader.result as string;
+                              formField.onChange(base64String);
+                              handleFieldChange(field.name, base64String);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    )}
                     <label
                       htmlFor={`${field.name}-upload`}
                       className="w-full h-full flex flex-col items-center justify-center"
                     >
                       {formField.value ? (
                         <img
-                          src={URL.createObjectURL(formField.value)}
+                          src={formField.value}
                           alt="Uploaded image"
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="flex flex-col justify-center items-center gap-2 p-2">
+                        <div className="flex flex-col justify-center items-center gap-2 p-2 cursor-pointer">
                           <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
                           <span className="text-xs text-muted-foreground text-center w-3/">
                             Click to upload or drag and drop
@@ -1146,12 +1234,13 @@ export function DynamicForm({
                   />
                 )}
               </FormControl>
-              {field.labelPos === "left" && (
-                <FormLabel className="ml-2 text-helper-secondary">
-                  {field.label}
-                  {field.required && <span className="text-red-500">*</span>}
-                </FormLabel>
-              )}
+              {Object.keys(field).includes("label") &&
+                field.labelPos === "left" && (
+                  <FormLabel className="ml-2 text-helper-secondary">
+                    {field.label}
+                    {field.required && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                )}
               <FormMessage />
             </FormItem>
           )}
@@ -1191,7 +1280,7 @@ export function DynamicForm({
         >
           <AccordionItem value={group.id}>
             <AccordionContent className="transition-all duration-300 ease-in-out">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
                 {group.fields.map((fieldName) => {
                   const field = config.fields.find((f) => f.name === fieldName);
                   return field ? renderField(field) : null;
@@ -1214,7 +1303,7 @@ export function DynamicForm({
           }`}
           key={group.id}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1302,10 +1391,21 @@ export function DynamicForm({
           </div>
         </div>
       );
+    } else if (group.type === "single-line") {
+      return (
+        <div key={group.id}>
+          <div className="grid grid-cols-1">
+            {group.fields.map((fieldName) => {
+              const field = config.fields.find((f) => f.name === fieldName);
+              return field ? renderField(field) : null;
+            })}
+          </div>
+        </div>
+      );
     } else {
       return (
         <div key={group.id}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1356,25 +1456,29 @@ export function DynamicForm({
                   {config.fields.map(renderField)}
                 </div>
               )}
-              {
-                <div className="relative w-full flex justify-end items-center">
-                  {(!isAdminOnly ||
-                    (isAdminOnly && user && user.role === "admin")) && (
-                    <Button
-                      type="submit"
-                      size={"lg"}
-                      form={formId}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <SpinnerTick color="#fff" />
-                      ) : (
-                        submitBtnText
+              {canSaveTheForm && (
+                <>
+                  {
+                    <div className="relative w-full flex justify-end items-center">
+                      {(!isAdminOnly ||
+                        (isAdminOnly && user && user.role === "admin")) && (
+                        <Button
+                          type="submit"
+                          size={"lg"}
+                          form={formId}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <SpinnerTick color="#fff" />
+                          ) : (
+                            submitBtnText
+                          )}
+                        </Button>
                       )}
-                    </Button>
-                  )}
-                </div>
-              }
+                    </div>
+                  }
+                </>
+              )}
             </form>
           </Form>
         </CardContent>

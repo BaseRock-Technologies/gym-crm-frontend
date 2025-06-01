@@ -40,9 +40,7 @@ export default function InquiryHome() {
         if (res.status === "success" && res.data) {
           const { clientSourceDetails, packageDetails, employeeDetails } =
             res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
+          const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             attendedBy: user?.userName || "",
             convertibility: "Warm",

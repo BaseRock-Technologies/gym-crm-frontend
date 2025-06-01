@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react"
+import { GroupedSelectOption } from "./form"
 
 export interface TableConfig {
   columns: ColumnDef[]
@@ -20,7 +21,7 @@ export interface ColumnDef {
 export interface ActionConfig {
   id: string
   label: string
-  icon?: string
+  icon?: LucideIcon
   onClick: (row: any) => void
 }
 
@@ -31,6 +32,8 @@ interface OutOfActionsLinkConfig {
   type: "link"
   icon?: LucideIcon
   customClass?: string,
+  getLinkFrom?: string,
+  additionalHref?: string,
 }
 interface OutOfActionsBtnConfig {
   id: string
@@ -38,8 +41,9 @@ interface OutOfActionsBtnConfig {
   label: string
   icon: LucideIcon,
   customClass?: string,
-  btnType: "icon" | "btn"
+  btnType: "icon" | "btn" | "icon-btn"
   onClick: (row: any) => void
+  showLabel?: boolean
 }
 
 export type OutOfActionsConfig = OutOfActionsLinkConfig | OutOfActionsBtnConfig;
@@ -63,7 +67,7 @@ export interface FilterConfig {
     from: Date;
     to: Date;
   };
-  options?: { label: string; value: string }[];
+  options?: GroupedSelectOption[] | [];
 }
 
 export interface TableState {

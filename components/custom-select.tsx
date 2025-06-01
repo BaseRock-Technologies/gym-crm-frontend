@@ -35,7 +35,7 @@ interface CustomSelectProps {
   primaryFields?: Record<string, string[]>;
   fieldsInOptions?: FieldsToAddInOptions;
   options?: GroupedSelectOption[];
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
   allowAddCustomOption?: boolean;
@@ -73,15 +73,7 @@ export function CustomSelect({
 }: CustomSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [customOptionGroupDialog, setCustomOptionGroupDialog] =
-    React.useState<string>("");
   const [selectedGroup, setSelectedGroup] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (options.length === 1) {
-      setCustomOptionGroupDialog(options[0].group);
-    }
-  }, [options]);
 
   React.useEffect(() => {
     if (customAddOptionsGroups && customAddOptionsGroups.length === 1) {
@@ -179,9 +171,9 @@ export function CustomSelect({
                   >
                     {selectGroups.options &&
                       selectGroups.options.length > 0 &&
-                      selectGroups.options.map((option) => (
+                      selectGroups.options.map((option, index) => (
                         <CommandItem
-                          key={option.value}
+                          key={option.value + index}
                           value={option.value}
                           onSelect={() => {
                             onChange(option.value);
@@ -238,7 +230,6 @@ export function CustomSelect({
             setDialogOpen(open);
             if (!open) {
               setSelectedGroup(null);
-              setCustomOptionGroupDialog("");
             }
           }}
         >

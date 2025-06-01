@@ -1,4 +1,4 @@
-import { SetStateAction, useState } from "react";
+import { type SetStateAction, useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { TableFilters } from "./table-filters";
 import { TableActions } from "./table-actions";
-import { BulkActions, TableConfig, TableState } from "../types/table";
+import type { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
 import { TableOutOfActions } from "./table-out-actions";
 
@@ -76,48 +76,67 @@ export function DataTable({
       default:
         break;
     }
-    console.log("Selected rows:", selectedRows);
+  };
+
+  const handleClearFilters = () => {
+    onStateChange({
+      filters: {},
+      page: 1,
+    });
   };
 
   return (
-    <div className="w-full relative">
-      <div className="flex items-center py-4 gap-4">
-        <TableFilters
-          filters={config.filters || []}
-          ctaActions={config.bulkActions || []}
-          onFilterChange={(filterId, value) => {
-            onStateChange({
-              filters: { ...tableState.filters, [filterId]: value },
-              page: 1,
-            });
-          }}
-          onBulkAction={handleBulkAction}
-          searchableColumns={config.searchableColumns}
-          pageSize={tableState.pageSize}
-          onPageSizeChange={(value) =>
-            onStateChange({ pageSize: Number(value), page: 1 })
-          } // Pass handler for page size change
-        />
-      </div>
+    <div className="w-full relative space-y-6">
+      <TableFilters
+        filters={config.filters || []}
+        ctaActions={config.bulkActions || []}
+        onFilterChange={(filterId, value) => {
+          onStateChange({
+            filters: { ...tableState.filters, [filterId]: value },
+            page: 1,
+          });
+        }}
+        onBulkAction={handleBulkAction}
+        searchableColumns={config.searchableColumns}
+        pageSize={tableState.pageSize}
+        onPageSizeChange={(value) =>
+          onStateChange({ pageSize: Number(value), page: 1 })
+        }
+      />
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border border-primary bg-white overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]" key="checkbox-header">
+              <TableHead
+                className="w-[50px] border-r border-black/70"
+                key="checkbox-header"
+              >
                 <Checkbox
                   onCheckedChange={(checked: boolean) =>
                     handleSelectAll(checked)
                   }
                 />
               </TableHead>
-              {config.columns.map((column) => (
-                <TableHead className="truncate" key={column.id}>
+              {config.columns.map((column, index) => (
+                <TableHead
+                  className={`truncate ${
+                    index < config.columns.length - 1
+                      ? "border-r border-black/70"
+                      : ""
+                  }`}
+                  key={column.id}
+                >
                   {column.header}
                 </TableHead>
               ))}
               {config.actions && (
-                <TableHead key="actions-header">Action</TableHead>
+                <TableHead
+                  key="actions-header"
+                  className="border-l border-black/70"
+                >
+                  Action
+                </TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -129,9 +148,14 @@ export function DataTable({
                     <TableRow
                       key={`row-${index}`}
                       onClick={() => handleSelectRow(row.id)}
-                      className="cursor-pointer"
+                      className={`cursor-pointer ${
+                        index % 2 === 1 ? "bg-gray-50" : ""
+                      }`}
                     >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
+                      <TableCell
+                        className="border-r border-black/70"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Checkbox
                           checked={selected[row.id] || false}
                           onCheckedChange={() => handleSelectRow(row.id)}
@@ -140,7 +164,11 @@ export function DataTable({
                       {config.columns.map((column, index) => (
                         <TableCell
                           key={`column-${index}`}
-                          className="max-w-[200px]"
+                          className={`max-w-[200px] ${
+                            index < config.columns.length
+                              ? "border-r border-black/70"
+                              : ""
+                          }`}
                         >
                           <div
                             className="truncate"
@@ -152,13 +180,13 @@ export function DataTable({
                           >
                             {column.cell
                               ? column.cell(row)
-                              : row[column.accessorKey]}
+                              : row[column.accessorKey] || "-"}
                           </div>
                         </TableCell>
                       ))}
                       {(config.actions || config.outOfActions) && (
                         <TableCell
-                          className="flex gap-2 flex-wrap"
+                          className={`flex gap-2 flex-wrap`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {config.actions && config.actions.length > 0 && (
@@ -204,13 +232,13 @@ export function DataTable({
       {!isLoading && (
         <>
           {total > 0 && (
-            <div className="flex items-center justify-between  py-4">
-              <div className="text-sm text-primary">
+            <div className="flex sm:flex-row flex-col items-center justify-between gap-4 py-4">
+              <div className="sm:text-sm text-xs text-primary w-full text-start">
                 Showing {(tableState.page - 1) * tableState.pageSize + 1} to{" "}
                 {Math.min(tableState.page * tableState.pageSize, total)} of{" "}
                 {total} entries
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="w-full flex items-center justify-end space-x-2">
                 <Button
                   variant="invert"
                   size="sm"

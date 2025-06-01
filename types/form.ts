@@ -1,6 +1,7 @@
-export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file';
+export type FieldType = 'text' | 'select' | 'multi-select' | 'date' | 'textarea' | 'checkbox' | 'number' | 'decimal' | 'time' | 'time-detailed' | 'phone' | 'email' | 'image' | 'file'  | 'products' ;
 
 export interface SelectOption {
+  id?: string
   label: string;
   value: string;
   [key: string]: any;
@@ -29,9 +30,17 @@ export interface AdminOnlyEdit {
   memberId?: string,
 }
 
+export interface Product {
+  id: string;
+  product: string;
+  price: string;
+  quantity: string;
+  total: string;
+}
+
 export interface FieldDependency {
   field: string;
-  formula: (values: Record<string, any>, options?: SelectOption[]) => any; 
+  formula: (values: Record<string, any>, options?: SelectOption[] ) => any; 
 }
 
 
@@ -71,6 +80,7 @@ export interface FormFieldBase {
   editable?: boolean;
   conditionalFields?: Record<string, FormField[]>;
   alias?: string;
+  isHidden?: boolean;
 }
 
 export type FieldsToAddInOptions = Record<string, string[]>;
@@ -81,6 +91,7 @@ export interface FormFieldWithCustomOptions extends FormFieldBase {
   customAddOptionsGroups?: string[];
   addCustomOptionForm: Record<string, FormConfig>;
   primaryFieldValues: Record<string, string[]>;
+  combinePrimaryFields?: Boolean;
   apiConfig?: SelectApiData;
   fieldsToAddInOptions?: FieldsToAddInOptions;
 }
@@ -89,6 +100,7 @@ export interface FormFieldWithoutCustomOptions extends FormFieldBase {
   customAddOptionsGroups?: never;
   addCustomOptionForm?:never;
   primaryFieldValues?: never;
+  combinePrimaryFields?: never;
   apiConfig?: never;
   fieldsToAddInOptions?: never;
 }
@@ -99,7 +111,11 @@ export interface FormGroup {
   id: string;
   title: string;
   accordianOpenTitle?: string;
-  type: 'accordion' | 'background' | 'default' | 'action-group'| 'card-form';
+  type: "accordion" | "background" | "default" | "action-group" | "card-form" | "single-line"
+  addMoreConfig?: {
+    buttonText: string
+    fields: string[],
+  }
   backgroundColor?: string;
   fields: string[];
   className?: string;

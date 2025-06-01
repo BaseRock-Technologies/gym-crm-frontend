@@ -4,35 +4,41 @@ import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData } from "@/types/form";
+import { useId } from "react";
 
-interface FeedbackRecordsProps {}
-
-const mockData: any[] = [];
+interface AttendanceClientRecordsProps {
+  apiConfig: SelectApiData;
+}
 
 const tableConfig: TableConfig = {
   columns: [
     { id: "sno", header: "SNO", accessorKey: "sno" },
-    { id: "date", header: "Date", accessorKey: "date" },
+    {
+      id: "biometricId",
+      header: "Biometric / Client ID",
+      accessorKey: "biometricId",
+    },
     { id: "name", header: "Name", accessorKey: "name" },
+    { id: "memberId", header: "Member ID", accessorKey: "memberId" },
     {
       id: "contactNumber",
       header: "Contact Number",
       accessorKey: "contactNumber",
     },
-    {
-      id: "feedback",
-      header: "Feedback / Suggestion",
-      accessorKey: "feedback",
-    },
-  ],
-  actions: [
-    {
-      id: "sms",
-      label: "SMS",
-      onClick: (row) => console.log("SMS", row),
-    },
+    { id: "inTime", header: "In Time", accessorKey: "inTime" },
+    { id: "outTime", header: "Out Time", accessorKey: "outTime" },
+    { id: "date", header: "Date", accessorKey: "date" },
   ],
   filters: [
+    {
+      id: "date-range",
+      label: "Pick a date",
+      type: "date-range",
+      dateRange: {
+        from: new Date(),
+        to: new Date(),
+      },
+    },
     {
       id: "search",
       label: "Search",
@@ -42,16 +48,14 @@ const tableConfig: TableConfig = {
   searchableColumns: ["name"],
 };
 
-const apiConfig: SelectApiData = {
-  apiPath: "feedback/records",
-  method: "POST",
-};
-
-const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
+const AttendanceClientRecords: React.FC<AttendanceClientRecordsProps> = ({
+  apiConfig,
+}) => {
+  const id = useId();
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Customer Feedbacks</CardTitle>
+        <CardTitle>Attendance</CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
@@ -60,4 +64,4 @@ const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
   );
 };
 
-export default FeedbackRecords;
+export default AttendanceClientRecords;

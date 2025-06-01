@@ -2,27 +2,23 @@
 
 import { DataTableWrapper } from "@/components/data-table-wrapper";
 import type { TableConfig } from "@/types/table";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData } from "@/types/form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-interface FeedbackRecordsProps {}
-
-const mockData: any[] = [];
+interface InStockRecordsProps {}
 
 const tableConfig: TableConfig = {
   columns: [
     { id: "sno", header: "SNO", accessorKey: "sno" },
-    { id: "date", header: "Date", accessorKey: "date" },
-    { id: "name", header: "Name", accessorKey: "name" },
     {
-      id: "contactNumber",
-      header: "Contact Number",
-      accessorKey: "contactNumber",
+      id: "productName",
+      header: "Product",
+      accessorKey: "productName",
     },
     {
-      id: "feedback",
-      header: "Feedback / Suggestion",
-      accessorKey: "feedback",
+      id: "itemInStock",
+      header: "Item In Stock",
+      accessorKey: "itemInStock",
     },
   ],
   actions: [
@@ -39,19 +35,22 @@ const tableConfig: TableConfig = {
       type: "search",
     },
   ],
-  searchableColumns: ["name"],
+  searchableColumns: ["productName"],
 };
 
 const apiConfig: SelectApiData = {
-  apiPath: "feedback/records",
+  apiPath: "product/records",
   method: "POST",
+  postData: {
+    category: "in-stock",
+  },
 };
 
-const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
+const InStockRecords: React.FC<InStockRecordsProps> = ({}) => {
   return (
     <Card className="w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Customer Feedbacks</CardTitle>
+        <CardTitle>Current Stock</CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper config={tableConfig} apiConfig={apiConfig} />
@@ -60,4 +59,4 @@ const FeedbackRecords: React.FC<FeedbackRecordsProps> = ({}) => {
   );
 };
 
-export default FeedbackRecords;
+export default InStockRecords;

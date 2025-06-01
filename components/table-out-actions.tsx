@@ -18,11 +18,19 @@ export function TableOutOfActions({ actions, row }: TableOutOfActionsProps) {
           switch (action.type) {
             case "link":
               return (
-                <Button key={action.id}>
+                <Button key={action.id} className="">
                   <Link
                     className={cn("gap-1 no-underline", action.customClass)}
                     key={action.id}
-                    href={action.href}
+                    href={
+                      action.getLinkFrom
+                        ? action.additionalHref
+                          ? `${action.additionalHref}/${
+                              row[action.getLinkFrom]
+                            }`
+                          : row[action.getLinkFrom]
+                        : action.href
+                    }
                   >
                     {action.icon && <action.icon />}
                     {action.label}
@@ -38,14 +46,16 @@ export function TableOutOfActions({ actions, row }: TableOutOfActionsProps) {
                     size="icon"
                     onClick={() => action.onClick(row)}
                     className={cn(
-                      "gap-1 bg-primary rounded-full p-2",
+                      `gap-1 bg-primary flex justify-center items-center ${
+                        action.showLabel ? "rounded-md" : "rounded-full"
+                      }  p-2`,
                       action.customClass
                     )}
                   >
                     <action.icon className="text-white w-4 h-4" />
                   </Button>
                 );
-              } else {
+              } else if (action.btnType === "btn") {
                 return (
                   <Button
                     key={action.id}
@@ -53,6 +63,23 @@ export function TableOutOfActions({ actions, row }: TableOutOfActionsProps) {
                     className={cn("gap-1", action.customClass)}
                   >
                     {action.label}
+                  </Button>
+                );
+              } else {
+                return (
+                  <Button
+                    key={action.id}
+                    size="icon"
+                    onClick={() => action.onClick(row)}
+                    className={cn(
+                      `w-fit gap-1 bg-primary flex justify-center items-center ${
+                        action.showLabel ? "rounded-md" : "rounded-full"
+                      }  py-2 px-3`,
+                      action.customClass
+                    )}
+                  >
+                    <action.icon className="text-white w-4 h-4" />
+                    {action.showLabel && action.label}
                   </Button>
                 );
               }

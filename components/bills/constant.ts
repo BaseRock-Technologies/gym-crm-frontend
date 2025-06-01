@@ -96,7 +96,9 @@ const formConfig: FormConfig = {
         name: "memberId",
         label: "Member ID",
         type: "number",
-        editable: false,
+        validation: {
+          min: 1,
+        }
       },
       {
         name: "invoiceDate",
@@ -121,17 +123,29 @@ const formConfig: FormConfig = {
             (item) => item.name
           )
         },
+        fieldsToAddInOptions:{
+          contactNumber: ["clientName"],
+          email: ["clientName"],
+          clientCode: ["clientName"],
+        },
         apiConfig: {
           apiPath: "client/create",
           method: "POST",
         },
+      },
+      {
+        name: "clientCode",
+        label: "clientCode",
+        type: "text",
+        placeholder: "clientCode",
+        isHidden: true,
         dependsOn: {
-          field: "contactNumber",
+          field: "clientName",
           formula: (values, options) => {
-            const clientName = options?.find(
-              (opt) => opt.value === values.contactNumber
-            )?.clientName;
-            return clientName || ''
+            const clientCode = options?.find(
+              (opt) => opt.value === values.clientName
+            )?.clientCode;
+            return clientCode|| ''
           },
         }
       },
@@ -331,7 +345,7 @@ const formConfig: FormConfig = {
         placeholder: "discount",
         validation: {
           max: 100,
-          min: 0.1,
+          min: 0,
         },
         dependsOn: {
           field: "packagePrice,discountAmount,packageName",
