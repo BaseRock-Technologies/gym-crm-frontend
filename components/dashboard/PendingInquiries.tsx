@@ -42,9 +42,14 @@ const tableConfig: TableConfig = {
       label: "Select Employee",
       type: "select",
       options: [
-        { label: "All employees", value: "all" },
-        { label: "Admin", value: "admin" },
-        { label: "Staff", value: "staff" },
+        {
+          group: "default",
+          options: [
+            { label: "All employees", value: "all" },
+            { label: "Admin", value: "admin" },
+            { label: "Staff", value: "staff" },
+          ],
+        },
       ],
     },
     {
@@ -52,12 +57,17 @@ const tableConfig: TableConfig = {
       label: "Select Type",
       type: "select",
       options: [
-        { label: "All", value: "all" },
-        { label: "Hot", value: "hot" },
-        { label: "Warm", value: "warm" },
-        { label: "Cold", value: "cold" },
-        { label: "Expected Amount", value: "expected-amount" },
-        { label: "Successfull Followup", value: "successfull-followup" },
+        {
+          group: "default",
+          options: [
+            { label: "All", value: "all" },
+            { label: "Hot", value: "hot" },
+            { label: "Warm", value: "warm" },
+            { label: "Cold", value: "cold" },
+            { label: "Expected Amount", value: "expected-amount" },
+            { label: "Successfull Followup", value: "successfull-followup" },
+          ],
+        },
       ],
     },
     {

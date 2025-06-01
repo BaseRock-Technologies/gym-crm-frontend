@@ -39,10 +39,15 @@ const tableConfig: TableConfig = {
       label: "Select Client",
       type: "select",
       options: [
-        { label: "All Clients", value: "all" },
-        { label: "Gym Membership", value: "gym-membership" },
-        { label: "Personal Training", value: "personal-training" },
-        { label: "Group Classes", value: "group-classes" },
+        {
+          group: "default",
+          options: [
+            { label: "All Clients", value: "all" },
+            { label: "Gym Membership", value: "gym-membership" },
+            { label: "Personal Training", value: "personal-training" },
+            { label: "Group Classes", value: "group-classes" },
+          ],
+        },
       ],
     },
     {

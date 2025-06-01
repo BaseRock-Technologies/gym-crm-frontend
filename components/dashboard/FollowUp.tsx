@@ -46,9 +46,14 @@ const tableConfig: TableConfig = {
       label: "Select Employee",
       type: "select",
       options: [
-        { label: "All employees", value: "all" },
-        { label: "Admin", value: "admin" },
-        { label: "Staff", value: "staff" },
+        {
+          group: "default",
+          options: [
+            { label: "All employees", value: "all" },
+            { label: "Admin", value: "admin" },
+            { label: "Staff", value: "staff" },
+          ],
+        },
       ],
     },
     {
@@ -56,9 +61,14 @@ const tableConfig: TableConfig = {
       label: "Select Type",
       type: "select",
       options: [
-        { label: "All types", value: "all" },
-        { label: "Regular", value: "regular" },
-        { label: "Premium", value: "premium" },
+        {
+          group: "default",
+          options: [
+            { label: "All types", value: "all" },
+            { label: "Regular", value: "regular" },
+            { label: "Premium", value: "premium" },
+          ],
+        },
       ],
     },
     {
