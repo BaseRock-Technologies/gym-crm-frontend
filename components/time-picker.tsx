@@ -28,7 +28,7 @@ export function TimePicker({ value, onChange, error }: TimePickerProps) {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover modal={true} open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className="relative">
           <Input
@@ -40,7 +40,7 @@ export function TimePicker({ value, onChange, error }: TimePickerProps) {
           <Clock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start">
+      <PopoverContent className="p-0 z-[9999]" align="start">
         <div className="flex flex-col">
           <div className="flex justify-center p-2 border-b">
             <Button

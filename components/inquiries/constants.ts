@@ -192,11 +192,11 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         type: "textarea",
         required: true,
       },
-      {
-        name: "sendTextEmail",
-        label: "Send Text & Email",
-        type: "checkbox",
-        labelPos: "left",
-      },
+      // {
+      //   name: "sendTextEmail",
+      //   label: "Send Text & Email",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
     ],
   };

@@ -33,9 +33,9 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
     ],
     actions: [
       {
-        id: "sms",
-        label: "SMS",
-        onClick: (row) => console.log("SMS", row),
+        id: "delete",
+        label: "Delete",
+        onClick: (row) => console.log("Delete", row),
       },
     ],
     filters: [
@@ -90,20 +90,20 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
     searchableColumns: ["name", "contactNumber"],
 
     bulkActions: [
-      {
-        id: "SMS",
-        label: "Bulk SMS",
-        icon: Send,
-        btnVariant: "default",
-        onClick: (value) => console.log("SMS", value),
-      },
-      {
-        id: "whatsapp",
-        label: "Bulk Whatsapp",
-        icon: Send,
-        btnVariant: "default",
-        onClick: (value) => console.log("Whatsapp", value),
-      },
+      // {
+      //   id: "SMS",
+      //   label: "Bulk SMS",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("SMS", value),
+      // },
+      // {
+      //   id: "whatsapp",
+      //   label: "Bulk Whatsapp",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("Whatsapp", value),
+      // },
       {
         id: "transfer-inquiry",
         label: "Transfer Inquiry",

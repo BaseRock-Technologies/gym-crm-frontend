@@ -40,9 +40,7 @@ export default function GymMembershipBill() {
             paymentMethod,
             trainersDetails,
           } = res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
+          const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             memberId: billId.toString(),
             clientRepresentative: user?.userName || "",

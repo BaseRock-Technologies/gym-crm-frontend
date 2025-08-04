@@ -129,7 +129,7 @@ export interface AddtionalFormFieldsConfigGroup {
 }
 export interface FormConfig {
   id: string;
-  title: string;
+  title?: string;
   groups?: FormGroup[];
   fields: FormField[];
 }

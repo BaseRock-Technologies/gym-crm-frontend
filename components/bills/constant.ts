@@ -568,18 +568,18 @@ const formConfig: FormConfig = {
           method: "POST",
         },
       },
-      {
-        name: "sendTextAndEmail",
-        label: "Send Text & Email",
-        type: "checkbox",
-        labelPos: "left",
-      },
-      {
-        name: "sendWhatsapp",
-        label: "Send WhatsApp",
-        type: "checkbox",
-        labelPos: "left",
-      },
+      // {
+      //   name: "sendTextAndEmail",
+      //   label: "Send Text & Email",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
+      // {
+      //   name: "sendWhatsapp",
+      //   label: "Send WhatsApp",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
     ],
   };
 

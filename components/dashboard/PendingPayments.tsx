@@ -66,13 +66,13 @@ const tableConfig: TableConfig = {
     },
   ],
   bulkActions: [
-    {
-      id: "SMS",
-      label: "Bulk SMS",
-      icon: Send,
-      btnVariant: "default",
-      onClick: (value) => console.log("SMS", value),
-    },
+    // {
+    //   id: "SMS",
+    //   label: "Bulk SMS",
+    //   icon: Send,
+    //   btnVariant: "default",
+    //   onClick: (value) => console.log("SMS", value),
+    // },
   ],
   searchableColumns: ["name", "number"],
 };

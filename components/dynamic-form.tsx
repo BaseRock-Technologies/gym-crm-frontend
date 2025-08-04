@@ -1424,9 +1424,11 @@ export function DynamicForm({
         ref={formCardRef}
         className="relative w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none"
       >
-        <CardHeader className="relative bg-primary text-white shadow-sm">
-          <CardTitle>{config.title}</CardTitle>
-        </CardHeader>
+        {config.title && (
+          <CardHeader className="relative bg-primary text-white shadow-sm">
+            <CardTitle>{config.title}</CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="relative p-0 w-full h-full">
           {(initialData === null || isRedirecting) && (
             <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">

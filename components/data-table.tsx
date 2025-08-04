@@ -14,6 +14,7 @@ import { TableActions } from "./table-actions";
 import type { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
 import { TableOutOfActions } from "./table-out-actions";
+import { formatTimestamp } from "@/utils/date-utils";
 
 interface DataTableProps {
   config: TableConfig;
@@ -65,8 +66,6 @@ export function DataTable({
         break;
       case "email":
         console.log("email");
-      case "follow-up":
-        console.log("follow-up");
       case "whatsapp":
         console.log("whatsapp");
         break;
@@ -96,6 +95,7 @@ export function DataTable({
             page: 1,
           });
         }}
+        components={config.components || []}
         onBulkAction={handleBulkAction}
         searchableColumns={config.searchableColumns}
         pageSize={tableState.pageSize}
@@ -108,16 +108,18 @@ export function DataTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead
-                className="w-[50px] border-r border-black/70"
-                key="checkbox-header"
-              >
-                <Checkbox
-                  onCheckedChange={(checked: boolean) =>
-                    handleSelectAll(checked)
-                  }
-                />
-              </TableHead>
+              {config.showSelector && (
+                <TableHead
+                  className="w-[50px] border-r border-black/70"
+                  key="checkbox-header"
+                >
+                  <Checkbox
+                    onCheckedChange={(checked: boolean) =>
+                      handleSelectAll(checked)
+                    }
+                  />
+                </TableHead>
+              )}
               {config.columns.map((column, index) => (
                 <TableHead
                   className={`truncate ${
@@ -152,15 +154,17 @@ export function DataTable({
                         index % 2 === 1 ? "bg-gray-50" : ""
                       }`}
                     >
-                      <TableCell
-                        className="border-r border-black/70"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          checked={selected[row.id] || false}
-                          onCheckedChange={() => handleSelectRow(row.id)}
-                        />
-                      </TableCell>
+                      {config.showSelector && (
+                        <TableCell
+                          className="border-r border-black/70"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Checkbox
+                            checked={selected[row.id] || false}
+                            onCheckedChange={() => handleSelectRow(row.id)}
+                          />
+                        </TableCell>
+                      )}
                       {config.columns.map((column, index) => (
                         <TableCell
                           key={`column-${index}`}
@@ -180,6 +184,8 @@ export function DataTable({
                           >
                             {column.cell
                               ? column.cell(row)
+                              : column.parseTimeToStr
+                              ? formatTimestamp(row[column.accessorKey])
                               : row[column.accessorKey] || "-"}
                           </div>
                         </TableCell>

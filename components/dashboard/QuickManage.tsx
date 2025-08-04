@@ -25,6 +25,7 @@ import CalendarInput, {
 } from "@/components/common/CalendarInput";
 import { QuickNavCardWithTrigger } from "./QuickNavCardWithTrigger";
 import CreateClient from "./QuickNavCardComponents/CreateClient";
+import CreateFollowup from "./QuickNavCardComponents/CreateFollowup";
 
 const QuickManage = () => {
   const calendarFromRef = useRef<CalendarInputRef>(null);
@@ -171,12 +172,13 @@ const QuickManage = () => {
             bgColor="bg-purple-100"
             dialogContent={<CreateClient />}
           />
-          <QuickNavCard
+          <QuickNavCardWithTrigger
             title="Create Client Follow-up"
             icon={Users}
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
-            linkTo="/dashboard"
+            contentClassName="p-0"
+            dialogContent={<CreateFollowup />}
           />
           <QuickNavCard
             title="Create POS Bill"
@@ -206,13 +208,13 @@ const QuickManage = () => {
             bgColor="bg-emerald-100"
             linkTo="/dashboard"
           />
-          <QuickNavCard
+          {/* <QuickNavCard
             title="Send bulk SMS"
             icon={Users}
             iconColor="text-blue-500"
             bgColor="bg-blue-100"
             linkTo="/dashboard"
-          />
+          /> */}
         </div>
       </div>
     </div>

@@ -20,6 +20,7 @@ interface TableFiltersProps {
   searchableColumns?: string[];
   pageSize: number;
   onPageSizeChange: (value: number) => void;
+  components: React.JSX.Element[];
 }
 
 export function TableFilters({
@@ -30,6 +31,7 @@ export function TableFilters({
   searchableColumns = [],
   pageSize,
   onPageSizeChange,
+  components,
 }: TableFiltersProps) {
   const hasSearchFilter = filters.find((filter) => filter.type === "search");
   return (
@@ -99,6 +101,7 @@ export function TableFilters({
               return null;
           }
         })}
+        {components.map((component) => component)}
       </div>
       <div className="relative flex flex-wrap justify-between items-center gap-4 max-[440px]:w-full">
         {hasSearchFilter && (

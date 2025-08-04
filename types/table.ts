@@ -1,6 +1,37 @@
 import { LucideIcon } from "lucide-react"
 import { GroupedSelectOption } from "./form"
 
+export interface ColumnDef {
+  id: string
+  header: string
+  accessorKey: string
+  enableSorting?: boolean
+  cell?: (props: any) => JSX.Element
+  parseTimeToStr?: boolean
+}
+
+export interface ActionFieldsConfig {
+  id: string
+  label: string
+  icon?: LucideIcon
+  alertTrigger?: boolean
+  onClick: (row: any) => void
+}
+export interface ActionWithAlert extends ActionFieldsConfig {
+  alertTrigger: true;
+  alertTitle: string;
+  alertDescription: string;
+  alertAction: string;
+}
+export interface ActionWithoutAlert extends ActionFieldsConfig {
+  alertTrigger?: false;
+  alertTitle?: never;
+  alertDescription?: never;
+  alertAction?: never;
+}
+
+export type ActionConfig = ActionWithAlert | ActionWithoutAlert;
+
 export interface TableConfig {
   columns: ColumnDef[]
   actions?: ActionConfig[]
@@ -8,21 +39,8 @@ export interface TableConfig {
   bulkActions?: BulkActionConfig[]
   filters?: FilterConfig[]
   searchableColumns?: string[]
-}
-
-export interface ColumnDef {
-  id: string
-  header: string
-  accessorKey: string
-  enableSorting?: boolean
-  cell?: (props: any) => JSX.Element
-}
-
-export interface ActionConfig {
-  id: string
-  label: string
-  icon?: LucideIcon
-  onClick: (row: any) => void
+  components?: React.JSX.Element[]
+  showSelector?: boolean
 }
 
 interface OutOfActionsLinkConfig {
