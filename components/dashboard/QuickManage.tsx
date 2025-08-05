@@ -162,56 +162,56 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-green-500"
             bgColor="bg-green-100"
-            linkTo="/dashboard"
+            linkTo="/customer-attendance"
           />
           <QuickNavCardWithTrigger
             title="Create Client"
             icon={Users}
             iconColor="text-purple-500"
             bgColor="bg-purple-100"
-            dialogContent={<CreateClient />}
+            linkTo="/manage-customers"
           />
           <QuickNavCard
             title="Create Client Follow-up"
             icon={Users}
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
-            linkTo="/dashboard"
+            linkTo="/manage-query"
           />
           <QuickNavCard
             title="Create POS Bill"
             icon={Users}
             iconColor="text-yellow-500"
             bgColor="bg-yellow-100"
-            linkTo="/dashboard"
+            linkTo="/pos"
           />
           <QuickNavCard
             title="Create Booking"
             icon={Users}
             iconColor="text-red-500"
             bgColor="bg-red-100"
-            linkTo="/dashboard"
+            linkTo="/gym-bill"
           />
           <QuickNavCard
             title="Add Training Plan"
             icon={Users}
             iconColor="text-orange-500"
             bgColor="bg-orange-100"
-            linkTo="/dashboard"
+            linkTo="/personal-training-bill"
           />
           <QuickNavCard
             title="Add Diet Plan"
             icon={Users}
             iconColor="text-emerald-500"
             bgColor="bg-emerald-100"
-            linkTo="/dashboard"
+            linkTo="/client-forms"
           />
           <QuickNavCard
             title="Send bulk SMS"
             icon={Users}
             iconColor="text-blue-500"
             bgColor="bg-blue-100"
-            linkTo="/dashboard"
+            linkTo="/feedback"
           />
         </div>
       </div>
