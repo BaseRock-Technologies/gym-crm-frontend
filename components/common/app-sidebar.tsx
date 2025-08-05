@@ -12,6 +12,7 @@ import {
   User2,
   UsersRound,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   Sidebar,
@@ -39,7 +40,7 @@ import {
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -101,11 +102,40 @@ const items = [
 export function AppSidebar() {
   const { loading, user, setLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check if current page is a billing submenu item and keep billing dropdown open
+  useEffect(() => {
+    if (mounted) {
+      const billingUrls = ["/gym-bill", "/personal-training-bill", "/group-class-bill", "/pos"];
+      const isOnBillingPage = billingUrls.includes(pathname);
+      
+      if (isOnBillingPage) {
+        setIsBillingOpen(true);
+      }
+      // Don't close the dropdown when navigating between billing pages
+      // Only close when explicitly navigating away from all billing pages
+    }
+  }, [mounted, pathname]);
+
+  // Helper function to check if any submenu item is active
+  const isSubmenuActive = (subMenu: any[]) => {
+    if (!mounted || !subMenu) return false;
+    return subMenu.some((subItem: any) => pathname === subItem.url);
+  };
+  
   function logoutUser() {
     setLoading(true);
     Cookies.remove("user");
     router.push("/signin");
   }
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -128,10 +158,21 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) =>
                 item.subMenu ? (
-                  <Collapsible className="group/collapsible" key={item.title}>
+                  <Collapsible 
+                    className="group/collapsible" 
+                    key={item.title}
+                    open={item.title === "Billing" ? isBillingOpen : undefined}
+                    onOpenChange={item.title === "Billing" ? setIsBillingOpen : undefined}
+                  >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
+                        <SidebarMenuButton 
+                          className={
+                            isSubmenuActive(item.subMenu) || (item.title === "Billing" && isBillingOpen)
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                              : ""
+                          }
+                        >
                           <item.icon className="text-primary" />
                           <span>{item.title}</span>
                           <ChevronDown className="ml-auto mr-2 transition-transform group-data-[state=open]/collapsible:rotate-180 text-primary" />
@@ -141,7 +182,16 @@ export function AppSidebar() {
                         <SidebarMenuSub>
                           {item.subMenu.map((subItem) => (
                             <SidebarMenuSubItem key={subItem.title}>
-                              <a href={subItem.url || "#"}>{subItem.title}</a>
+                              <a 
+                                href={subItem.url || "#"}
+                                className={`block w-full px-3 rounded-md transition-colors ${
+                                  mounted && pathname === subItem.url 
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                                    : "hover:bg-sidebar-accent/50"
+                                }`}
+                              >
+                                {subItem.title}
+                              </a>
                             </SidebarMenuSubItem>
                           ))}
                         </SidebarMenuSub>
@@ -151,7 +201,10 @@ export function AppSidebar() {
                 ) : (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <a 
+                        href={item.url}
+                        className={mounted && pathname === item.url && !isBillingOpen ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""}
+                      >
                         <item.icon className="text-primary" />
                         <span>{item.title}</span>
                       </a>
