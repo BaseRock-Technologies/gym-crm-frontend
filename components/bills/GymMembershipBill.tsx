@@ -113,7 +113,7 @@ export default function GymMembershipBill() {
         showToast("error", "Failed to load data");
       }
     };
-    formConfig.title = "Create new bill for Gym Membership";
+    formConfig.title = "Create New Bill for Gym Membership";
     fetchInitialData();
   }, [user]);
 
