@@ -162,6 +162,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           apiPath: "others/client-source/create",
           method: "POST",
         },
+        fieldsToAddInOptions: {
+          "default": ["clientSource", "_id"]
+        },
       },
       {
         name: "inquiryFor",
