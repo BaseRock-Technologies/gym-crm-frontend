@@ -76,18 +76,18 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         required: true,
         placeholder: "Select Follow Up",
       },
-      {
-        name: "followUpTime",
-        label: "Schedule FollowUp Time",
-        type: "time",
-        placeholder: "Enter Time",
-      },
-      {
-        name: "assessmentDate",
-        label: "Assessment Date",
-        type: "date",
-        placeholder: "Select Date",
-      },
+      // {
+      //   name: "followUpTime",
+      //   label: "Schedule FollowUp Time",
+      //   type: "time",
+      //   placeholder: "Enter Time",
+      // },
+      // {
+      //   name: "assessmentDate",
+      //   label: "Assessment Date",
+      //   type: "date",
+      //   placeholder: "Select Date",
+      // },
       {
         name: "status",
         label: "Status",
@@ -192,11 +192,11 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         type: "textarea",
         required: true,
       },
-      {
-        name: "sendTextEmail",
-        label: "Send Text & Email",
-        type: "checkbox",
-        labelPos: "left",
-      },
+      // {
+      //   name: "sendTextEmail",
+      //   label: "Send Text & Email",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
     ],
   };
