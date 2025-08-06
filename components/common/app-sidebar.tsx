@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import {
   Book,
   ChevronDown,
@@ -113,9 +114,9 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard">
-                <div className="flex aspect-square size-8 p-2 items-center justify-center rounded-lg bg-primary">
-                  <Dumbbell className="text-white" />
-                </div>
+                <div className="flex items-center justify-center py-2">
+              <Image src="/logo.svg" alt="Logo" width={40} height={40} />
+              </div>
                 <span>Fitpass</span>
               </a>
             </SidebarMenuButton>
