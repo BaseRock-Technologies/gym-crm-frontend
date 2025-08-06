@@ -76,7 +76,7 @@ export default function InquiryHome() {
         showToast("error", "Failed to load data");
       }
     };
-    InquiryFormConfig.title = "Create new bill for Gym Membership";
+    InquiryFormConfig.title = "Create New Inquiry";
     fetchInitialData();
   }, [user]);
 

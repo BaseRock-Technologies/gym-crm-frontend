@@ -206,13 +206,14 @@ const QuickManage = () => {
             bgColor="bg-emerald-100"
             linkTo="/dashboard"
           />
-          <QuickNavCard
+          {/* <QuickNavCard
             title="Send bulk SMS"
             icon={Users}
             iconColor="text-blue-500"
             bgColor="bg-blue-100"
             linkTo="/dashboard"
-          />
+            
+          /> */}
         </div>
       </div>
     </div>
