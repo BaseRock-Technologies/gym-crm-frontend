@@ -210,25 +210,25 @@ const formConfig: FormConfig = {
           },
         ],
         type: "select",
-        placeholder: "Select gender",
+        placeholder: "Select Gender",
       },
       {
         name: "birthday",
         label: "Birthday",
         type: "date",
-        placeholder: "birthday date",
+        placeholder: "Birthday Date",
       },
       {
         name: "anniversary",
         label: "Anniversary",
         type: "date",
-        placeholder: "anniversary date",
+        placeholder: "Anniversary Date",
       },
       {
         name: "profession",
         label: "Profession",
         type: "text",
-        placeholder: "profession",
+        placeholder: "Profession",
       },
       {
         name: "taxId",
@@ -240,17 +240,17 @@ const formConfig: FormConfig = {
         name: "workoutHourmorning",
         label: "Workout Hours",
         type: "time-detailed",
-        placeholder: "choose workout hour",
+        placeholder: "Choose Workout Hour",
       },
       {
         name: "workoutHourevening",
         label: "",
         type: "time-detailed",
-        placeholder: "choose workout hour",
+        placeholder: "Choose Workout Hour",
       },
       {
         name: "address",
-        placeholder: "address",
+        placeholder: "Address",
         label: "Area Address",
         type: "textarea",
         validation: {
@@ -275,7 +275,7 @@ const formConfig: FormConfig = {
         name: "joiningDate",
         label: "Joining Date",
         type: "date",
-        placeholder: "joining date",
+        placeholder: "Joining Date",
       },
       {
         name: "packageName",
@@ -306,7 +306,7 @@ const formConfig: FormConfig = {
         name: "endDate",
         label: "End Date",
         type: "date",
-        placeholder: "end date",
+        placeholder: "End Date",
         dependsOn: {
           field: "packageName,joiningDate",
           formula: (values, options) => {
@@ -329,7 +329,7 @@ const formConfig: FormConfig = {
         name: "packagePrice",
         label: "Price",
         type: "decimal",
-        placeholder: "price",
+        placeholder: "Price",
         editable: false,
         dependsOn: {
           field: "packageName",
@@ -342,7 +342,7 @@ const formConfig: FormConfig = {
         name: "discount",
         label: "Discount(%)",
         type: "decimal",
-        placeholder: "discount",
+        placeholder: "Discount",
         validation: {
           max: 100,
           min: 0,
@@ -376,7 +376,7 @@ const formConfig: FormConfig = {
         name: "discountAmount",
         label: "Discount",
         type: "decimal",
-        placeholder: "discount amount",
+        placeholder: "Discount Amount",
         editable: false,
         dependsOn: {
           field: "packagePrice,discount,packageName",
@@ -400,14 +400,14 @@ const formConfig: FormConfig = {
         name: "admissionCharges",
         label: "Admission Charges",
         type: "decimal",
-        placeholder: "admission",
+        placeholder: "Admission",
       },
       {
         name: "taxName",
         label: "Tax",
         options: [],
         type: "select",
-        placeholder: "Select tax",
+        placeholder: "Select Tax",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["default"],
         addCustomOptionForm: {
@@ -426,7 +426,7 @@ const formConfig: FormConfig = {
         label: "Amount Payable",
         type: "decimal",
         editable: false,
-        placeholder: "payable",
+        placeholder: "Payable",
         dependsOn: {
           field:
             "packageName, packagePrice,discountAmount,discount,admissionCharges,taxName",
@@ -451,14 +451,14 @@ const formConfig: FormConfig = {
         name: "amountPaid",
         label: "Amount Paid",
         type: "decimal",
-        placeholder: "paid",
+        placeholder: "Paid",
       },
       {
         name: "paymentMode",
         label: "Payment Mode",
         options: [],
         type: "select",
-        placeholder: "Select method",
+        placeholder: "Select Method",
         conditionalFields: {
           Cheque: chequeConditionalFields,
         },
@@ -479,7 +479,7 @@ const formConfig: FormConfig = {
         name: "balanceAmount",
         label: "Balance",
         type: "decimal",
-        placeholder: "paid",
+        placeholder: "Paid",
         editable: false,
         dependsOn: {
           field: "amountPayable, amountPaid",
@@ -503,7 +503,7 @@ const formConfig: FormConfig = {
         name: "amount",
         label: "Amount",
         type: "decimal",
-        placeholder: "amount",
+        placeholder: "Amount",
         editable: false,
         dependsOn: {
           field: "amountPayable, amountPaid",
@@ -547,7 +547,7 @@ const formConfig: FormConfig = {
         name: "clientRepresentative",
         label: "Client Representative",
         type: "text",
-        placeholder: "rep",
+        placeholder: "Rep",
         editable: false,
       },
       {

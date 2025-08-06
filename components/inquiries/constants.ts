@@ -3,7 +3,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
 
   export const InquiryFormConfig: FormConfig = {
     id: "inquiry",
-    title: "Create new Inquiry",
+    title: "Create New Inquiry",
     fields: [
       {
         name: "firstName",
@@ -24,7 +24,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "contactNumber",
-        label: "Contact number",
+        label: "Contact Number",
         type: "phone",
         required: true,
         placeholder: "Contact Number",
@@ -65,7 +65,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "areaAddress",
-        placeholder: "address",
+        placeholder: "Address",
         label: "Area Address",
         type: "text",
       },
