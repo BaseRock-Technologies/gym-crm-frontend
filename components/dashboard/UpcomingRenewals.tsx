@@ -1,84 +1,106 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { DataTableWrapper } from "@/components/data-table-wrapper";
+import { SelectApiData } from "@/types/form";
 import type { TableConfig } from "@/types/table";
-import { addDays } from "date-fns";
-import { Plus, Send } from "lucide-react";
-
-// Example data and table configuration (unchanged)
-// const mockData = Array.from({ length: 50 }, (_, i) => ({
-//   id: i + 1,
-//   name: `Client ${i + 1}`,
-//   type: "Regular",
-//   contact: `+1234567${i.toString().padStart(4, "0")}`,
-//   followupDate: "2024-12-08",
-//   representative: "Admin",
-//   status: "Active",
-// }));
-const mockData: any[] = [];
-
-const tableConfig: TableConfig = {
-  columns: [
-    { id: "date", header: "Date", accessorKey: "date" },
-    { id: "name", header: "Name", accessorKey: "name" },
-    { id: "number", header: "Number", accessorKey: "number" },
-    { id: "photo", header: "Photo", accessorKey: "photo" },
-    { id: "for", header: "For", accessorKey: "for" },
-    { id: "representative", header: "Rep.", accessorKey: "representative" },
-  ],
-  actions: [
-    {
-      id: "sms",
-      label: "SMS",
-      onClick: (row) => console.log("SMS", row),
-    },
-  ],
-  filters: [
-    {
-      id: "clients",
-      label: "Select Client",
-      type: "select",
-      options: [
-        {
-          group: "default",
-          options: [
-            { label: "All Clients", value: "all" },
-            { label: "Gym Membership", value: "gym-membership" },
-            { label: "Personal Training", value: "personal-training" },
-            { label: "Group Classes", value: "group-classes" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "date-range",
-      label: "Pick a date",
-      type: "date-range",
-      dateRange: {
-        from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        to: new Date(),
-      },
-    },
-    {
-      id: "search",
-      label: "Search",
-      type: "search",
-    },
-  ],
-  bulkActions: [
-    // {
-    //   id: "SMS",
-    //   label: "Bulk SMS",
-    //   icon: Send,
-    //   btnVariant: "default",
-    //   onClick: (value) => console.log("SMS", value),
-    // },
-  ],
-  searchableColumns: ["name", "number"],
-};
+import { Card, CardTitle, CardContent, CardHeader } from "../ui/card";
+import { Eye, Edit } from "lucide-react";
+import { ImageCell } from "../image-cell";
 
 export default function UpcomingRenewals() {
-  // return <DataTableWrapper config={tableConfig} initialData={mockData} />;
-  return <div>To be implemented</div>;
+  const tableConfig: TableConfig = {
+    columns: [
+      {
+        id: "endDate",
+        header: "Date",
+        accessorKey: "endDate",
+        parseDateToStr: true,
+      },
+      { id: "clientName", header: "Name", accessorKey: "clientName" },
+      { id: "contactNumber", header: "Number", accessorKey: "contactNumber" },
+      {
+        id: "clientPicture",
+        header: "Photo",
+        cell: (props) => <ImageCell {...props} />,
+        accessorKey: "clientPicture",
+      },
+      { id: "packageName", header: "For", accessorKey: "packageName" },
+      {
+        id: "clientRepresentative",
+        header: "Rep.",
+        accessorKey: "clientRepresentative",
+      },
+    ],
+    actions: [
+      {
+        id: "view",
+        label: "View/Update",
+        onClick: (row) => {
+          const billType = row.billType;
+          const billId = row.billId;
+
+          if (billType === "gym-membership") {
+            window.open(`/gym-bill/${billId}`, "_blank");
+          } else if (billType === "personal-training") {
+            window.open(`personal-training-bill/${billId}`, "_blank");
+          } else if (billType === "group-class") {
+            window.open(`group-class-bill/${billId}`, "_blank");
+          }
+        },
+      },
+    ],
+    filters: [
+      {
+        id: "billType",
+        label: "Select Bill Type",
+        type: "select",
+        options: [
+          {
+            group: "default",
+            options: [
+              { label: "All Bills", value: "all" },
+              { label: "Gym Membership", value: "gym-membership" },
+              { label: "Personal Training", value: "personal-training" },
+              { label: "Group Classes", value: "group-class" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "date-range",
+        label: "Pick a date",
+        type: "date-range",
+        dateRange: {
+          from: new Date(),
+          to: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0), // End of next month
+        },
+      },
+      {
+        id: "search",
+        label: "Search",
+        type: "search",
+      },
+    ],
+    bulkActions: [],
+    searchableColumns: ["clientName", "contactNumber", "packageName"],
+  };
+
+  const apiConfig: SelectApiData = {
+    apiPath: "bills/records",
+    method: "POST",
+    postData: {
+      type: "upcoming-renewals",
+    },
+  };
+
+  return (
+    <Card className="w-full h-auto mx-auto border-none rounded-md overflow-hidden shadow-none">
+      <CardHeader className="bg-primary text-white mb-5 shadow-sm">
+        <CardTitle>Upcoming Renewals</CardTitle>
+      </CardHeader>
+      <CardContent className="container">
+        <DataTableWrapper apiConfig={apiConfig} config={tableConfig} />
+      </CardContent>
+    </Card>
+  );
 }

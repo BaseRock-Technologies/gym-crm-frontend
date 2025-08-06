@@ -37,10 +37,10 @@ export function TableFilters({
   return (
     <div
       className={cn(
-        "relative w-full flex gap-4",
-        filters.length > 2
-          ? "flex-col"
-          : "min-[440px]:flex-row flex-col min-[440px]:justify-between justify-start min-[440px]:items-center items-start"
+        "relative w-full flex gap-4 flex-col"
+        // filters.length > 2
+        //   ? "flex-col"
+        //   : "min-[440px]:flex-row flex-col min-[440px]:justify-between justify-start min-[440px]:items-center items-start"
       )}
     >
       <div className="relative w-full flex flex-wrap justify-start items-center gap-4 ">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
@@ -116,9 +116,18 @@ const CreateFollowup = () => {
     method: "POST",
   };
 
+  const hasFetchedRef = useRef(false);
+
   React.useEffect(() => {
+    // Prevent multiple API calls
+    if (hasFetchedRef.current) {
+      return;
+    }
+
     const fetchInitialData = async () => {
       try {
+        hasFetchedRef.current = true;
+
         const res: StatusResponse = await post(
           {},
           "others/clients",
@@ -150,11 +159,13 @@ const CreateFollowup = () => {
       } catch (error) {
         console.error("Error fetching initial data in Create Followup:", error);
         showToast("error", "Failed to load data");
+        // Reset the ref on error so we can retry
+        hasFetchedRef.current = false;
       }
     };
 
     fetchInitialData();
-  }, [user]);
+  }, [user?.userName]);
 
   return (
     <DynamicForm

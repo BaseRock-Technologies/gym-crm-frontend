@@ -73,3 +73,20 @@ export const formatTimestamp = (timestamp: number): string => {
   
   return date.toLocaleDateString('en-US', options).replace(',', '');
 };
+
+
+export const formatTime = (timestamp: number): string => {
+  if (!timestamp) {
+      return "-";
+  }
+  const date = new Date(timestamp * 1000);
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  const updatedHour = hours ? String(hours).padStart(2, '0') : '12';
+
+  return `${updatedHour}:${minutes}:${seconds} ${ampm}`;
+};

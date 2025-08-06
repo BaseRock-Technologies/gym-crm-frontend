@@ -37,8 +37,7 @@ export default function FollowUp() {
   const deleteFollowup = async (row: any) => {
     try {
       if (!row || !row._id) {
-        showToast("error", "Please select a followup to delete");
-        return;
+        throw new Error();
       }
 
       const response = await post(
@@ -50,7 +49,7 @@ export default function FollowUp() {
       if (response.status === "success") {
         showToast("success", "Followup deleted successfully");
       } else {
-        showToast("success", "Failed to delete followup");
+        showToast("error", "Failed to delete followup");
       }
     } catch {
       showToast("error", "Failed to delete followup");
@@ -67,10 +66,15 @@ export default function FollowUp() {
         id: "followupDate",
         header: "Followup date",
         accessorKey: "followupDate",
-        parseTimeToStr: true,
+        parseDateToStr: true,
       },
       { id: "createdBy", header: "Created By", accessorKey: "createdBy" },
-      { id: "status", header: "Status", accessorKey: "status" },
+      {
+        id: "status",
+        header: "Status",
+        accessorKey: "status",
+        startCase: true,
+      },
     ],
     actions: [
       {

@@ -7,7 +7,9 @@ export interface ColumnDef {
   accessorKey: string
   enableSorting?: boolean
   cell?: (props: any) => JSX.Element
+  parseDateToStr?: boolean
   parseTimeToStr?: boolean
+  startCase?: boolean
 }
 
 export interface ActionFieldsConfig {

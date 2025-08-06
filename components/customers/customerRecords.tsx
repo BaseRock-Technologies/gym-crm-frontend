@@ -22,6 +22,32 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
   const [isFreezeModalOpen, setIsFreezeModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const markAttendance = async (row: any) => {
+    try {
+      if (!row || !row._id) {
+        throw new Error();
+      }
+      const response = await post(
+        {
+          biometricId: row.memberId,
+          name: row.clientName,
+          memberId: row.memberId,
+          contactNumber: row.contactNumber,
+        },
+        `attendance/client/create`,
+        "Failed to mark attendance"
+      );
+      const { status, message } = response;
+      if (status === "success") {
+        showToast("success", message);
+      } else {
+        showToast("error", message);
+      }
+    } catch {
+      showToast("error", "Failed to mark attendance");
+    }
+  };
+
   const tableConfigRef = useRef<TableConfig>({
     columns: [
       {
@@ -42,9 +68,19 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         accessorKey: "contactNumber",
       },
       { id: "gender", header: "Gender", accessorKey: "gender" },
-      { id: "joiningDate", header: "Registration", accessorKey: "joiningDate" },
+      {
+        id: "joiningDate",
+        header: "Registration",
+        accessorKey: "joiningDate",
+        parseDateToStr: true,
+      },
       { id: "packageName", header: "Package", accessorKey: "packageName" },
-      { id: "endDate", header: "Expiration", accessorKey: "endDate" },
+      {
+        id: "endDate",
+        header: "Expiration",
+        accessorKey: "endDate",
+        parseDateToStr: true,
+      },
     ],
     actions: [
       {
@@ -70,31 +106,31 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         label: "Transfer Membership(s)",
         onClick: (row) => console.log("Transfer Membership(s)", row),
       },
-      {
-        id: "sendBill",
-        label: "SMS / Whatsapp / E-mail",
-        onClick: (row) => console.log("SMS / Whatsapp / E-mail", row),
-      },
+      // {
+      //   id: "sendBill",
+      //   label: "SMS / Whatsapp / E-mail",
+      //   onClick: (row) => console.log("SMS / Whatsapp / E-mail", row),
+      // },
       {
         id: "addFollowup",
         label: "Add Followup",
         onClick: (row) => console.log("Add Followup", row),
       },
-      {
-        id: "sendQR",
-        label: "Send QR Url via SMS & Email",
-        onClick: (row) => console.log("Send QR Url via SMS & Email", row),
-      },
+      // {
+      //   id: "sendQR",
+      //   label: "Send QR Url via SMS & Email",
+      //   onClick: (row) => console.log("Send QR Url via SMS & Email", row),
+      // },
       {
         id: "markAttendance",
-        label: "Mark attendance-in",
-        onClick: (row) => console.log("Mark attendance-in", row),
+        label: "Mark attendance",
+        onClick: (row) => markAttendance(row),
       },
-      {
-        id: "registerRfid",
-        label: "Register RFID no",
-        onClick: (row) => console.log("Register RFID no", row),
-      },
+      // {
+      //   id: "registerRfid",
+      //   label: "Register RFID no",
+      //   onClick: (row) => console.log("Register RFID no", row),
+      // },
       {
         id: "deleteClient",
         label: "Delete Client",
@@ -229,9 +265,10 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         showToast("error", "Failed to load data");
       }
     };
+
     InquiryFormConfig.title = "Create new bill for Gym Membership";
     fetchInitialData();
-  }, [user]);
+  }, []);
 
   const apiConfig: SelectApiData = {
     apiPath: "client/records",

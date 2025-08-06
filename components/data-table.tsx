@@ -14,7 +14,8 @@ import { TableActions } from "./table-actions";
 import type { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
 import { TableOutOfActions } from "./table-out-actions";
-import { formatTimestamp } from "@/utils/date-utils";
+import { formatTimestamp, formatTime } from "@/utils/date-utils";
+import { startCase } from "lodash";
 
 interface DataTableProps {
   config: TableConfig;
@@ -82,6 +83,36 @@ export function DataTable({
       filters: {},
       page: 1,
     });
+  };
+
+  const renderCellContent = (column: any, row: any) => {
+    const cellValue = row[column.accessorKey];
+
+    // If custom cell renderer is provided, use it
+    if (column.cell) {
+      return column.cell(row);
+    }
+
+    // If no value, return default
+    if (!cellValue) {
+      return "-";
+    }
+
+    // Apply formatting based on column configuration
+    if (column.parseDateToStr) {
+      return formatTimestamp(cellValue);
+    }
+
+    if (column.startCase) {
+      return startCase(cellValue);
+    }
+
+    if (column.parseTimeToStr) {
+      return formatTime(cellValue);
+    }
+
+    // Return raw value
+    return cellValue;
   };
 
   return (
@@ -182,11 +213,7 @@ export function DataTable({
                                 : row[column.accessorKey]?.toString()
                             }
                           >
-                            {column.cell
-                              ? column.cell(row)
-                              : column.parseTimeToStr
-                              ? formatTimestamp(row[column.accessorKey])
-                              : row[column.accessorKey] || "-"}
+                            {renderCellContent(column, row)}
                           </div>
                         </TableCell>
                       ))}

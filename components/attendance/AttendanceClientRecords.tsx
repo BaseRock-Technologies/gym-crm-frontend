@@ -25,9 +25,19 @@ const tableConfig: TableConfig = {
       header: "Contact Number",
       accessorKey: "contactNumber",
     },
-    { id: "inTime", header: "In Time", accessorKey: "inTime" },
-    { id: "outTime", header: "Out Time", accessorKey: "outTime" },
-    { id: "date", header: "Date", accessorKey: "date" },
+    {
+      id: "inTime",
+      header: "In Time",
+      accessorKey: "inTime",
+      parseTimeToStr: true,
+    },
+    {
+      id: "outTime",
+      header: "Out Time",
+      accessorKey: "outTime",
+      parseTimeToStr: true,
+    },
+    { id: "date", header: "Date", accessorKey: "date", parseDateToStr: true },
   ],
   filters: [
     {

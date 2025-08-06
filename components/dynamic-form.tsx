@@ -29,6 +29,7 @@ import {
   RedirectRules,
   SelectApiData,
   SelectOption,
+  SelectSubApiData,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
@@ -70,6 +71,7 @@ interface DynamicFormProps {
   isAdminOnly?: boolean;
   adminEditRules?: AdminOnlyEdit;
   canSaveTheForm?: boolean;
+  subApiData?: SelectSubApiData;
 }
 
 export function DynamicForm({
@@ -85,6 +87,7 @@ export function DynamicForm({
   isAdminOnly = false,
   canSaveTheForm = true,
   adminEditRules,
+  subApiData,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -728,13 +731,16 @@ export function DynamicForm({
 
   const sendApiRequest = async (
     data: SelectApiData,
-    postData?: { [key: string]: any }
+    postData?: { [key: string]: any },
+    makeToast: boolean = true
   ) => {
     const handleResponse = (res: StatusResponse) => {
       const { status, message } = res;
-      showToast(status, message, {
-        toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
-      });
+      if (makeToast) {
+        showToast(status, message, {
+          toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
+        });
+      }
       return status !== "error";
     };
     if (data.billType) {
@@ -775,9 +781,11 @@ export function DynamicForm({
       }
       return handleResponse(res);
     } catch (error) {
-      showToast("error", "Failed to send data", {
-        toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
-      });
+      if (makeToast) {
+        showToast("error", "Failed to send data", {
+          toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
+        });
+      }
       return false;
     }
   };
@@ -796,6 +804,33 @@ export function DynamicForm({
         router.push(redirectRules.redirectPath);
       }
     }
+  };
+
+  const constructSubApiData = (values: Record<string, any>) => {
+    if (subApiData) {
+      const constructedData: Record<string, any> = {};
+
+      subApiData.fields.forEach((fieldMapping: any) => {
+        const { fields, as } = fieldMapping;
+
+        // Extract values for the specified fields
+        const fieldValues = fields
+          .map((fieldName: string) => values[fieldName])
+          .filter(Boolean);
+
+        // If there are multiple fields, join them, otherwise use the single value
+        if (fieldValues.length > 1) {
+          constructedData[as] = fieldValues.join(" ");
+        } else if (fieldValues.length === 1) {
+          constructedData[as] = fieldValues[0];
+        }
+      });
+
+      console.log("Constructed sub API data:", constructedData);
+      return constructedData;
+    }
+
+    return {};
   };
 
   const onSubmit = async (
@@ -820,8 +855,14 @@ export function DynamicForm({
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
-        if (sentData && resetOnSubmit) {
-          resetForm(filteredValues);
+        if (sentData) {
+          if (subApiData) {
+            const subApiDataFrom = constructSubApiData(filteredValues);
+            await sendApiRequest(subApiData, subApiDataFrom, false);
+          }
+          if (resetOnSubmit) {
+            resetForm(filteredValues);
+          }
         }
       } else if (resetOnSubmit) {
         resetForm(filteredValues);

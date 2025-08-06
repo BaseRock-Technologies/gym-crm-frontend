@@ -163,7 +163,7 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-green-500"
             bgColor="bg-green-100"
-            linkTo="/dashboard"
+            linkTo="/manage-query"
           />
           <QuickNavCardWithTrigger
             title="Create Client"
@@ -185,7 +185,7 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-yellow-500"
             bgColor="bg-yellow-100"
-            linkTo="/dashboard"
+            linkTo="/pos"
           />
           <QuickNavCard
             title="Create Booking"
