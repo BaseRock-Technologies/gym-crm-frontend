@@ -29,7 +29,6 @@ import {
   RedirectRules,
   SelectApiData,
   SelectOption,
-  SelectSubApiData,
 } from "../types/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MultiSelect } from "./multi-select";
@@ -71,7 +70,6 @@ interface DynamicFormProps {
   isAdminOnly?: boolean;
   adminEditRules?: AdminOnlyEdit;
   canSaveTheForm?: boolean;
-  subApiData?: SelectSubApiData;
 }
 
 export function DynamicForm({
@@ -87,7 +85,6 @@ export function DynamicForm({
   isAdminOnly = false,
   canSaveTheForm = true,
   adminEditRules,
-  subApiData,
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -806,33 +803,6 @@ export function DynamicForm({
     }
   };
 
-  const constructSubApiData = (values: Record<string, any>) => {
-    if (subApiData) {
-      const constructedData: Record<string, any> = {};
-
-      subApiData.fields.forEach((fieldMapping: any) => {
-        const { fields, as } = fieldMapping;
-
-        // Extract values for the specified fields
-        const fieldValues = fields
-          .map((fieldName: string) => values[fieldName])
-          .filter(Boolean);
-
-        // If there are multiple fields, join them, otherwise use the single value
-        if (fieldValues.length > 1) {
-          constructedData[as] = fieldValues.join(" ");
-        } else if (fieldValues.length === 1) {
-          constructedData[as] = fieldValues[0];
-        }
-      });
-
-      console.log("Constructed sub API data:", constructedData);
-      return constructedData;
-    }
-
-    return {};
-  };
-
   const onSubmit = async (
     values: z.infer<ReturnType<typeof generateZodSchema>>
   ) => {
@@ -855,14 +825,8 @@ export function DynamicForm({
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
-        if (sentData) {
-          if (subApiData) {
-            const subApiDataFrom = constructSubApiData(filteredValues);
-            await sendApiRequest(subApiData, subApiDataFrom, false);
-          }
-          if (resetOnSubmit) {
-            resetForm(filteredValues);
-          }
+        if (sentData && resetOnSubmit) {
+          resetForm(filteredValues);
         }
       } else if (resetOnSubmit) {
         resetForm(filteredValues);

@@ -1,6 +1,6 @@
 "use client";
 import { DynamicForm } from "@/components/dynamic-form";
-import { SelectApiData, SelectSubApiData } from "@/types/form";
+import { SelectApiData } from "@/types/form";
 
 import { useState, useEffect, useRef } from "react";
 import InquiryHistory from "./inquiryHistory";
@@ -27,37 +27,6 @@ export default function InquiryHome() {
   const apiConfig: SelectApiData = {
     apiPath: "inquiry/create",
     method: "POST",
-  };
-
-  const subApiConfig: SelectSubApiData = {
-    apiPath: "followup/create",
-    method: "POST",
-    fields: [
-      {
-        fields: ["firstName", "lastName"],
-        as: "clientName",
-      },
-      {
-        fields: ["contactNumber"],
-        as: "contactNumber",
-      },
-      {
-        fields: ["followupDate"],
-        as: "followupDate",
-      },
-      {
-        fields: ["followupTime"],
-        as: "followupTime",
-      },
-      {
-        fields: ["feedback"],
-        as: "feedback",
-      },
-      {
-        fields: ["status"],
-        as: "status",
-      },
-    ],
   };
 
   const hasFetchedRef = useRef(false);
@@ -133,7 +102,6 @@ export default function InquiryHome() {
             submitBtnText="CREATE INQUIRY"
             apiData={apiConfig}
             resetOnSubmit={true}
-            subApiData={subApiConfig}
             initialData={inquiryFormInitialData}
           />
         </div>

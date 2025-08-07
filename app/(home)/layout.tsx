@@ -8,8 +8,11 @@ import { AppSidebar } from "@/components/common/app-sidebar";
 import BreadCrumbs from "@/components/common/BreadCrumbs";
 
 export const metadata: Metadata = {
-  title: "Gym Management",
-  description: "The Gym Management",
+  title: "Fitpass",
+  description: "The Fitpass",
+  icons: {
+    icon: "./logo.svg",
+  },
 };
 
 export default function RootLayout({

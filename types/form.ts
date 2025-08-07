@@ -60,14 +60,6 @@ interface FieldsForm {
   as: string
 }
 
-export interface SelectSubApiData {
-  apiPath: string, 
-  method: ApiMethod,
-  billType?: BillTypes,
-  postData?: Record<string, any>
-  fields: FieldsForm[]
-}
-
 export interface FormFieldBase {
   name: string;
   label: string;
