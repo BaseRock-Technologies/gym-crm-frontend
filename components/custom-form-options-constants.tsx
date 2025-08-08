@@ -271,16 +271,7 @@ const EmployeeCustomAddOptionForm: FormConfig = {
       id: "employmentDetails",
       title: "Employment Details",
       type: "background",
-      fields: ["employeeType", "monthlySalary", "maxDiscount", "status"],
-    },
-    {
-      id: "settings",
-      title: "Additional Settings",
-      type: "action-group",
-      renderType: "default",
-      backgroundColor: "bg-transparent",
-      layout: "row",
-      fields: ["loginRequired", "setTraget"],
+      fields: ["employeeType", "monthlySalary", "status"],
     },
   ],
   fields: [
@@ -319,8 +310,8 @@ const EmployeeCustomAddOptionForm: FormConfig = {
         {
           group: "default",
           options: [
-            { label: "Male", value: "Male" },
-            { label: "Female", value: "Female" },
+            { label: "Male", value: "male" },
+            { label: "Female", value: "female" },
           ],
         },
       ],
@@ -346,9 +337,9 @@ const EmployeeCustomAddOptionForm: FormConfig = {
         {
           group: "default",
           options: [
-            { label: "Sales Team", value: "Sales Team" },
-            { label: "Management", value: "Management" },
-            { label: "Others", value: "Others" },
+            { label: "Sales Team", value: "sales-team" },
+            { label: "Management", value: "management" },
+            { label: "Others", value: "others" },
           ],
         },
       ],
@@ -360,12 +351,6 @@ const EmployeeCustomAddOptionForm: FormConfig = {
       placeholder: "Enter monthly salary",
     },
     {
-      name: "maxDiscount",
-      label: "Maximum Discount",
-      type: "number",
-      placeholder: "Enter maximum discount allowed",
-    },
-    {
       name: "status",
       label: "Status",
       type: "select",
@@ -374,23 +359,11 @@ const EmployeeCustomAddOptionForm: FormConfig = {
         {
           group: "default",
           options: [
-            { label: "Active", value: "Active" },
-            { label: "Inactive", value: "Inactive" },
+            { label: "Active", value: "active" },
+            { label: "Inactive", value: "inactive" },
           ],
         },
       ],
-    },
-    {
-      name: "loginRequired",
-      label: "Login Required",
-      type: "checkbox",
-      labelPos: "left",
-    },
-    {
-      name: "setTraget",
-      label: "Set Target",
-      type: "checkbox",
-      labelPos: "left",
     },
   ],
 };

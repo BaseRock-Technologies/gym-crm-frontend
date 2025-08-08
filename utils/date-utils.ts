@@ -1,7 +1,6 @@
 export interface TimeSlotSection {
-  startTime: string;
-  endTime: string;
-  displayTime: string;
+  startTime: string; // Formatted time string (e.g., "5:00 AM")
+  endTime: string;   // Formatted time string (e.g., "5:15 AM")
 }
 
 export interface TimeSlot {
@@ -10,18 +9,8 @@ export interface TimeSlot {
   sections: TimeSlotSection[];
 }
 
-export function generateTimeSlots(): TimeSlot[] {
-  const slots: TimeSlot[] = [
-    {
-      time: 'all-day',
-      displayTime: 'All-Day',
-      sections: [{
-        startTime: '00:00',
-        endTime: '23:59',
-        displayTime: 'All-Day'
-      }]
-    }
-  ];
+export function generateTimeSlots(selectedDate: Date = new Date()): TimeSlot[] {
+  const slots: TimeSlot[] = [];
 
   for (let hour = 5; hour <= 23; hour++) {
     for (let minute of [0, 30]) {
@@ -30,17 +19,19 @@ export function generateTimeSlots(): TimeSlot[] {
       const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       const displayTime = `${hour % 12 || 12}:${minute.toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
       
-      // Create two 15-minute sections
+      // Create date objects for the selected date with specific times
+      const baseDate = new Date(selectedDate);
+      baseDate.setHours(hour, minute, 0, 0);
+      
+      // Create two 15-minute sections with formatted time strings
       const sections: TimeSlotSection[] = [
         {
-          startTime: timeStr,
-          endTime: `${hour.toString().padStart(2, '0')}:${(minute + 15).toString().padStart(2, '0')}`,
-          displayTime: `${displayTime} - First Half`
+          startTime: displayTime,
+          endTime: `${hour % 12 || 12}:${(minute + 15).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`
         },
         {
-          startTime: `${hour.toString().padStart(2, '0')}:${(minute + 15).toString().padStart(2, '0')}`,
-          endTime: `${hour.toString().padStart(2, '0')}:${(minute + 30).toString().padStart(2, '0')}`,
-          displayTime: `${displayTime} - Second Half`
+          startTime: `${hour % 12 || 12}:${(minute + 15).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`,
+          endTime: `${hour % 12 || 12}:${(minute + 30).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`
         }
       ];
 

@@ -166,6 +166,6 @@ helper-secondary - #4F3187
   }
 
   div[role="dialog"] {
-    @apply overflow-hidden p-0;
+    @apply p-0 scrollbar-none rounded-lg;
   }
 }

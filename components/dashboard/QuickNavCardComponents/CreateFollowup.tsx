@@ -130,7 +130,7 @@ const CreateFollowup = () => {
 
         const res: StatusResponse = await post(
           {},
-          "others/clients",
+          "others/clients/list",
           "Failed to fetch clients"
         );
 

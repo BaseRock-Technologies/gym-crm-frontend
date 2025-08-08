@@ -38,7 +38,7 @@ export function ButtonDialogTrigger({
       </DialogTrigger>
       <DialogContent className={contentClassName}>
         {title && (
-          <DialogTitle className="p-6 bg-primary text-white">
+          <DialogTitle className="p-6 bg-primary text-white rounded-t-lg shadow-none">
             {title}
           </DialogTitle>
         )}

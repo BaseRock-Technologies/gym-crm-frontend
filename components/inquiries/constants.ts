@@ -110,18 +110,18 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         label: "Attended By",
         options: [],
         type: "select",
-        // allowAddCustomOption: true,
-        // customAddOptionsGroups: ["default"],
-        // addCustomOptionForm: {
-        //     "default": EmployeeCustomAddOptionForm,
-        // },
-        // primaryFieldValues: {
-        //     "default": ["fullName"]
-        // },
-        // apiConfig: {
-        //     apiPath: "others/employee/create",
-        //     method: "POST",
-        //   },
+        allowAddCustomOption: true,
+        customAddOptionsGroups: ["default"],
+        addCustomOptionForm: {
+            "default": EmployeeCustomAddOptionForm,
+        },
+        primaryFieldValues: {
+            "default": ["fullName"]
+        },
+        apiConfig: {
+            apiPath: "others/employee/create",
+            method: "POST",
+          },
         required: true,
       },
       {
