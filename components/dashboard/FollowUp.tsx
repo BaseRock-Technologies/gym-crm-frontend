@@ -36,13 +36,13 @@ export default function FollowUp() {
 
   const deleteFollowup = async (row: any) => {
     try {
-      if (!row || !row._id) {
+      if (!row || !row.id) {
         throw new Error();
       }
 
       const response = await post(
         {},
-        `followup/delete/${row._id}`,
+        `followup/delete/${row.id}`,
         "Failed to delete followup"
       );
 

@@ -13,11 +13,18 @@ interface TimePickerProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
+  editable?: boolean;
 }
 
-export function TimePicker({ value, onChange, error }: TimePickerProps) {
+export function TimePicker({
+  value,
+  onChange,
+  error,
+  editable = true,
+}: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [period, setPeriod] = React.useState<"AM" | "PM">("AM");
+  const canOpen = Boolean(editable);
 
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 
@@ -28,14 +35,21 @@ export function TimePicker({ value, onChange, error }: TimePickerProps) {
   };
 
   return (
-    <Popover modal={true} open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Popover
+      modal={true}
+      open={canOpen ? open : false}
+      onOpenChange={(next) => {
+        if (canOpen) setOpen(next);
+      }}
+    >
+      <PopoverTrigger asChild disabled={!editable}>
         <div className="relative">
           <Input
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Select time"
             errorMessage={error}
+            readOnly={!editable}
           />
           <Clock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
         </div>

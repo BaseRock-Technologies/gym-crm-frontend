@@ -12,27 +12,42 @@ export interface TimeSlot {
 export function generateTimeSlots(selectedDate: Date = new Date()): TimeSlot[] {
   const slots: TimeSlot[] = [];
 
+  const formatDisplayTimeFromDate = (date: Date): string => {
+    const hour24 = date.getHours();
+    const minute = date.getMinutes();
+    const hour12 = hour24 % 12 || 12;
+    const ampm = hour24 < 12 ? 'AM' : 'PM';
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  };
+
   for (let hour = 5; hour <= 23; hour++) {
     for (let minute of [0, 30]) {
       if (hour === 23 && minute === 30) break; // Stop at 11:00 PM
       
-      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayTime = `${hour % 12 || 12}:${minute.toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
-      
-      // Create date objects for the selected date with specific times
       const baseDate = new Date(selectedDate);
       baseDate.setHours(hour, minute, 0, 0);
-      
-      // Create two 15-minute sections with formatted time strings
+
+      const timeStr = `${baseDate.getHours().toString().padStart(2, '0')}:${baseDate
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}`;
+      const displayTime = formatDisplayTimeFromDate(baseDate);
+
+      const endFirstSection = new Date(baseDate);
+      endFirstSection.setMinutes(endFirstSection.getMinutes() + 15);
+
+      const endSecondSection = new Date(baseDate);
+      endSecondSection.setMinutes(endSecondSection.getMinutes() + 30);
+
       const sections: TimeSlotSection[] = [
         {
           startTime: displayTime,
-          endTime: `${hour % 12 || 12}:${(minute + 15).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`
+          endTime: formatDisplayTimeFromDate(endFirstSection),
         },
         {
-          startTime: `${hour % 12 || 12}:${(minute + 15).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`,
-          endTime: `${hour % 12 || 12}:${(minute + 30).toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`
-        }
+          startTime: formatDisplayTimeFromDate(endFirstSection),
+          endTime: formatDisplayTimeFromDate(endSecondSection),
+        },
       ];
 
       slots.push({

@@ -1,7 +1,7 @@
 export interface Note {
   id: string;
-  fromTime: string;
-  toTime: string;
+  timeFrom: string;
+  timeTo: string;
   employeeName: string;
   clientName: string;
   scheduleDate: string;

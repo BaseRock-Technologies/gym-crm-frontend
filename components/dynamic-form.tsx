@@ -367,6 +367,7 @@ export function DynamicForm({
                 const date = new Date(val);
                 return Math.floor(date.getTime() / 1000);
               }
+              console.log(val);
               return val ? val : null;
             }, z.number().nullish())
             .superRefine((val, ctx) => {
@@ -1108,6 +1109,7 @@ export function DynamicForm({
                       formField.onChange(value);
                       handleFieldChange(field.name, value);
                     }}
+                    editable={field.editable}
                   />
                 ) : field.type === "time-detailed" ? (
                   <TimePickerDetailed

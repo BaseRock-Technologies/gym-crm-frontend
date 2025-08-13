@@ -5,15 +5,15 @@ import type { TableConfig } from "@/types/table";
 import { Send } from "lucide-react";
 import type React from "react";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ImageCell } from "../image-cell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageCell } from "@/components/image-cell";
 import { post, updateFilterOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import type { StatusResponse } from "@/types/query";
-import { InquiryFormConfig } from "../inquiries/constants";
+import { InquiryFormConfig } from "@/components/inquiries/constants";
 import { useAuth } from "@/lib/context/authContext";
 import type { SelectApiData } from "@/types/form";
-import FreezeMembership from "./FreezeMembership";
+import FreezeMembership from "@/components/customers/FreezeMembership";
 
 type CustomerRecordsProps = {};
 
@@ -29,9 +29,9 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
       }
       const response = await post(
         {
-          biometricId: row.memberId,
-          name: row.clientName,
           memberId: row.memberId,
+          name: row.clientName,
+          clientId: row.clientId,
           contactNumber: row.contactNumber,
         },
         `attendance/client/create`,
@@ -51,9 +51,9 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
   const tableConfigRef = useRef<TableConfig>({
     columns: [
       {
-        id: "memberId",
-        header: "Cliend ID/Biometric ID",
-        accessorKey: "memberId",
+        id: "clientId",
+        header: "Cliend ID",
+        accessorKey: "clientId",
       },
       {
         id: "clientPicture",
@@ -143,7 +143,7 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         label: "Profile",
         type: "link",
         href: "/dashboard",
-        getLinkFrom: "memberId",
+        getLinkFrom: "clientId",
         additionalHref: "/profile",
       },
       {

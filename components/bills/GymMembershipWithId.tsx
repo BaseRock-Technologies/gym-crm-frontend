@@ -110,15 +110,15 @@ const GymMembershipBillWithId = () => {
         if (billDetails.status === "success" && billDetails.data) {
           const { data } = billDetails;
 
-          const dateFields = formConfig.fields
-            .filter((field) => field.type === "date")
-            .map((field) => field.name);
+          // const dateFields = formConfig.fields
+          //   .filter((field) => field.type === "date")
+          //   .map((field) => field.name);
 
-          dateFields.forEach((field) => {
-            if (data[field]) {
-              data[field] = formatTimestamp(data[field]);
-            }
-          });
+          // dateFields.forEach((field) => {
+          //   if (data[field]) {
+          //     data[field] = formatTimestamp(data[field]);
+          //   }
+          // });
           setInitialData(data);
         }
       } catch (error) {

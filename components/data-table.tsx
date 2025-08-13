@@ -60,8 +60,39 @@ export function DataTable({
 
   const handleBulkAction = (type: BulkActions) => {
     const selectedRows = data.filter((row) => selected[row.id]);
-    // Handle bulk actions
+
+    const rowsToExport = selectedRows.length > 0 ? selectedRows : data;
+
+    const exportToCSV = (filename: string) => {
+      if (!rowsToExport || rowsToExport.length === 0) return;
+      const headers = config.columns.map((c) => c.header);
+      const keys = config.columns.map((c) => c.accessorKey);
+      const csv = [headers.join(",")]
+        .concat(
+          rowsToExport.map((r) =>
+            keys.map((k) => JSON.stringify((r as any)[k] ?? "")).join(",")
+          )
+        )
+        .join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+
     switch (type) {
+      case "export-excel":
+        exportToCSV("table-export.csv");
+        break;
+      case "export-pdf":
+        window.print();
+        break;
+      case "print":
+        window.print();
+        break;
       case "SMS":
         console.log("sms");
         break;

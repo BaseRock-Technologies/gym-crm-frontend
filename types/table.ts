@@ -17,7 +17,8 @@ export interface ActionFieldsConfig {
   label: string
   icon?: LucideIcon
   alertTrigger?: boolean
-  onClick: (row: any) => void
+  onClick?: (row: any) => void
+  dialogTrigger?: boolean
 }
 export interface ActionWithAlert extends ActionFieldsConfig {
   alertTrigger: true;
@@ -32,7 +33,19 @@ export interface ActionWithoutAlert extends ActionFieldsConfig {
   alertAction?: never;
 }
 
-export type ActionConfig = ActionWithAlert | ActionWithoutAlert;
+export interface ActionWithDialog extends ActionFieldsConfig {
+  dialogTrigger: true;
+  dialogTitle: string;
+  dialogContent: (row: any) => JSX.Element;
+}
+
+export interface ActionWithoutDialog extends ActionFieldsConfig {
+  dialogTrigger?: false;
+  dialogTitle?: never;
+  dialogContent?: never;
+}
+
+export type ActionConfig = ActionWithAlert | ActionWithoutAlert | ActionWithDialog | ActionWithoutDialog;
 
 export interface TableConfig {
   columns: ColumnDef[]
@@ -76,7 +89,15 @@ export interface BulkActionConfig {
   onClick: (selectedRows: any[]) => void
 }
 
-export type BulkActions = "SMS" | "follow-up" | "whatsapp" | "email" | "transfer-inquiry";
+export type BulkActions =
+  | "SMS"
+  | "follow-up"
+  | "whatsapp"
+  | "email"
+  | "transfer-inquiry"
+  | "export-excel"
+  | "export-pdf"
+  | "print";
 export type BulkActionsBtnVariant = "default" | "whatsapp" | "secondary" | "email";
 
 export interface FilterConfig {

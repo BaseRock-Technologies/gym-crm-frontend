@@ -31,10 +31,18 @@ export function DataTableWrapper({
   apiConfig,
   setSelectedRow,
 }: DataTableWrapperProps) {
+  const filters: Record<string, any> = {};
+  if (config.filters) {
+    config.filters.forEach((filter) => {
+      if (filter.type === "date-range") {
+        filters[filter.id] = filter.dateRange;
+      }
+    });
+  }
   const [tableState, setTableState] = useState<TableState>({
     page: 1,
     pageSize: 10,
-    filters: {},
+    filters,
     sorting: [],
   });
   const [pageData, setPageData] = useState<Record<number, PageData>>({});
