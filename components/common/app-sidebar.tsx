@@ -1,4 +1,8 @@
 "use client";
+import React from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+
 import {
   Book,
   ChevronDown,
@@ -101,6 +105,36 @@ const items = [
 ];
 
 export function AppSidebar() {
+  // Track which dropdown is open
+  const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
+  // Get current path and store in state to avoid hydration errors
+  const pathname = usePathname();
+
+  // Helper: is main item active (exact or starts with, ignore trailing slash)
+  function isActive(url: string) {
+    if (!url || url === "#") return false;
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanUrl = url.replace(/\/$/, "");
+    return cleanPath === cleanUrl || cleanPath.startsWith(cleanUrl + "/");
+  }
+
+  // Helper: is any submenu active
+  function isSubMenuActive(subMenu: any[]) {
+    return subMenu.some((sub) => isActive(sub.url));
+  }
+
+  // Helper: get class for active menu item
+  function getMenuItemClass(active: boolean) {
+    // Use the exact hover color from sidebar: bg-sidebar-accent text-sidebar-accent-foreground
+    return active
+      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+      : "";
+  }
+
+  // Helper: get class for active menu button
+  function getMenuButtonClass(active: boolean) {
+    return active ? "bg-primary/10" : "";
+  }
   const { loading, user, setLoading } = useAuth();
   const router = useRouter();
   function logoutUser() {
@@ -114,7 +148,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
+              <Link href="/dashboard">
                 <div className="flex aspect-square size-8 p-2 items-center justify-center rounded-lg bg-primary">
                   <Image
                     src={Logo}
@@ -126,7 +160,7 @@ export function AppSidebar() {
                   />
                 </div>
                 <span>Fitpass</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -135,39 +169,47 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) =>
-                item.subMenu ? (
-                  <Collapsible className="group/collapsible" key={item.title}>
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
-                          <item.icon className="text-primary" />
-                          <span>{item.title}</span>
-                          <ChevronDown className="ml-auto mr-2 transition-transform group-data-[state=open]/collapsible:rotate-180 text-primary" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.subMenu.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <a href={subItem.url || "#"}>{subItem.title}</a>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                ) : (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
+              {items.map((item) => {
+                if (item.subMenu) {
+                  const open = openDropdown === item.title;
+                  return (
+                    <Collapsible className="group/collapsible" key={item.title} open={open}>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton onClick={() => setOpenDropdown(open ? null : item.title)}>
+                            <item.icon className="text-primary" />
+                            <span>{item.title}</span>
+                            <ChevronDown className={`ml-auto mr-2 transition-transform group-data-[state=open]/collapsible:rotate-180 text-primary ${open ? "rotate-180" : ""}`} />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.subMenu.map((subItem) => {
+                              const subActive = isActive(subItem.url);
+                              return (
+                                <SidebarMenuSubItem key={subItem.title} className={getMenuItemClass(subActive)}>
+                                  <Link href={subItem.url || "#"}>{subItem.title}</Link>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+                const mainActive = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title} className={getMenuItemClass(mainActive)}>
+                    <SidebarMenuButton asChild className={getMenuButtonClass(mainActive)}>
+                      <Link href={item.url} onClick={() => setOpenDropdown(null)}>
                         <item.icon className="text-primary" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )
-              )}
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -199,5 +241,6 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+
   );
 }
