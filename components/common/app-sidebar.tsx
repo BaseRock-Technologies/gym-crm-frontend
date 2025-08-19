@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
   Book,
   ChevronDown,
@@ -39,7 +40,7 @@ import {
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Logo from "@/public/logo.svg";
 import Image from "next/image";
 
@@ -103,6 +104,15 @@ const items = [
 export function AppSidebar() {
   const { loading, user, setLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const [billingOpen, setBillingOpen] = React.useState(false);
+  // Open Billing dropdown if any billing subitem is active
+  React.useEffect(() => {
+    const billingItem = items.find(i => i.title === "Billing");
+    if (billingItem && Array.isArray(billingItem.subMenu) && billingItem.subMenu.some(subItem => subItem.url === pathname)) {
+      setBillingOpen(true);
+    }
+  }, [pathname]);
   function logoutUser() {
     setLoading(true);
     Cookies.remove("user");
@@ -113,7 +123,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild isActive={false}>
               <a href="/dashboard">
                 <div className="flex aspect-square size-8 p-2 items-center justify-center rounded-lg bg-primary">
                   <Image
@@ -135,39 +145,68 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) =>
-                item.subMenu ? (
-                  <Collapsible className="group/collapsible" key={item.title}>
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
+              {items.map((item) => {
+                if (item.subMenu) {
+                  // Only Billing tab is active if open, others are not
+                  const isBillingActive = billingOpen || item.subMenu.some(subItem => subItem.url === pathname);
+                  return (
+                    <Collapsible className="group/collapsible" key={item.title} open={billingOpen} onOpenChange={setBillingOpen}>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton isActive={isBillingActive}>
+                            <item.icon className="text-primary" />
+                            <span>{item.title}</span>
+                            <ChevronDown className="ml-auto mr-2 transition-transform group-data-[state=open]/collapsible:rotate-180 text-primary" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.subMenu.map((subItem, idx) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <a
+                                  href={subItem.url || "#"}
+                                  style={{
+                                    ...(subItem.title === "Personal Training Bill"
+                                      ? {
+                                          whiteSpace: 'normal',
+                                          wordBreak: 'break-word',
+                                          display: 'block',
+                                          marginTop: idx === 1 ? '8px' : undefined,
+                                          marginBottom: '4px',
+                                        }
+                                      : { whiteSpace: 'nowrap' }),
+                                    background: subItem.url === pathname ? '#e0fcff' : undefined,
+                                    borderRadius: subItem.url === pathname ? '8px' : undefined,
+                                    padding: subItem.url === pathname ? '8px 12px' : undefined,
+                                    width: subItem.url === pathname ? '100%' : undefined,
+                                  }}
+                                >
+                                  {subItem.title === "Personal Training Bill"
+                                    ? (<><span>Personal Training</span><br /><span>Bill</span></>)
+                                    : subItem.title}
+                                </a>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                } else {
+                  // Only one tab active at a time: if Billing is open, others are not active
+                  const isActive = item.url === pathname && !billingOpen;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <a href={item.url}>
                           <item.icon className="text-primary" />
                           <span>{item.title}</span>
-                          <ChevronDown className="ml-auto mr-2 transition-transform group-data-[state=open]/collapsible:rotate-180 text-primary" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.subMenu.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.title}>
-                              <a href={subItem.url || "#"}>{subItem.title}</a>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
+                        </a>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
-                  </Collapsible>
-                ) : (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon className="text-primary" />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              )}
+                  );
+                }
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
