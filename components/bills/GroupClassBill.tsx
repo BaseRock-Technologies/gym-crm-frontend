@@ -206,7 +206,7 @@ export default function GroupClassBill() {
       );
     }
 
-    formConfig.title = "Create New Group Class bill";
+    formConfig.title = "Create New Group Class Bill";
 
     fetchInitialData();
   }, [user]);

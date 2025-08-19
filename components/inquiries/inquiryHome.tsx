@@ -89,7 +89,7 @@ export default function InquiryHome() {
         hasFetchedRef.current = false;
       }
     };
-    InquiryFormConfig.title = "Create new bill for Gym Membership";
+    InquiryFormConfig.title = "Create New Inquiry";
     fetchInitialData();
   }, [user?.userName]);
 
