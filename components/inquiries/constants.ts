@@ -3,7 +3,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
 
   export const InquiryFormConfig: FormConfig = {
     id: "inquiry",
-    title: "Create new Inquiry",
+    title: "Create New Inquiry",
     fields: [
       {
         name: "firstName",
