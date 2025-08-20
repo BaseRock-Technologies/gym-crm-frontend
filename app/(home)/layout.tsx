@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Fitpass",
   description: "The Fitpass",
   icons: {
-    icon: "./logo.svg",
+    icon: "./favicon.ico",
   },
 };
 
