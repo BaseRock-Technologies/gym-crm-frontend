@@ -202,7 +202,7 @@ export default function PersonalTrainingBill() {
       );
     }
 
-    formConfig.title = "Create New Personal Training bill";
+    formConfig.title = "Create New Personal Training Bill";
 
     fetchInitialData();
   }, [user]);

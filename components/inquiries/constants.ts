@@ -3,7 +3,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
 
   export const InquiryFormConfig: FormConfig = {
     id: "inquiry",
-    title: "Create new Inquiry",
+    title: "Create New Inquiry",
     fields: [
       {
         name: "firstName",
@@ -76,6 +76,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         required: true,
         placeholder: "Select follow-up date",
       },
+
       {
         name: "followupTime",
         label: "Schedule FollowUp Time",
@@ -88,6 +89,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         type: "date",
         placeholder: "Select assessment date",
       },
+
       {
         name: "status",
         label: "Status",

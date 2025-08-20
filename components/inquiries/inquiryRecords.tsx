@@ -125,13 +125,13 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({ setSelectedRow }) => {
       //   btnVariant: "default",
       //   onClick: (value) => console.log("Whatsapp", value),
       // },
-      {
-        id: "transfer-inquiry",
-        label: "Transfer Inquiry",
-        icon: Send,
-        btnVariant: "default",
-        onClick: (value) => console.log("Transfer Inquiry", value),
-      },
+      // {
+      //   id: "transfer-inquiry",
+      //   label: "Transfer Inquiry",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("Transfer Inquiry", value),
+      // },
     ],
   };
 
