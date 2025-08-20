@@ -61,6 +61,7 @@ export function AnimatedSearchInput({
           value={deferredInputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyPress}
+          style={{ minWidth: "700px" }}
           className={`pl-9 pr-4 h-9 bg-white ${isPending ? "opacity-50" : ""}`}
         />
         {!deferredInputValue && (
@@ -70,7 +71,6 @@ export function AnimatedSearchInput({
           >
             <span className="text-gray-400 text-ellipsis overflow-hidden">
               Search for {searchableColumns.join(", ")}
-              {/* Search by {searchableColumns[currentIndex]} */}
             </span>
           </div>
         )}
