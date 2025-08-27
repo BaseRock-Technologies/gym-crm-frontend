@@ -112,6 +112,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         label: "Attended By",
         options: [],
         type: "select",
+        placeholder: "Select Staff",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["default"],
         addCustomOptionForm: {
@@ -172,7 +173,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         options: [],
         type: "select",
         required: true,
-        placeholder: "Select package",
+        placeholder: "Select Package",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["GYM Packages", "PT Packages", "Group Class Package"],
         addCustomOptionForm: {
@@ -192,8 +193,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "feedback",
-        label: "Responce/Feedback",
+        label: "Response/Feedback",
         type: "textarea",
+        placeholder: "Enter Feedback",
         required: true,
         placeholder: "Enter response or feedback",
       },
