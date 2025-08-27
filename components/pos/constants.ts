@@ -243,13 +243,13 @@ export const ProductFormConfig: FormConfig = {
       type: "textarea",
       placeholder: "Write notes here...",
     },
-    {
-      name: "sendWhatsApp",
-      label: "Send WhatsApp",
-      type: "checkbox",
-      defaultValue: false,
-      labelPos: "left"
-    },
+    // {
+    //   name: "sendWhatsApp",
+    //   label: "Send WhatsApp",
+    //   type: "checkbox",
+    //   defaultValue: false,
+    //   labelPos: "left"
+    // },
   ],
   groups: [
     {

@@ -10,7 +10,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         label: "First Name",
         type: "text",
         required: true,
-        placeholder: "Enter Name",
+        placeholder: "First Name",
         validation: {
           pattern: "^[A-Za-z ]+$",
           minLength: 1,
@@ -21,6 +21,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "lastName",
         label: "Last Name",
         type: "text",
+
         required: true,
         placeholder: "Enter Name",
         validation: {
@@ -28,10 +29,12 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           minLength: 1,
           maxLength: 50,
         },
+        placeholder: "Last Name",
+
       },
       {
         name: "contactNumber",
-        label: "Contact number",
+        label: "Contact Number",
         type: "phone",
         required: true,
         placeholder: "Contact Number",
@@ -44,7 +47,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         label: "Alternate Contact",
         type: "phone",
         required: true,
-        placeholder: "Alternate Contact",
+        placeholder: "Alternate Number",
         validation: {
           pattern: "^\\d{10}$",
         },
@@ -53,11 +56,14 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "email",
         label: "Email",
         type: "email",
+
         required: true,
         placeholder: "Email",
         validation: {
           pattern: "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
         },
+        placeholder: "Email Address",
+
       },
       {
         name: "gender",
@@ -77,7 +83,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "areaAddress",
-        placeholder: "address",
+
         label: "Area Address",
         required: true,
         type: "text",
@@ -90,7 +96,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         placeholder: "Select Follow Up",
       },
       // {
-      //   name: "followupTime",
+
       //   label: "Schedule FollowUp Time",
       //   type: "time",
       //   placeholder: "Enter Time",
@@ -123,6 +129,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         label: "Attended By",
         options: [],
         type: "select",
+        placeholder: "Select Staff",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["default"],
         addCustomOptionForm: {
@@ -182,7 +189,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         options: [],
         type: "select",
         required: true,
-        placeholder: "Select Source",
+        placeholder: "Select Package",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["GYM Packages", "PT Packages", "Group Class Package"],
         addCustomOptionForm: {
@@ -202,8 +209,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "feedback",
-        label: "Responce/Feedback",
+        label: "Response/Feedback",
         type: "textarea",
+        placeholder: "Enter Feedback",
         required: true,
       },
       // {
