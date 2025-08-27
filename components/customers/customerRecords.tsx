@@ -5,15 +5,15 @@ import type { TableConfig } from "@/types/table";
 import { Send } from "lucide-react";
 import type React from "react";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ImageCell } from "../image-cell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageCell } from "@/components/image-cell";
 import { post, updateFilterOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import type { StatusResponse } from "@/types/query";
-import { InquiryFormConfig } from "../inquiries/constants";
+import { InquiryFormConfig } from "@/components/inquiries/constants";
 import { useAuth } from "@/lib/context/authContext";
 import type { SelectApiData } from "@/types/form";
-import FreezeMembership from "./FreezeMembership";
+import FreezeMembership from "@/components/customers/FreezeMembership";
 
 type CustomerRecordsProps = {};
 
@@ -22,12 +22,38 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
   const [isFreezeModalOpen, setIsFreezeModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  const markAttendance = async (row: any) => {
+    try {
+      if (!row || !row._id) {
+        throw new Error();
+      }
+      const response = await post(
+        {
+          memberId: row.memberId,
+          name: row.clientName,
+          clientId: row.clientId,
+          contactNumber: row.contactNumber,
+        },
+        `attendance/client/create`,
+        "Failed to mark attendance"
+      );
+      const { status, message } = response;
+      if (status === "success") {
+        showToast("success", message);
+      } else {
+        showToast("error", message);
+      }
+    } catch {
+      showToast("error", "Failed to mark attendance");
+    }
+  };
+
   const tableConfigRef = useRef<TableConfig>({
     columns: [
       {
-        id: "memberId",
-        header: "Cliend ID/Biometric ID",
-        accessorKey: "memberId",
+        id: "clientId",
+        header: "Cliend ID",
+        accessorKey: "clientId",
       },
       {
         id: "clientPicture",
@@ -42,9 +68,19 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         accessorKey: "contactNumber",
       },
       { id: "gender", header: "Gender", accessorKey: "gender" },
-      { id: "joiningDate", header: "Registration", accessorKey: "joiningDate" },
+      {
+        id: "joiningDate",
+        header: "Registration",
+        accessorKey: "joiningDate",
+        parseDateToStr: true,
+      },
       { id: "packageName", header: "Package", accessorKey: "packageName" },
-      { id: "endDate", header: "Expiration", accessorKey: "endDate" },
+      {
+        id: "endDate",
+        header: "Expiration",
+        accessorKey: "endDate",
+        parseDateToStr: true,
+      },
     ],
     actions: [
       {
@@ -70,31 +106,31 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         label: "Transfer Membership(s)",
         onClick: (row) => console.log("Transfer Membership(s)", row),
       },
-      {
-        id: "sendBill",
-        label: "SMS / Whatsapp / E-mail",
-        onClick: (row) => console.log("SMS / Whatsapp / E-mail", row),
-      },
+      // {
+      //   id: "sendBill",
+      //   label: "SMS / Whatsapp / E-mail",
+      //   onClick: (row) => console.log("SMS / Whatsapp / E-mail", row),
+      // },
       {
         id: "addFollowup",
         label: "Add Followup",
         onClick: (row) => console.log("Add Followup", row),
       },
-      {
-        id: "sendQR",
-        label: "Send QR Url via SMS & Email",
-        onClick: (row) => console.log("Send QR Url via SMS & Email", row),
-      },
+      // {
+      //   id: "sendQR",
+      //   label: "Send QR Url via SMS & Email",
+      //   onClick: (row) => console.log("Send QR Url via SMS & Email", row),
+      // },
       {
         id: "markAttendance",
-        label: "Mark attendance-in",
-        onClick: (row) => console.log("Mark attendance-in", row),
+        label: "Mark attendance",
+        onClick: (row) => markAttendance(row),
       },
-      {
-        id: "registerRfid",
-        label: "Register RFID no",
-        onClick: (row) => console.log("Register RFID no", row),
-      },
+      // {
+      //   id: "registerRfid",
+      //   label: "Register RFID no",
+      //   onClick: (row) => console.log("Register RFID no", row),
+      // },
       {
         id: "deleteClient",
         label: "Delete Client",
@@ -107,7 +143,7 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         label: "Profile",
         type: "link",
         href: "/dashboard",
-        getLinkFrom: "memberId",
+        getLinkFrom: "clientId",
         additionalHref: "/profile",
       },
       {
@@ -184,13 +220,13 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
     ],
     searchableColumns: ["clientName", "contactNumber"],
     bulkActions: [
-      {
-        id: "SMS",
-        label: "Bulk SMS",
-        icon: Send,
-        btnVariant: "default",
-        onClick: (value) => console.log("SMS", value),
-      },
+      // {
+      //   id: "SMS",
+      //   label: "Bulk SMS",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("SMS", value),
+      // },
     ],
   });
 
@@ -229,9 +265,10 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         showToast("error", "Failed to load data");
       }
     };
+
     InquiryFormConfig.title = "Create new bill for Gym Membership";
     fetchInitialData();
-  }, [user]);
+  }, []);
 
   const apiConfig: SelectApiData = {
     apiPath: "client/records",

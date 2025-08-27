@@ -1,6 +1,52 @@
 import { LucideIcon } from "lucide-react"
 import { GroupedSelectOption } from "./form"
 
+export interface ColumnDef {
+  id: string
+  header: string
+  accessorKey: string
+  enableSorting?: boolean
+  cell?: (props: any) => JSX.Element
+  parseDateToStr?: boolean
+  parseTimeToStr?: boolean
+  startCase?: boolean
+}
+
+export interface ActionFieldsConfig {
+  id: string
+  label: string
+  icon?: LucideIcon
+  alertTrigger?: boolean
+  onClick?: (row: any) => void
+  dialogTrigger?: boolean
+}
+export interface ActionWithAlert extends ActionFieldsConfig {
+  alertTrigger: true;
+  alertTitle: string;
+  alertDescription: string;
+  alertAction: string;
+}
+export interface ActionWithoutAlert extends ActionFieldsConfig {
+  alertTrigger?: false;
+  alertTitle?: never;
+  alertDescription?: never;
+  alertAction?: never;
+}
+
+export interface ActionWithDialog extends ActionFieldsConfig {
+  dialogTrigger: true;
+  dialogTitle: string;
+  dialogContent: (row: any) => JSX.Element;
+}
+
+export interface ActionWithoutDialog extends ActionFieldsConfig {
+  dialogTrigger?: false;
+  dialogTitle?: never;
+  dialogContent?: never;
+}
+
+export type ActionConfig = ActionWithAlert | ActionWithoutAlert | ActionWithDialog | ActionWithoutDialog;
+
 export interface TableConfig {
   columns: ColumnDef[]
   actions?: ActionConfig[]
@@ -8,21 +54,8 @@ export interface TableConfig {
   bulkActions?: BulkActionConfig[]
   filters?: FilterConfig[]
   searchableColumns?: string[]
-}
-
-export interface ColumnDef {
-  id: string
-  header: string
-  accessorKey: string
-  enableSorting?: boolean
-  cell?: (props: any) => JSX.Element
-}
-
-export interface ActionConfig {
-  id: string
-  label: string
-  icon?: LucideIcon
-  onClick: (row: any) => void
+  components?: React.JSX.Element[]
+  showSelector?: boolean
 }
 
 interface OutOfActionsLinkConfig {
@@ -56,7 +89,15 @@ export interface BulkActionConfig {
   onClick: (selectedRows: any[]) => void
 }
 
-export type BulkActions = "SMS" | "follow-up" | "whatsapp" | "email" | "transfer-inquiry";
+export type BulkActions =
+  | "SMS"
+  | "follow-up"
+  | "whatsapp"
+  | "email"
+  | "transfer-inquiry"
+  | "export-excel"
+  | "export-pdf"
+  | "print";
 export type BulkActionsBtnVariant = "default" | "whatsapp" | "secondary" | "email";
 
 export interface FilterConfig {

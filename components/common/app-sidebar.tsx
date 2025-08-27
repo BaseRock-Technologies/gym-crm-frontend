@@ -40,7 +40,12 @@ import {
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
 import Cookies from "js-cookie";
+
 import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import Logo from "@/public/logo.svg";
+import Image from "next/image";
+
 
 // Menu items.
 const items = [
@@ -144,7 +149,14 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard">
                 <div className="flex aspect-square size-8 p-2 items-center justify-center rounded-lg bg-primary">
-                  <Dumbbell className="text-white" />
+                  <Image
+                    src={Logo}
+                    alt="logo"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    className="w-full h-full text-white"
+                  />
                 </div>
                 <span>Fitpass</span>
               </a>

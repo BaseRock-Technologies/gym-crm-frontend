@@ -2,7 +2,7 @@
 import { DynamicForm } from "@/components/dynamic-form";
 import { SelectApiData } from "@/types/form";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import InquiryHistory from "./inquiryHistory";
 import InquiryRecords from "./inquiryRecords";
 import { InquiryFormConfig } from "../inquiries/constants";
@@ -29,9 +29,18 @@ export default function InquiryHome() {
     method: "POST",
   };
 
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
+    // Prevent multiple API calls
+    if (hasFetchedRef.current) {
+      return;
+    }
+
     const fetchInitialData = async () => {
       try {
+        hasFetchedRef.current = true;
+
         const res: StatusResponse = await post(
           {},
           "inquiry/options",
@@ -40,12 +49,14 @@ export default function InquiryHome() {
         if (res.status === "success" && res.data) {
           const { clientSourceDetails, packageDetails, employeeDetails } =
             res.data;
-          const currentDate = Math.floor(new Date().getTime() / 1000);
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const currentDate = Math.floor(tomorrow.getTime() / 1000);
           const data = {
             attendedBy: user?.userName || "",
-            convertibility: "Warm",
-            status: "Pending",
-            followUpDate: currentDate,
+            convertibility: "warm",
+            status: "pending",
+            followupDate: currentDate,
           };
 
           updateFormConfigOptions(
@@ -74,26 +85,13 @@ export default function InquiryHome() {
           error
         );
         showToast("error", "Failed to load data");
+        // Reset the ref on error so we can retry
+        hasFetchedRef.current = false;
       }
     };
-    InquiryFormConfig.title = "Create new bill for Gym Membership";
+    InquiryFormConfig.title = "Create New Inquiry";
     fetchInitialData();
-  }, [user]);
-
-  const filtersOptions: FilterOptions = {
-    convertibility:
-      InquiryFormConfig.fields
-        .find((field) => field.name === "convertibility")
-        ?.options?.flatMap((option) => option.options) ?? [],
-    status:
-      InquiryFormConfig.fields
-        .find((field) => field.name === "status")
-        ?.options?.flatMap((option) => option.options) ?? [],
-    attendedByOptions:
-      InquiryFormConfig.fields
-        .find((field) => field.name === "attendedBy")
-        ?.options?.flatMap((option) => option.options) ?? [],
-  };
+  }, [user?.userName]);
 
   return (
     <div className="relative p-6 flex flex-col gap-6">
@@ -112,10 +110,7 @@ export default function InquiryHome() {
         </div>
       </div>
       <div>
-        <InquiryRecords
-          filtersOptions={filtersOptions}
-          setSelectedRow={setSelectedInquiry}
-        />
+        <InquiryRecords setSelectedRow={setSelectedInquiry} />
       </div>
     </div>
   );
