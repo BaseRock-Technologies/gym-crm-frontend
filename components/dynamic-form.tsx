@@ -1035,6 +1035,25 @@ export function DynamicForm({
                         additionalValuesToFocus
                       )
                     }
+                    onDeleteOption={field.name === "sourceOfInquiry" ? async (optionId: string) => {
+                      try {
+                        const response = await fetch(`/api/others/client-source/delete/${optionId}`, {
+                          method: 'DELETE',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+                        
+                        if (response.ok) {
+                          // Refresh options after deletion
+                          if (config.id === "inquiry") {
+                            await updateSelectFieldOptions("inquiry", field.name);
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Error deleting option:', error);
+                      }
+                    } : undefined}
                     disabled={field.editable === false}
                     apiData={field.apiConfig ?? null}
                   />
