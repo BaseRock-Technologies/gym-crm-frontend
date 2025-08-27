@@ -24,7 +24,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "contactNumber",
-        label: "Contact number",
+        label: "Contact Number",
         type: "phone",
         required: true,
         placeholder: "Contact Number",
@@ -65,7 +65,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "areaAddress",
-        placeholder: "Your Address",
+
         label: "Area Address",
         type: "text",
       },
@@ -77,7 +77,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         placeholder: "Select Follow Up",
       },
       // {
-      //   name: "followupTime",
+
       //   label: "Schedule FollowUp Time",
       //   type: "time",
       //   placeholder: "Enter Time",
