@@ -189,7 +189,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
       },
       {
         name: "feedback",
-        label: "Responce/Feedback",
+        label: "Response/Feedback",
         type: "textarea",
         required: true,
       },
