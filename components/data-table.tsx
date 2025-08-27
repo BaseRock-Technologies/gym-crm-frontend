@@ -250,18 +250,17 @@ export function DataTable({
                       ))}
                       {(config.actions || config.outOfActions) && (
                         <TableCell
-                          className={`flex gap-2 flex-wrap`}
+                          className="p-0 text-center align-middle"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {config.actions && config.actions.length > 0 && (
-                            <TableActions actions={config.actions} row={row} />
-                          )}
-                          {config.outOfActions && (
-                            <TableOutOfActions
-                              actions={config.outOfActions}
-                              row={row}
-                            />
-                          )}
+                          <div className="inline-flex justify-center items-center gap-4 max-w-xs mx-auto">
+                            {config.actions && config.actions.length > 0 && (
+                              <TableActions actions={config.actions} row={row} />
+                            )}
+                            {config.outOfActions && (
+                              <TableOutOfActions actions={config.outOfActions} row={row} />
+                            )}
+                          </div>
                         </TableCell>
                       )}
                     </TableRow>
