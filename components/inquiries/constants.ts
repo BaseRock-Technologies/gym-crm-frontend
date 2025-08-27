@@ -12,6 +12,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         required: true,
         placeholder: "First Name",
         validation: {
+          pattern: "^[A-Za-z ]+$",
           minLength: 1,
           maxLength: 50,
         },
@@ -20,7 +21,16 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "lastName",
         label: "Last Name",
         type: "text",
+
+        required: true,
+        placeholder: "Enter Name",
+        validation: {
+          pattern: "^[A-Za-z ]+$",
+          minLength: 1,
+          maxLength: 50,
+        },
         placeholder: "Last Name",
+
       },
       {
         name: "contactNumber",
@@ -36,6 +46,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "alternateContact",
         label: "Alternate Contact",
         type: "phone",
+        required: true,
         placeholder: "Alternate Number",
         validation: {
           pattern: "^\\d{10}$",
@@ -45,7 +56,14 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "email",
         label: "Email",
         type: "email",
+
+        required: true,
+        placeholder: "Email",
+        validation: {
+          pattern: "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
+        },
         placeholder: "Email Address",
+
       },
       {
         name: "gender",
@@ -67,6 +85,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "areaAddress",
 
         label: "Area Address",
+        required: true,
         type: "text",
       },
       {
