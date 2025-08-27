@@ -243,7 +243,7 @@ export function CustomSelect({
                 : ""
             )}
           >
-            <DialogHeader>
+            <DialogHeader className="hidden">
               <DialogTitle>
                 {customAddOptionsGroups &&
                 customAddOptionsGroups.length > 1 &&

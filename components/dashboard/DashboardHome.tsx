@@ -35,7 +35,7 @@ const DashboardHome = () => {
             </TabsTrigger>
             <TabsTrigger value="birthdays">Birthdays</TabsTrigger>
             <TabsTrigger value="anniversary">Anniversary</TabsTrigger>
-            <TabsTrigger value="today-schedule">Today's Schedule</TabsTrigger>
+            <TabsTrigger value="daily-schedule">Daily Schedule</TabsTrigger>
           </TabsList>
           <div className="absolute bottom-0 w-full h-[2px] bg-gray-100 z-0"></div>
         </div>
@@ -89,7 +89,7 @@ const DashboardHome = () => {
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"
-          value="today-schedule"
+          value="daily-schedule"
         >
           <TodaySchedule />
         </TabsContent>

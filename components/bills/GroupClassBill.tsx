@@ -80,9 +80,7 @@ export default function GroupClassBill() {
             paymentMethod,
             trainersDetails,
           } = res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
+          const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             memberId: billId.toString(),
             clientRepresentative: user?.userName || "",
@@ -208,7 +206,7 @@ export default function GroupClassBill() {
       );
     }
 
-    formConfig.title = "Create New Group Class bill";
+    formConfig.title = "Create New Group Class Bill";
 
     fetchInitialData();
   }, [user]);

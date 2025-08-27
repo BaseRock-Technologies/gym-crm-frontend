@@ -203,6 +203,7 @@ const updateFormConfigOptions = (
   fieldName: string,
   options: Record<string, any[]>,
   labelField: string,
+  valueField?: string,
   fieldsToDelete?: string[]
 ) => {
   const field: FormField | undefined = formConfig.fields.find((item) => item.name === fieldName);
@@ -215,7 +216,7 @@ const updateFormConfigOptions = (
             const { ...filteredOption } = option;
             const data = {
                 label: filteredOption[labelField],
-                value: filteredOption[labelField],
+                value: valueField ? filteredOption[valueField] : filteredOption[labelField],
             };
           delete filteredOption[labelField];
           delete filteredOption[labelField];
@@ -245,6 +246,7 @@ const updateFormConfigOptions = (
 const returnUpdatedOptions = (
   options: Record<string, any[]>,
   labelField: string,
+  valueField: string,
   fieldsToDelete?: string[]
 ) => {
   const tempOptions: Record<string, GroupedSelectOption[]> = {};
@@ -255,7 +257,7 @@ const returnUpdatedOptions = (
         const { ...filteredOption } = option;
         const data = {
           label: filteredOption[labelField],
-          value: filteredOption[labelField],
+          value: filteredOption[valueField],
         };
         delete filteredOption[labelField];
 

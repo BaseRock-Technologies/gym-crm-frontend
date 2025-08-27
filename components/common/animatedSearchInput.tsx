@@ -54,7 +54,7 @@ export function AnimatedSearchInput({
   */
 
   return (
-    <div className="relative w-full max-w-sm">
+    <div className="relative w-full max-w-xl">
       <div className="relative flex items-center w-full">
         <Search className="absolute left-2.5 h-4 w-4 text-gray-500 z-10" />
         <Input

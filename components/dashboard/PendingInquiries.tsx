@@ -1,103 +1,119 @@
 "use client";
 
 import { DataTableWrapper } from "@/components/data-table-wrapper";
+import { SelectApiData } from "@/types/form";
 import type { TableConfig } from "@/types/table";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Send } from "lucide-react";
 
-// Example data and table configuration (unchanged)
-// const mockData = Array.from({ length: 50 }, (_, i) => ({
-//   id: i + 1,
-//   name: `Client ${i + 1}`,
-//   type: "Regular",
-//   contact: `+1234567${i.toString().padStart(4, "0")}`,
-//   followupDate: "2024-12-08",
-//   representative: "Admin",
-//   status: "Active",
-// }));
-const mockData: any[] = [];
-
-const tableConfig: TableConfig = {
-  columns: [
-    { id: "name", header: "Name", accessorKey: "name" },
-    { id: "number", header: "Number", accessorKey: "number" },
-    { id: "for", header: "For", accessorKey: "for" },
-    {
-      id: "nextFollowUp",
-      header: "Next Follow-up",
-      accessorKey: "nextFollowUp",
-    },
-    { id: "representative", header: "Rep.", accessorKey: "representative" },
-    { id: "status", header: "Status", accessorKey: "status" },
-  ],
-  actions: [
-    {
-      id: "sms",
-      label: "SMS",
-      onClick: (row) => console.log("SMS", row),
-    },
-  ],
-  filters: [
-    {
-      id: "employee",
-      label: "Select Employee",
-      type: "select",
-      options: [
-        {
-          group: "default",
-          options: [
-            { label: "All employees", value: "all" },
-            { label: "Admin", value: "admin" },
-            { label: "Staff", value: "staff" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "type",
-      label: "Select Type",
-      type: "select",
-      options: [
-        {
-          group: "default",
-          options: [
-            { label: "All", value: "all" },
-            { label: "Hot", value: "hot" },
-            { label: "Warm", value: "warm" },
-            { label: "Cold", value: "cold" },
-            { label: "Expected Amount", value: "expected-amount" },
-            { label: "Successfull Followup", value: "successfull-followup" },
-          ],
-        },
-      ],
-    },
-    {
-      id: "date-range",
-      label: "Pick a date",
-      type: "date-range",
-      dateRange: {
-        from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        to: new Date(),
-      },
-    },
-    {
-      id: "search",
-      label: "Search",
-      type: "search",
-    },
-  ],
-  bulkActions: [
-    {
-      id: "SMS",
-      label: "Bulk SMS",
-      icon: Send,
-      btnVariant: "default",
-      onClick: (value) => console.log("SMS", value),
-    },
-  ],
-  searchableColumns: ["name", "number"],
-};
-
 export default function PendingInquiries() {
-  // return <DataTableWrapper config={tableConfig} initialData={mockData} />;
-  return <div>To be implemented</div>;
+  const tableConfig: TableConfig = {
+    columns: [
+      { id: "sno", header: "SNO", accessorKey: "sno" },
+      { id: "name", header: "Name", accessorKey: "name" },
+      { id: "contactNumber", header: "Number", accessorKey: "contactNumber" },
+      { id: "inquiryFor", header: "For", accessorKey: "inquiryFor" },
+      {
+        id: "followupDate",
+        header: "Next Follow-up",
+        accessorKey: "followupDate",
+        parseDateToStr: true,
+      },
+      { id: "attendedBy", header: "Rep.", accessorKey: "attendedBy" },
+      { id: "status", header: "Status", accessorKey: "status" },
+    ],
+    actions: [
+      {
+        id: "delete",
+        label: "Delete",
+        onClick: (row) => console.log("Delete", row),
+      },
+    ],
+    filters: [
+      {
+        id: "attendedBy",
+        label: "Select AttendedBy",
+        type: "select",
+        options: [
+          {
+            group: "default",
+            options: [{ label: "Admin", value: "Admin" }],
+          },
+        ],
+      },
+      {
+        id: "convertibility",
+        label: "Select Convertibility",
+        type: "select",
+        options: [
+          {
+            group: "default",
+            options: [
+              { label: "Hot", value: "Hot" },
+              { label: "Warm", value: "Warm" },
+              { label: "Cold", value: "Cold" },
+              { label: "Expected Amount", value: "Expected Amount" },
+              { label: "Successfull Followup", value: "Successfull Followup" },
+            ],
+          },
+        ],
+      },
+      {
+        id: "date-range",
+        label: "Pick a date",
+        type: "date-range",
+        dateRange: {
+          from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          to: new Date(),
+        },
+      },
+      {
+        id: "search",
+        label: "Search",
+        type: "search",
+      },
+    ],
+    searchableColumns: ["name", "contactNumber"],
+    bulkActions: [
+      // {
+      //   id: "SMS",
+      //   label: "Bulk SMS",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("SMS", value),
+      // },
+      // {
+      //   id: "whatsapp",
+      //   label: "Bulk Whatsapp",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("Whatsapp", value),
+      // },
+      // {
+      //   id: "transfer-inquiry",
+      //   label: "Transfer Inquiry",
+      //   icon: Send,
+      //   btnVariant: "default",
+      //   onClick: (value) => console.log("Transfer Inquiry", value),
+      // },
+    ],
+    showSelector: false,
+  };
+  const apiConfig: SelectApiData = {
+    apiPath: "inquiry/records",
+    method: "POST",
+    postData: {
+      filters: { status: "pending" },
+    },
+  };
+  return (
+    <Card className="w-full h-auto mx-auto border-none rounded-md overflow-hidden shadow-none">
+      <CardHeader className="bg-primary text-white mb-5 shadow-sm">
+        <CardTitle>Pending Inquiries</CardTitle>
+      </CardHeader>
+      <CardContent className="container">
+        <DataTableWrapper apiConfig={apiConfig} config={tableConfig} />
+      </CardContent>
+    </Card>
+  );
 }

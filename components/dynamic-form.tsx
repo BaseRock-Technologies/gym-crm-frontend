@@ -367,6 +367,7 @@ export function DynamicForm({
                 const date = new Date(val);
                 return Math.floor(date.getTime() / 1000);
               }
+              console.log(val);
               return val ? val : null;
             }, z.number().nullish())
             .superRefine((val, ctx) => {
@@ -728,13 +729,16 @@ export function DynamicForm({
 
   const sendApiRequest = async (
     data: SelectApiData,
-    postData?: { [key: string]: any }
+    postData?: { [key: string]: any },
+    makeToast: boolean = true
   ) => {
     const handleResponse = (res: StatusResponse) => {
       const { status, message } = res;
-      showToast(status, message, {
-        toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
-      });
+      if (makeToast) {
+        showToast(status, message, {
+          toastId: "673d4655-3cde-46ae-90e0-a220d19c6026",
+        });
+      }
       return status !== "error";
     };
     if (data.billType) {
@@ -775,9 +779,11 @@ export function DynamicForm({
       }
       return handleResponse(res);
     } catch (error) {
-      showToast("error", "Failed to send data", {
-        toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
-      });
+      if (makeToast) {
+        showToast("error", "Failed to send data", {
+          toastId: "fa05b23c-a49e-4ccb-914e-10a742ffc6f7",
+        });
+      }
       return false;
     }
   };
@@ -1103,6 +1109,7 @@ export function DynamicForm({
                       formField.onChange(value);
                       handleFieldChange(field.name, value);
                     }}
+                    editable={field.editable}
                   />
                 ) : field.type === "time-detailed" ? (
                   <TimePickerDetailed
@@ -1280,7 +1287,7 @@ export function DynamicForm({
         >
           <AccordionItem value={group.id}>
             <AccordionContent className="transition-all duration-300 ease-in-out">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 gap-3">
                 {group.fields.map((fieldName) => {
                   const field = config.fields.find((f) => f.name === fieldName);
                   return field ? renderField(field) : null;
@@ -1303,7 +1310,7 @@ export function DynamicForm({
           }`}
           key={group.id}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1405,7 +1412,7 @@ export function DynamicForm({
     } else {
       return (
         <div key={group.id}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-8 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-4 gap-3">
             {group.fields.map((fieldName) => {
               const field = config.fields.find((f) => f.name === fieldName);
               return field ? renderField(field) : null;
@@ -1424,9 +1431,11 @@ export function DynamicForm({
         ref={formCardRef}
         className="relative w-full h-full mx-auto border-none rounded-md overflow-hidden shadow-none"
       >
-        <CardHeader className="relative bg-primary text-white shadow-sm">
-          <CardTitle>{config.title}</CardTitle>
-        </CardHeader>
+        {config.title && (
+          <CardHeader className="relative bg-primary text-white shadow-sm">
+            <CardTitle>{config.title}</CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="relative p-0 w-full h-full">
           {(initialData === null || isRedirecting) && (
             <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">

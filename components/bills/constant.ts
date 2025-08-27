@@ -68,7 +68,7 @@ const formConfig: FormConfig = {
         additionalClass: "p-4",
         fields: [
           "amount",
-          "followUpDate",
+          "followupDate",
           "amountStatus",
           "paymentMethod",
           "paymentMethodDetail",
@@ -519,7 +519,7 @@ const formConfig: FormConfig = {
         },
       },
       {
-        name: "followUpDate",
+        name: "followupDate",
         label: "Followup Date",
         type: "date",
       },
@@ -568,18 +568,18 @@ const formConfig: FormConfig = {
           method: "POST",
         },
       },
-      {
-        name: "sendTextAndEmail",
-        label: "Send Text & Email",
-        type: "checkbox",
-        labelPos: "left",
-      },
-      {
-        name: "sendWhatsapp",
-        label: "Send WhatsApp",
-        type: "checkbox",
-        labelPos: "left",
-      },
+      // {
+      //   name: "sendTextAndEmail",
+      //   label: "Send Text & Email",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
+      // {
+      //   name: "sendWhatsapp",
+      //   label: "Send WhatsApp",
+      //   type: "checkbox",
+      //   labelPos: "left",
+      // },
     ],
   };
 

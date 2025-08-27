@@ -40,9 +40,7 @@ export default function GymMembershipBill() {
             paymentMethod,
             trainersDetails,
           } = res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
+          const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             memberId: billId.toString(),
             clientRepresentative: user?.userName || "",
@@ -113,7 +111,7 @@ export default function GymMembershipBill() {
         showToast("error", "Failed to load data");
       }
     };
-    formConfig.title = "Create new bill for Gym Membership";
+    formConfig.title = "Create New Bill for Gym Membership";
     fetchInitialData();
   }, [user]);
 
