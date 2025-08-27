@@ -12,8 +12,8 @@ const mockData: any[] = [];
 const tableConfig: TableConfig = {
   columns: [
     { id: "sno", header: "SNO", accessorKey: "sno" },
-    { id: "date", header: "Date", accessorKey: "date" },
-    { id: "name", header: "Name", accessorKey: "name" },
+    { id: "date", header: "Date", accessorKey: "date", parseDateToStr: true },
+    { id: "clientName", header: "Name", accessorKey: "clientName" },
     {
       id: "contactNumber",
       header: "Contact Number",
@@ -27,9 +27,9 @@ const tableConfig: TableConfig = {
   ],
   actions: [
     {
-      id: "sms",
-      label: "SMS",
-      onClick: (row) => console.log("SMS", row),
+      id: "delete",
+      label: "Delete",
+      onClick: (row) => console.log("Delete", row),
     },
   ],
   filters: [

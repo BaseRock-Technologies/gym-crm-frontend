@@ -26,8 +26,6 @@ const ClientFormIndex = () => {
         return "attendance/client/records";
       case "employees":
         return "attendance/employee/records";
-      case "trainers":
-        return "attendance/employee/records";
       default:
         return "attendance/client/records";
     }
@@ -75,26 +73,12 @@ const ClientFormIndex = () => {
             Employees
           </Label>
         </div>
-
-        <div className="flex items-center">
-          <RadioGroupItem
-            value="trainers"
-            id="trainers"
-            className="peer sr-only"
-          />
-          <Label htmlFor="trainers" className={cn(labelClassName)}>
-            Trainers
-          </Label>
-        </div>
       </RadioGroup>
 
       {selected === "clients" && (
         <AttendanceClientRecords apiConfig={apiConfig} />
       )}
       {selected === "employees" && (
-        <AttendanceEmployeeRecords apiConfig={apiConfig} />
-      )}
-      {selected === "trainers" && (
         <AttendanceEmployeeRecords apiConfig={apiConfig} />
       )}
     </div>

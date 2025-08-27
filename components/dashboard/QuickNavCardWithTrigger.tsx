@@ -11,6 +11,7 @@ interface QuickNavCardWithTriggerProps {
   iconColor: string;
   bgColor: string;
   dialogContent: React.JSX.Element;
+  contentClassName?: string;
 }
 
 export function QuickNavCardWithTrigger({
@@ -19,6 +20,7 @@ export function QuickNavCardWithTrigger({
   iconColor,
   bgColor,
   dialogContent,
+  contentClassName,
 }: QuickNavCardWithTriggerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -40,8 +42,12 @@ export function QuickNavCardWithTrigger({
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent>
-        <DialogTitle>Select Package</DialogTitle>
+      <DialogContent className={contentClassName}>
+        {title && (
+          <DialogTitle className="p-6 bg-primary text-white">
+            {title}
+          </DialogTitle>
+        )}
         {dialogContent}
       </DialogContent>
     </Dialog>

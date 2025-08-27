@@ -4,7 +4,7 @@ export interface InquiryRecord {
     name: string;
     contactNumber: number;
     inquiryFor: string;
-    followUpDate: number;
+    followupDate: number;
     attendedBy: string;
     status: string;
     convertibility: string;
