@@ -9,14 +9,10 @@ import { SelectApiData, SelectOption } from "@/types/form";
 import { FilterOptions } from "./types";
 
 interface InquiryRecordsProps {
-  filtersOptions: FilterOptions;
   setSelectedRow: React.Dispatch<SetStateAction<Record<string, boolean>>>;
 }
 
-const InquiryRecords: React.FC<InquiryRecordsProps> = ({
-  setSelectedRow,
-  filtersOptions,
-}) => {
+const InquiryRecords: React.FC<InquiryRecordsProps> = ({ setSelectedRow }) => {
   const tableConfig: TableConfig = {
     columns: [
       { id: "sno", header: "SNO", accessorKey: "sno" },
@@ -24,18 +20,24 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
       { id: "contactNumber", header: "Number", accessorKey: "contactNumber" },
       { id: "inquiryFor", header: "For", accessorKey: "inquiryFor" },
       {
-        id: "followUpDate",
+        id: "followupDate",
         header: "Next Follow-up",
-        accessorKey: "followUpDate",
+        accessorKey: "followupDate",
+        parseDateToStr: true,
       },
       { id: "attendedBy", header: "Rep.", accessorKey: "attendedBy" },
-      { id: "status", header: "Status", accessorKey: "status" },
+      {
+        id: "status",
+        header: "Status",
+        accessorKey: "status",
+        startCase: true,
+      },
     ],
     actions: [
       {
-        id: "sms",
-        label: "SMS",
-        onClick: (row) => console.log("SMS", row),
+        id: "delete",
+        label: "Delete",
+        onClick: (row) => console.log("Delete", row),
       },
     ],
     filters: [
@@ -46,7 +48,7 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
         options: [
           {
             group: "default",
-            options: filtersOptions.attendedByOptions,
+            options: [{ label: "Admin", value: "Admin" }],
           },
         ],
       },
@@ -57,7 +59,13 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
         options: [
           {
             group: "default",
-            options: filtersOptions.convertibility,
+            options: [
+              { label: "Hot", value: "hot" },
+              { label: "Warm", value: "warm" },
+              { label: "Cold", value: "cold" },
+              { label: "Expected Amount", value: "expected-amount" },
+              { label: "Successfull Followup", value: "successful-followup" },
+            ],
           },
         ],
       },
@@ -68,7 +76,20 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({
         options: [
           {
             group: "default",
-            options: filtersOptions.status,
+            options: [
+              {
+                label: "Pending",
+                value: "pending",
+              },
+              {
+                label: "Converted",
+                value: "converted",
+              },
+              {
+                label: "Closed",
+                value: "closed",
+              },
+            ],
           },
         ],
       },

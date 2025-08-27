@@ -55,6 +55,11 @@ export interface SelectApiData {
   postData?: Record<string, any>
 }
 
+interface FieldsForm {
+  fields: string[],
+  as: string
+}
+
 export interface FormFieldBase {
   name: string;
   label: string;
@@ -129,7 +134,7 @@ export interface AddtionalFormFieldsConfigGroup {
 }
 export interface FormConfig {
   id: string;
-  title: string;
+  title?: string;
   groups?: FormGroup[];
   fields: FormField[];
 }

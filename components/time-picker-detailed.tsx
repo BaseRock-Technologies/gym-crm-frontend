@@ -43,7 +43,7 @@ export function TimePickerDetailed({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover modal={true} open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <div className="relative">
           <Input
@@ -56,7 +56,7 @@ export function TimePickerDetailed({
           {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[280px]" align="start">
+      <PopoverContent className="p-0 z-[9999]" align="start">
         <div className="flex flex-col">
           <div className="flex justify-center p-2 border-b">
             <Button

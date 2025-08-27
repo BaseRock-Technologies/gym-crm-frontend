@@ -58,7 +58,7 @@ const tableConfig: TableConfig = {
       label: "Pick a date",
       type: "date-range",
       dateRange: {
-        from: new Date(),
+        from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         to: new Date(),
       },
     },

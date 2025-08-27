@@ -14,6 +14,8 @@ import { TableActions } from "./table-actions";
 import type { BulkActions, TableConfig, TableState } from "../types/table";
 import { Spinner } from "@/components/ui/spinner";
 import { TableOutOfActions } from "./table-out-actions";
+import { formatTimestamp, formatTime } from "@/utils/date-utils";
+import { startCase } from "lodash";
 
 interface DataTableProps {
   config: TableConfig;
@@ -58,15 +60,44 @@ export function DataTable({
 
   const handleBulkAction = (type: BulkActions) => {
     const selectedRows = data.filter((row) => selected[row.id]);
-    // Handle bulk actions
+
+    const rowsToExport = selectedRows.length > 0 ? selectedRows : data;
+
+    const exportToCSV = (filename: string) => {
+      if (!rowsToExport || rowsToExport.length === 0) return;
+      const headers = config.columns.map((c) => c.header);
+      const keys = config.columns.map((c) => c.accessorKey);
+      const csv = [headers.join(",")]
+        .concat(
+          rowsToExport.map((r) =>
+            keys.map((k) => JSON.stringify((r as any)[k] ?? "")).join(",")
+          )
+        )
+        .join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+
     switch (type) {
+      case "export-excel":
+        exportToCSV("table-export.csv");
+        break;
+      case "export-pdf":
+        window.print();
+        break;
+      case "print":
+        window.print();
+        break;
       case "SMS":
         console.log("sms");
         break;
       case "email":
         console.log("email");
-      case "follow-up":
-        console.log("follow-up");
       case "whatsapp":
         console.log("whatsapp");
         break;
@@ -85,6 +116,36 @@ export function DataTable({
     });
   };
 
+  const renderCellContent = (column: any, row: any) => {
+    const cellValue = row[column.accessorKey];
+
+    // If custom cell renderer is provided, use it
+    if (column.cell) {
+      return column.cell(row);
+    }
+
+    // If no value, return default
+    if (!cellValue) {
+      return "-";
+    }
+
+    // Apply formatting based on column configuration
+    if (column.parseDateToStr) {
+      return formatTimestamp(cellValue);
+    }
+
+    if (column.startCase) {
+      return startCase(cellValue);
+    }
+
+    if (column.parseTimeToStr) {
+      return formatTime(cellValue);
+    }
+
+    // Return raw value
+    return cellValue;
+  };
+
   return (
     <div className="w-full relative space-y-6">
       <TableFilters
@@ -96,6 +157,7 @@ export function DataTable({
             page: 1,
           });
         }}
+        components={config.components || []}
         onBulkAction={handleBulkAction}
         searchableColumns={config.searchableColumns}
         pageSize={tableState.pageSize}
@@ -108,16 +170,18 @@ export function DataTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead
-                className="w-[50px] border-r border-black/70"
-                key="checkbox-header"
-              >
-                <Checkbox
-                  onCheckedChange={(checked: boolean) =>
-                    handleSelectAll(checked)
-                  }
-                />
-              </TableHead>
+              {config.showSelector && (
+                <TableHead
+                  className="w-[50px] border-r border-black/70"
+                  key="checkbox-header"
+                >
+                  <Checkbox
+                    onCheckedChange={(checked: boolean) =>
+                      handleSelectAll(checked)
+                    }
+                  />
+                </TableHead>
+              )}
               {config.columns.map((column, index) => (
                 <TableHead
                   className={`truncate ${
@@ -152,15 +216,17 @@ export function DataTable({
                         index % 2 === 1 ? "bg-gray-50" : ""
                       }`}
                     >
-                      <TableCell
-                        className="border-r border-black/70"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Checkbox
-                          checked={selected[row.id] || false}
-                          onCheckedChange={() => handleSelectRow(row.id)}
-                        />
-                      </TableCell>
+                      {config.showSelector && (
+                        <TableCell
+                          className="border-r border-black/70"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Checkbox
+                            checked={selected[row.id] || false}
+                            onCheckedChange={() => handleSelectRow(row.id)}
+                          />
+                        </TableCell>
+                      )}
                       {config.columns.map((column, index) => (
                         <TableCell
                           key={`column-${index}`}
@@ -178,9 +244,7 @@ export function DataTable({
                                 : row[column.accessorKey]?.toString()
                             }
                           >
-                            {column.cell
-                              ? column.cell(row)
-                              : row[column.accessorKey] || "-"}
+                            {renderCellContent(column, row)}
                           </div>
                         </TableCell>
                       ))}

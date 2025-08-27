@@ -33,9 +33,7 @@ const PosIndex = () => {
         if (res.status === "success" && res.data) {
           const { invoiceNo, clientDetails, paymentMethod, productDetails } =
             res.data;
-          const currentDate = formatTimestamp(
-            Math.floor(new Date().getTime() / 1000)
-          );
+          const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             invoiceNo: invoiceNo.toString(),
             billDate: currentDate,

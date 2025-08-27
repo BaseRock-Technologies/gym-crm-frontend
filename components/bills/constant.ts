@@ -68,7 +68,7 @@ const formConfig: FormConfig = {
         additionalClass: "p-4",
         fields: [
           "amount",
-          "followUpDate",
+          "followupDate",
           "amountStatus",
           "paymentMethod",
           "paymentMethodDetail",
@@ -519,7 +519,7 @@ const formConfig: FormConfig = {
         },
       },
       {
-        name: "followUpDate",
+        name: "followupDate",
         label: "Followup Date",
         type: "date",
       },

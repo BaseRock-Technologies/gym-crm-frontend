@@ -1,7 +1,6 @@
 export interface TimeSlotSection {
-  startTime: string;
-  endTime: string;
-  displayTime: string;
+  startTime: string; // Formatted time string (e.g., "5:00 AM")
+  endTime: string;   // Formatted time string (e.g., "5:15 AM")
 }
 
 export interface TimeSlot {
@@ -10,38 +9,45 @@ export interface TimeSlot {
   sections: TimeSlotSection[];
 }
 
-export function generateTimeSlots(): TimeSlot[] {
-  const slots: TimeSlot[] = [
-    {
-      time: 'all-day',
-      displayTime: 'All-Day',
-      sections: [{
-        startTime: '00:00',
-        endTime: '23:59',
-        displayTime: 'All-Day'
-      }]
-    }
-  ];
+export function generateTimeSlots(selectedDate: Date = new Date()): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+
+  const formatDisplayTimeFromDate = (date: Date): string => {
+    const hour24 = date.getHours();
+    const minute = date.getMinutes();
+    const hour12 = hour24 % 12 || 12;
+    const ampm = hour24 < 12 ? 'AM' : 'PM';
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  };
 
   for (let hour = 5; hour <= 23; hour++) {
     for (let minute of [0, 30]) {
       if (hour === 23 && minute === 30) break; // Stop at 11:00 PM
       
-      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayTime = `${hour % 12 || 12}:${minute.toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
-      
-      // Create two 15-minute sections
+      const baseDate = new Date(selectedDate);
+      baseDate.setHours(hour, minute, 0, 0);
+
+      const timeStr = `${baseDate.getHours().toString().padStart(2, '0')}:${baseDate
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}`;
+      const displayTime = formatDisplayTimeFromDate(baseDate);
+
+      const endFirstSection = new Date(baseDate);
+      endFirstSection.setMinutes(endFirstSection.getMinutes() + 15);
+
+      const endSecondSection = new Date(baseDate);
+      endSecondSection.setMinutes(endSecondSection.getMinutes() + 30);
+
       const sections: TimeSlotSection[] = [
         {
-          startTime: timeStr,
-          endTime: `${hour.toString().padStart(2, '0')}:${(minute + 15).toString().padStart(2, '0')}`,
-          displayTime: `${displayTime} - First Half`
+          startTime: displayTime,
+          endTime: formatDisplayTimeFromDate(endFirstSection),
         },
         {
-          startTime: `${hour.toString().padStart(2, '0')}:${(minute + 15).toString().padStart(2, '0')}`,
-          endTime: `${hour.toString().padStart(2, '0')}:${(minute + 30).toString().padStart(2, '0')}`,
-          displayTime: `${displayTime} - Second Half`
-        }
+          startTime: formatDisplayTimeFromDate(endFirstSection),
+          endTime: formatDisplayTimeFromDate(endSecondSection),
+        },
       ];
 
       slots.push({
@@ -72,4 +78,21 @@ export const formatTimestamp = (timestamp: number): string => {
   };
   
   return date.toLocaleDateString('en-US', options).replace(',', '');
+};
+
+
+export const formatTime = (timestamp: number): string => {
+  if (!timestamp) {
+      return "-";
+  }
+  const date = new Date(timestamp * 1000);
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  const updatedHour = hours ? String(hours).padStart(2, '0') : '12';
+
+  return `${updatedHour}:${minutes}:${seconds} ${ampm}`;
 };
