@@ -216,6 +216,7 @@ const QuickManage = () => {
             bgColor="bg-blue-100"
             linkTo="/dashboard"
           /> */}
+
         </div>
       </div>
     </div>
