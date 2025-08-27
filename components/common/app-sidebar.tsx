@@ -42,7 +42,6 @@ import {
 import Cookies from "js-cookie";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Logo from "@/public/logo.svg";
 import Image from "next/image";
 

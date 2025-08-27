@@ -164,6 +164,7 @@ const QuickManage = () => {
             iconColor="text-green-500"
             bgColor="bg-green-100"
             linkTo="/manage-query"
+
           />
           <QuickNavCardWithTrigger
             title="Create Client"
