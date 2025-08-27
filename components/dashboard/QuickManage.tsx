@@ -178,7 +178,6 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
-
             linkTo="/manage-query"
             contentClassName="p-0"
             dialogContent={<CreateFollowup />}
