@@ -1,9 +1,10 @@
 "use client";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import WithAuth from "@/lib/helper/withAuth";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Spinner } from "@/components/ui/spinner";
 import Profile from "./Profile";
 import BillingAndPayment from "./BillingAndPayment";
 import Communication from "./Communication";
@@ -15,15 +16,32 @@ import Documents from "./Documents";
 import Bookings from "./Bookings";
 
 const ProfileIndex = () => {
+  const [tab, setTab] = useState("profile");
+  const [loading, setLoading] = useState(false);
+
+  const handleTabChange = (value: string) => {
+    setTab(value);
+    if (value === "profile") {
+      setLoading(true);
+      setTimeout(() => setLoading(false), 1000); // 1s loader
+    }
+  };
+
+  const handleProfileClick = () => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1000);
+  };
+
   return (
     <div className="relative w-full h-full space-y-12 px-2 pt-8 shadow-none">
       <Tabs
-        defaultValue="profile"
+        value={tab}
+        onValueChange={handleTabChange}
         className="relative w-full h-full overflow-hidden"
       >
         <div className="relative w-full">
           <TabsList className="relative w-full flex justify-start items-center gap-5 overflow-x-auto scrollbar-none">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="profile" onClick={handleProfileClick}>Profile</TabsTrigger>
             <TabsTrigger value="billingAndPayments">
               Billing & Payments
             </TabsTrigger>
@@ -41,7 +59,13 @@ const ProfileIndex = () => {
           className="relative w-full h-full pb-8 px-3 container mx-auto overflow-y-auto scrollbar-none"
           value="profile"
         >
-          <Profile />
+          {loading ? (
+            <div className="flex justify-center items-center h-40">
+              <Spinner />
+            </div>
+          ) : (
+            <Profile />
+          )}
         </TabsContent>
         <TabsContent
           className="relative w-full h-full pb-8 px-3 py-5 overflow-y-auto scrollbar-none container mx-auto"

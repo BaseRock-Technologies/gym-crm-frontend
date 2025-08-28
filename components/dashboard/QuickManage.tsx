@@ -171,17 +171,15 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-purple-500"
             bgColor="bg-purple-100"
-            linkTo="/manage-customers"
+            dialogContent={<CreateClient />}
           />
           <QuickNavCardWithTrigger
             title="Create Client Follow-up"
             icon={Users}
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
-            linkTo="/manage-query"
             contentClassName="p-0"
             dialogContent={<CreateFollowup />}
-
           />
           <QuickNavCard
             title="Create POS Bill"
