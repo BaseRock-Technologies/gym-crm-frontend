@@ -46,7 +46,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         name: "alternateContact",
         label: "Alternate Contact",
         type: "phone",
-        required: true,
+        
         placeholder: "Alternate Number",
         validation: {
           pattern: "^\\d{10}$",
