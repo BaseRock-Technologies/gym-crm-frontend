@@ -623,7 +623,7 @@ export function DynamicForm({
   React.useEffect(() => {
     const { errors } = form.formState;
     if (Object.keys(errors).length) {
-      showToast("error", "Please check all your data", {
+      showToast("error", "Please fill all the details", {
         toastId: "3912f12f-8cb4-45f8-a152-91a2dbb78549",
       });
 
