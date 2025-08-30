@@ -1457,7 +1457,7 @@ export function DynamicForm({
         )}
         <CardContent className="relative p-0 w-full h-full">
           {(initialData === null || isRedirecting) && (
-            <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
+            <div className="fixed inset-0 z-50 bg-white/60 flex justify-center items-center">
               <SpinnerTick color="#1a0f2b" />
             </div>
           )}

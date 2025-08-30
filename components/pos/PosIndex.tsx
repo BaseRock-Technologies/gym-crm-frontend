@@ -11,6 +11,7 @@ import { formatTimestamp } from "@/utils/date-utils";
 import React, { useState } from "react";
 
 const PosIndex = () => {
+  const MIN_LOADER_TIME = 1000; 
   const apiConfig: SelectApiData = {
     apiPath: "pos/bill/create",
     method: "POST",
@@ -25,14 +26,19 @@ const PosIndex = () => {
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        const start = Date.now();
         const res: StatusResponse = await post(
           {},
           "pos/bill/options",
           "Failed to fetch bill options"
         );
         if (res.status === "success" && res.data) {
-          const { invoiceNo, clientDetails, paymentMethod, productDetails } =
-            res.data;
+          const {
+            invoiceNo,
+            clientDetails,
+            paymentMethod,
+            productDetails
+          } = res.data;
           const currentDate = Math.floor(new Date().getTime() / 1000);
           const data = {
             invoiceNo: invoiceNo.toString(),
@@ -57,7 +63,14 @@ const PosIndex = () => {
             productDetails,
             "productName"
           );
-          setInitialData(data);
+
+          // Ensure spinner shows for at least MIN_LOADER_TIME
+          const elapsed = Date.now() - start;
+          if (elapsed < MIN_LOADER_TIME) {
+            setTimeout(() => setInitialData(data), MIN_LOADER_TIME - elapsed);
+          } else {
+            setInitialData(data);
+          }
         }
       } catch (error) {
         console.error("Error fetching initial data in Pos Bill:", error);
