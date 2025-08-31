@@ -70,7 +70,6 @@ interface DynamicFormProps {
   isAdminOnly?: boolean;
   adminEditRules?: AdminOnlyEdit;
   canSaveTheForm?: boolean;
-  onSuccess?: () => void; 
 }
 
 export function DynamicForm({
@@ -86,8 +85,6 @@ export function DynamicForm({
   isAdminOnly = false,
   canSaveTheForm = true,
   adminEditRules,
-  onSuccess,
-
 }: DynamicFormProps) {
   const [customOptions, setCustomOptions] = React.useState<
     Record<string, GroupedSelectOption[]>
@@ -829,9 +826,8 @@ export function DynamicForm({
 
       if (apiData) {
         const sentData: boolean = await sendApiRequest(apiData, filteredValues);
-        if (sentData) {
-          if (onSuccess) onSuccess(); 
-          if (resetOnSubmit) resetForm(filteredValues);
+        if (sentData && resetOnSubmit) {
+          resetForm(filteredValues);
         }
       } else if (resetOnSubmit) {
         resetForm(filteredValues);

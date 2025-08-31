@@ -48,13 +48,7 @@ export function QuickNavCardWithTrigger({
             {title}
           </DialogTitle>
         )}
-        {dialogContent &&
-          (typeof dialogContent.type === "function"
-            ? (
-              
-              dialogContent.type({ ...dialogContent.props, onClose: () => setIsOpen(false) })
-            )
-            : dialogContent)}
+        {dialogContent}
       </DialogContent>
     </Dialog>
   );
