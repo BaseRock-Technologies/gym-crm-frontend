@@ -175,8 +175,19 @@ const formConfig: FormConfig = {
       {
         name: "email",
         label: "Email",
-        type: "email",
+        type: "select",
         placeholder: "Email",
+        required: true,
+        editable: false,
+        dependsOn: {
+          field: "clientName",
+          formula: (values, options) => {
+            const email = options?.find(
+              (opt) => opt.value === values.clientName
+            )?.email;
+            return email || '';
+          },
+        },
       },
       {
         name: "clientSource",
