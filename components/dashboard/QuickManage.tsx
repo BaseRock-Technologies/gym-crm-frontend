@@ -179,7 +179,7 @@ const QuickManage = () => {
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
             contentClassName="p-0"
-            dialogContent={<CreateFollowup  />}
+            dialogContent={<CreateFollowup />}
           />
           <QuickNavCard
             title="Create POS Bill"
