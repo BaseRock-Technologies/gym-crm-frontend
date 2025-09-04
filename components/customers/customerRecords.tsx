@@ -55,12 +55,12 @@ const CustomerRecords: React.FC<CustomerRecordsProps> = ({}) => {
         header: "Cliend ID",
         accessorKey: "clientId",
       },
-      {
-        id: "clientPicture",
-        header: "Photo",
-        cell: (props) => <ImageCell {...props} />,
-        accessorKey: "clientPicture",
-      },
+      // {
+      //   id: "clientPicture",
+      //   header: "Photo",
+      //   cell: (props) => <ImageCell {...props} />,
+      //   accessorKey: "clientPicture",
+      // },
       { id: "clientName", header: "Client Name", accessorKey: "clientName" },
       {
         id: "contactNumber",
