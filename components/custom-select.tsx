@@ -198,7 +198,7 @@ export function CustomSelect({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onDeleteOption(option.id);
+                                onDeleteOption(option.id as string);
                               }}
                               className="ml-2 text-red-500 hover:text-red-700"
                             >
