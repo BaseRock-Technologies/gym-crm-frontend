@@ -23,7 +23,6 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         type: "text",
 
         required: true,
-        placeholder: "Enter Name",
         validation: {
           pattern: "^[A-Za-z ]+$",
           minLength: 1,
@@ -58,11 +57,10 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         type: "email",
 
         required: true,
-        placeholder: "Email",
+        placeholder: "Email Address",
         validation: {
           pattern: "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
         },
-        placeholder: "Email Address",
 
       },
       {

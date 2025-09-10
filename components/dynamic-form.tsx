@@ -1047,7 +1047,7 @@ export function DynamicForm({
                         if (response.ok) {
                           // Refresh options after deletion
                           if (config.id === "inquiry") {
-                            await updateSelectFieldOptions("inquiry", field.name);
+                            // await updateSelectFieldOptions("inquiry", field.name);
                           }
                         }
                       } catch (error) {
