@@ -1,5 +1,7 @@
 'use client';
 
+import SignInForm from "./(auth)/signin/page";
+
 export default function Page() {
-  return <h1>Client Component</h1>
+  return SignInForm();
 }

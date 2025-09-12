@@ -96,6 +96,8 @@ export default function SignInForm() {
     }
   }, [user, loading]);
 
+  if (loading) return <p>Loading...</p>;
+
   return (
     <div className="relative">
       {loading && (

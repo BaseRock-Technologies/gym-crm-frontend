@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3000:3000" # Expose the app on port 3000
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env # Load environment variables from .env file
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next # Persist the .next directory
+    command: "npm run start" # Start the Next.js app in production mode
+    depends_on:
+      - node_modules_cache
+
+  node_modules_cache:
+    image: node:18-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: "npm install"
+
+volumes:
+  node_modules:
