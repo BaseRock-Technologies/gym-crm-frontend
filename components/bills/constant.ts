@@ -161,17 +161,22 @@ const formConfig: FormConfig = {
       {
         name: "contactNumber",
         label: "Contact Number",
-        type: "select",
-        placeholder: "Select Contact Number",
+        type: "text",
+        placeholder: "Contact Number",
         required: true,
-        editable: false,
+        editable: true,
+        validation: {
+          pattern: "^\\d{10}$",
+          minLength: 10,
+          maxLength: 10
+        },
         dependsOn: {
           field: "clientName",
           formula: (values, options) => {
             const contactNumber = options?.find(
               (opt) => opt.value === values.clientName
             )?.contactNumber;
-            return contactNumber || ''
+            return contactNumber || values.contactNumber || '';
           },
         }
       },
