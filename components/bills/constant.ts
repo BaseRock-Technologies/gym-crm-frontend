@@ -13,13 +13,14 @@ const formConfig: FormConfig = {
         title: "Personal Information",
         type: "default",
         fields: [
+          "invoiceId",
           "memberId",
           "invoiceDate",
           "clientName",
           "contactNumber",
           "alternateContact",
           "email",
-          "clientSource",
+          "clientSource"
         ],
       },
       {
@@ -92,14 +93,22 @@ const formConfig: FormConfig = {
       },
     ],
     fields: [
-      {
-        name: "memberId",
-        label: "Member ID",
-        type: "number",
-        validation: {
-          min: 1,
-        }
-      },
+        {
+          name: "invoiceId",
+          label: "Invoice ID",
+          type: "text",
+          placeholder: "Invoice ID",
+          required: true,
+          defaultValue: "",
+        },
+        {
+          name: "memberId",
+          label: "Member ID",
+          type: "number",
+          validation: {
+            min: 1,
+          }
+        },
       {
         name: "invoiceDate",
         label: "Invoice Date",
@@ -152,17 +161,22 @@ const formConfig: FormConfig = {
       {
         name: "contactNumber",
         label: "Contact Number",
-        type: "select",
-        placeholder: "Select Contact Number",
+        type: "text",
+        placeholder: "Contact Number",
         required: true,
-        editable: false,
+        editable: true,
+        validation: {
+          pattern: "^\\d{10}$",
+          minLength: 10,
+          maxLength: 10
+        },
         dependsOn: {
           field: "clientName",
           formula: (values, options) => {
             const contactNumber = options?.find(
               (opt) => opt.value === values.clientName
             )?.contactNumber;
-            return contactNumber || ''
+            return contactNumber || values.contactNumber || '';
           },
         }
       },
