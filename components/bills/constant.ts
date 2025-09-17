@@ -176,7 +176,7 @@ const formConfig: FormConfig = {
             const contactNumber = options?.find(
               (opt) => opt.value === values.clientName
             )?.contactNumber;
-            return contactNumber || values.contactNumber || '';
+            return contactNumber ? String(contactNumber) : (values.contactNumber || "");
           },
         }
       },
