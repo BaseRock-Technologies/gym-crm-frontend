@@ -93,6 +93,13 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         required: true,
         placeholder: "Select Follow Up",
       },
+      {
+        name: "birthday",
+        label: "Date of Birth",
+        type: "date",
+        required: true,
+        placeholder: "Date of Birth",
+      },
       // {
 
       //   label: "Schedule FollowUp Time",
@@ -140,6 +147,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
             apiPath: "others/employee/create",
             method: "POST",
           },
+          fieldsToAddInOptions: {   
+          "default": ["clientSource", "_id"]
+        },
         required: true,
       },
       {

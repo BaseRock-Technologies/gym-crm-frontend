@@ -225,7 +225,7 @@ const formConfig: FormConfig = {
       },
       {
         name: "birthday",
-        label: "Birthday",
+        label: "Date of Birth",
         type: "date",
         placeholder: "Birthday Date",
       },
