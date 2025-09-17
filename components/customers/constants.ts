@@ -4,14 +4,14 @@ const profileFormConfig: FormConfig = {
     id: "profile-information",
     title: "Profile Information",
     groups: [
-        {
-            id: "profile-picture",
-            title: "Image",
-            type: "default",
-            fields: [
-            "picture",
-            ],
-        },
+        // {
+        //     id: "profile-picture",
+        //     title: "Image",
+        //     type: "default",
+        //     fields: [
+        //     "picture",
+        //     ],
+        // },
       {
         id: "profile-info",
         title: "Personal Information",
@@ -48,13 +48,13 @@ const profileFormConfig: FormConfig = {
       },
     ],
     fields: [
-      {
-        name: "picture",
-        label: "Profile Picture",
-        type: "image",
-        maxSize: 5 * 1024 * 1024,
-        editable: false,
-      },
+      // {
+      //   name: "picture",
+      //   label: "Profile Picture",
+      //   type: "image",
+      //   maxSize: 5 * 1024 * 1024,
+      //   editable: false,
+      // },
       {
         name: "clientName",
         label: "Client Name",
