@@ -208,38 +208,38 @@ const updateFormConfigOptions = (
 ) => {
   const field: FormField | undefined = formConfig.fields.find((item) => item.name === fieldName);
   if (field) {
-    const tempOptions: GroupedSelectOption[] = [];
-    
-    for (const group in options) {
-      if (options.hasOwnProperty(group)) {
+  const tempOptions: GroupedSelectOption[] = [];
+
+  for (const group in options) {
+    if (options.hasOwnProperty(group)) {
         const groupOptions = options[group].map(option => {
             const { ...filteredOption } = option;
-            const data = {
-                label: filteredOption[labelField],
-                value: valueField ? filteredOption[valueField] : filteredOption[labelField],
-            };
-          delete filteredOption[labelField];
+        const data = {
+          label: filteredOption[labelField],
+          value: valueField ? filteredOption[valueField] : filteredOption[labelField],
+        };
+        delete filteredOption[labelField];
           delete filteredOption[labelField];
 
-          if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
+        if (fieldsToDelete && Array.isArray(fieldsToDelete)) {
               fieldsToDelete.forEach(fieldToDelete => {
-                delete filteredOption[fieldToDelete];
-              });
-          }
-          return { ...data, ...filteredOption };
-        });
+            delete filteredOption[fieldToDelete];
+          });
+        }
+        return { ...data, ...filteredOption };
+      });
 
         const uniqueGroupOptions = Array.from(new Set(groupOptions.map(item => item.value)))
           .map(value => groupOptions.find(item => item.value === value));
 
-        tempOptions.push({
-          group,
-          options: uniqueGroupOptions,
-        });
-      }
+      tempOptions.push({
+        group,
+        options: uniqueGroupOptions,
+      });
     }
-    
-    field.options = tempOptions;
+  }
+
+  field.options = tempOptions;
   }
 };
 

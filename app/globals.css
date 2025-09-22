@@ -172,3 +172,7 @@ helper-secondary - #4F3187
     @apply p-0 scrollbar-none rounded-lg;
   }
 }
+
+.custom-datepicker .react-datepicker-wrapper {
+  width: 100% !important;  /* override inline width */
+}

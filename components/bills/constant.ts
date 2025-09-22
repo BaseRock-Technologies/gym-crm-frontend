@@ -112,7 +112,7 @@ const formConfig: FormConfig = {
       {
         name: "invoiceDate",
         label: "Invoice Date",
-        type: "date",
+        type: "custom-date",
         placeholder: "Invoice Date",
       },
       {
