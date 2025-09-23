@@ -335,18 +335,28 @@ const formConfig: FormConfig = {
         dependsOn: {
           field: "packageName,joiningDate",
           formula: (values, options) => {
+
+            // Get the selected package from options
             const packageDetails = options?.find(
               (opt) => opt.value === values.packageName
             );
-            const totalDurationOfPackageInDays =
-              packageDetails?.durationInDays || 0;
-            const joiningDate = values.joiningDate
-              ? new Date(values.joiningDate)
-              : new Date();
-  
+            if (!packageDetails) {
+              console.log("⚠️ No package matched");
+            }
+
+            const totalDurationInDays = packageDetails?.durationInDays || 0;
+
+            let joiningDate = new Date();
+            if (values.joiningDate) {
+              const jd = Number(values.joiningDate);
+              joiningDate = jd > 1000000000 ? new Date(jd * 1000) : new Date(jd);
+            }
+
             const endDate = new Date(joiningDate);
-            endDate.setDate(joiningDate.getDate() + totalDurationOfPackageInDays);
-            return formatTimestamp(Math.floor(endDate.getTime() / 1000));
+            endDate.setDate(joiningDate.getDate() + totalDurationInDays);
+        
+            const formattedEndDate = formatTimestamp(Math.floor(endDate.getTime() / 1000));
+            return formattedEndDate;
           },
         },
       },
