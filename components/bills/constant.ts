@@ -3,6 +3,11 @@ import { FormConfig } from "@/types/form";
 import { formatTimestamp } from "@/utils/date-utils";
 import { ClientCustomAddOptionForm, ClientSourceCustomAddOptionForm, TaxCustomAddOptionForm, chequeConditionalFields, PaytmMethodCustomAddOptionForm, TrainerCustomAddOptionForm, GymPackageCustomAddOptionForm } from "../custom-form-options-constants";
 
+const generateInvoiceId = () => {
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const randomPart = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+  return `INV-${datePart}-${randomPart}`;
+};
 
 const formConfig: FormConfig = {
     id: "gym-package",
@@ -100,7 +105,7 @@ const formConfig: FormConfig = {
           type: "text",
           placeholder: "Invoice ID",
           required: true,
-          defaultValue: "",
+          defaultValue: generateInvoiceId(),
         },
         {
           name: "memberId",
