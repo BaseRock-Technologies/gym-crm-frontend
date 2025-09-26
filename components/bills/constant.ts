@@ -50,6 +50,7 @@ const formConfig: FormConfig = {
           "packageName",
           "joiningDate",
           "endDate",
+          "sessions",
           "packagePrice",
           "discount",
           "discountAmount",
@@ -377,42 +378,41 @@ const formConfig: FormConfig = {
         name: "discount",
         label: "Discount(%)",
         type: "decimal",
-        placeholder: "Discount",
+        placeholder: "Discount Percentage",
+        editable: true,
         validation: {
           max: 100,
           min: 0,
         },
         dependsOn: {
-          field: "packagePrice,discountAmount,packageName",
+          field: "packageName,packagePrice",
           formula: (values, options) => {
             const packagePrice: number = parseFloat(values.packagePrice) || 0;
-            const userDiscount: number = parseFloat(values.discount) || 0;
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
-                ?.maxDiscount || 0;
-  
-            if (packagePrice) {
-              const maxDiscountPercentage = (maxDiscount / packagePrice) * 100;
+                ?.maxDiscount || 999999; // Default high value if no max discount
+
+            const userDiscount: number = parseFloat(values.discount) || 0;
+            if (packagePrice > 0 && maxDiscount < 999999) {
+              const maxDiscountPercentage = Math.round((maxDiscount / packagePrice * 100) * 100) / 100;
               if (userDiscount > maxDiscountPercentage) {
                 showToast(
-                  "info",
-                  `Max discount percentage is ${maxDiscountPercentage}`
+                  "warning",
+                  `Max discount percentage is ${maxDiscountPercentage.toFixed(2)}%`
                 );
                 return maxDiscountPercentage;
               }
-              return userDiscount;
-            } else {
-              return userDiscount;
             }
+            return userDiscount;
           },
         },
       },
       {
         name: "discountAmount",
-        label: "Discount",
+        label: "Discount Amount",
         type: "decimal",
         placeholder: "Discount Amount",
-        editable: false,
+        editable: true,
         dependsOn: {
           field: "packagePrice,discount,packageName",
           formula: (values, options) => {
@@ -420,14 +420,21 @@ const formConfig: FormConfig = {
             const discount: number = parseFloat(values.discount) || 0;
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
-                ?.maxDiscount || 0;
-            if ((packagePrice * discount) / 100 > maxDiscount)
-              showToast("info", `Max Discount is ${maxDiscount}`, {
-                toastId: "019411cb-5477-7a10-869e-cedb19af7489",
-              });
-            return Math.min((packagePrice * discount) / 100, maxDiscount).toFixed(
-              2
-            );
+                ?.maxDiscount || 999999; // Default high value if no max discount
+
+            // Calculate discount amount from percentage
+            if (packagePrice > 0 && discount > 0) {
+              const calculatedAmount = Math.round((packagePrice * discount / 100) * 100) / 100;
+              return Math.min(calculatedAmount, maxDiscount);
+            }
+
+            // Allow manual entry if no percentage is set
+            const userDiscountAmount: number = parseFloat(values.discountAmount) || 0;
+            if (userDiscountAmount > maxDiscount && maxDiscount < 999999) {
+              showToast("warning", `Max discount amount is ₹${maxDiscount}`);
+              return maxDiscount;
+            }
+            return userDiscountAmount;
           },
         },
       },
@@ -533,6 +540,12 @@ const formConfig: FormConfig = {
             return priceCalculates.toFixed(2);
           },
         },
+      },
+      {
+        name: "sessions",
+        label: "Session(s)",
+        type: "text",
+        placeholder: "Sessions",
       },
       {
         name: "amount",
