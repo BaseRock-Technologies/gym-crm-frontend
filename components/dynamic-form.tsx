@@ -842,7 +842,7 @@ export function DynamicForm({
     }
   };
 
-  const handleAddCustomOption = (
+  const handleAddCustomOption = async (
     fieldName: string,
     primaryFields: string[],
     primaryValues: string[],
@@ -855,7 +855,8 @@ export function DynamicForm({
       const shouldCombinePrimaryFieldValues =
         config.fields.find((ele) => ele.name === fieldName)
           ?.combinePrimaryFields || false;
-      primaryFields.forEach((field, index) => {
+      for (let index = 0; index < primaryFields.length; index++) {
+        const field = primaryFields[index];
         let currentValue = primaryValues[index];
         if (shouldCombinePrimaryFieldValues) {
           currentValue = primaryValues.join("-");
@@ -918,12 +919,44 @@ export function DynamicForm({
                 return updatedOptions;
               });
               handleFieldChange(field, currentValue, fieldNewOptions);
+              // If adding a new sourceOfInquiry, refresh options from backend instantly
+              if (fieldName === "sourceOfInquiry" && config.id === "inquiry") {
+                try {
+                  const response = await fetch("/api/others/client-source/list", {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  });
+                  if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === "success" && Array.isArray(data.sources)) {
+                      const updatedSourceOptions = [
+                        {
+                          group: "default",
+                          options: data.sources.map((src: any) => ({
+                            label: src.clientSource,
+                            value: src.clientSource,
+                            id: src._id,
+                          })),
+                        },
+                      ];
+                      setCustomOptions((prev) => ({
+                        ...prev,
+                        sourceOfInquiry: updatedSourceOptions,
+                      }));
+                    }
+                  }
+                } catch (err) {
+                  console.error("Failed to refresh sourceOfInquiry options", err);
+                }
+              }
             } else {
               handleFieldChange(field, currentValue);
             }
           }
         }
-      });
+      }
     } catch (error) {
       console.error("Error Adding Custom options:", error);
     }
