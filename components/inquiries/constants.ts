@@ -217,6 +217,9 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           apiPath: "package/create",
           method: "POST",
         },
+        fieldsToAddInOptions: {
+          "default": ["clientSource", "_id"]
+        },
       },
       {
         name: "feedback",

@@ -50,6 +50,10 @@ export function DataTableWrapper({
   const isFetchingRef = useRef(false);
   const previousFiltersRef = useRef(tableState.filters);
 
+  
+  
+  const searchTimeout = useRef<number | null>(null);
+
   const getFilteredData = useCallback(async (): Promise<
     PageData | undefined
   > => {
@@ -61,21 +65,15 @@ export function DataTableWrapper({
     setIsLoading(true);
 
     try {
-      const payload = {
+      
+      
+      const payload = merge({}, apiConfig.postData, {
         filters: { ...tableState.filters },
-        searchConfig: tableState.filters.search
-          ? {
-              searchTerm: tableState.filters.search,
-              searchableColumns: config.searchableColumns,
-            }
-          : undefined,
-      };
-      delete payload.filters.search;
+      });
+
       const res: StatusResponse = await post(
-        merge({}, apiConfig.postData, payload),
-        `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${
-          tableState.pageSize
-        }`
+        payload,
+        `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${tableState.pageSize}`
       );
 
       if (res.status === "error") {
@@ -113,7 +111,7 @@ export function DataTableWrapper({
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [tableState, config.searchableColumns, apiConfig]);
+  }, [tableState, apiConfig]);
 
   const fetchData = useCallback(async () => {
     const currentPage = tableState.page;
@@ -133,11 +131,13 @@ export function DataTableWrapper({
     const currentFilters = tableState.filters;
     const previousFilters = previousFiltersRef.current;
 
-    // Check if filters have actually changed
+
+    
     const filtersChanged =
       JSON.stringify(currentFilters) !== JSON.stringify(previousFilters);
 
-    // If filters changed, clear cache and reset to page 1
+    
+      
     if (filtersChanged) {
       setPageData({});
       setTableState((prev) => ({ ...prev, page: 1 }));
@@ -145,7 +145,8 @@ export function DataTableWrapper({
       return;
     }
 
-    // Check if data is already cached for current page
+   
+    
     if (pageData[currentPage]) {
       return;
     }
@@ -153,15 +154,39 @@ export function DataTableWrapper({
     fetchData();
   }, [tableState.filters, tableState.page, tableState.pageSize, fetchData]);
 
+  
+  const handleStateChange = (newState: Partial<TableState>) => {
+    if (newState.filters && newState.filters.search !== undefined) {
+      if (searchTimeout.current) {
+        window.clearTimeout(searchTimeout.current);
+      }
+      // @ts-ignore: browser setTimeout returns number
+      searchTimeout.current = window.setTimeout(() => {
+        setTableState((prev) => ({ ...prev, ...newState, page: 1 }));
+      }, 400);
+    } else if (newState.filters) {
+      setTableState((prev) => ({ ...prev, ...newState, page: 1 }));
+    } else {
+      setTableState((prev) => ({ ...prev, ...newState }));
+    }
+  };
+
+  
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) {
+        window.clearTimeout(searchTimeout.current);
+      }
+    };
+  }, []);
+
   return (
     <DataTable
       config={config}
       data={currentPageData.data}
       total={currentPageData.total}
       tableState={tableState}
-      onStateChange={(newState) =>
-        setTableState((prevState) => ({ ...prevState, ...newState }))
-      }
+      onStateChange={handleStateChange} 
       isLoading={isLoading}
       setSelectedRow={setSelectedRow}
     />
