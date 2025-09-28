@@ -172,7 +172,7 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
         placeholder: "Select Convertibility",
       },
       {
-        name: "sourceOfInquiry",
+        name: "clientSource",
         label: "Source of Inquiry",
         options: [],
         type: "select",
