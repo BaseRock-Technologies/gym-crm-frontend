@@ -390,13 +390,22 @@ const formConfig: FormConfig = {
           min: 0,
         },
         dependsOn: {
-          field: "packageName,packagePrice",
+          field: "packageName,packagePrice,discountAmount",
           formula: (values, options) => {
             const packagePrice: number = parseFloat(values.packagePrice) || 0;
+            const discountAmount: number = parseFloat(values.discountAmount);
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
                 ?.maxDiscount || 999999; // Default high value if no max discount
 
+            // If user is editing discount amount, calculate percentage from amount
+            if (packagePrice > 0 && values.discountAmount !== undefined && values.discountAmount !== null && values.discountAmount !== '') {
+              const calculatedPercentage = Math.round((discountAmount / packagePrice * 100) * 100) / 100;
+              const maxPercentage = maxDiscount < 999999 ? Math.round((maxDiscount / packagePrice * 100) * 100) / 100 : 100;
+              return Math.min(calculatedPercentage, maxPercentage).toFixed(2);
+            }
+
+            // Otherwise, validate the entered percentage
             const userDiscount: number = parseFloat(values.discount) || 0;
             if (packagePrice > 0 && maxDiscount < 999999) {
               const maxDiscountPercentage = Math.round((maxDiscount / packagePrice * 100) * 100) / 100;
@@ -405,10 +414,10 @@ const formConfig: FormConfig = {
                   "warning",
                   `Max discount percentage is ${maxDiscountPercentage.toFixed(2)}%`
                 );
-                return maxDiscountPercentage;
+                return maxDiscountPercentage.toFixed(2);
               }
             }
-            return userDiscount;
+            return userDiscount.toFixed(2);
           },
         },
       },
@@ -422,18 +431,18 @@ const formConfig: FormConfig = {
           field: "packagePrice,discount,packageName",
           formula: (values, options) => {
             const packagePrice: number = parseFloat(values.packagePrice) || 0;
-            const discount: number = parseFloat(values.discount) || 0;
+            const discount: number = parseFloat(values.discount);
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
                 ?.maxDiscount || 999999; // Default high value if no max discount
 
-            // Calculate discount amount from percentage
-            if (packagePrice > 0 && discount > 0) {
+            // Always calculate discount amount from percentage when discount field has a value (including 0)
+            if (packagePrice > 0 && values.discount !== undefined && values.discount !== null && values.discount !== '') {
               const calculatedAmount = Math.round((packagePrice * discount / 100) * 100) / 100;
               return Math.min(calculatedAmount, maxDiscount);
             }
 
-            // Allow manual entry if no percentage is set
+            // Allow manual entry only when no percentage is set
             const userDiscountAmount: number = parseFloat(values.discountAmount) || 0;
             if (userDiscountAmount > maxDiscount && maxDiscount < 999999) {
               showToast("warning", `Max discount amount is ₹${maxDiscount}`);
