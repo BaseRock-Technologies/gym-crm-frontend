@@ -153,7 +153,7 @@ const ClientCustomAddOptionForm: FormConfig = {
       editable: false,
       isHidden: true,
       placeholder: "client code",
-      defaultValue: crypto.randomUUID(),
+      defaultValue: typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
     },
   ],
 };
