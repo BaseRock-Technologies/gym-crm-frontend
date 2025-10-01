@@ -19,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { CustomSelect } from "./custom-select";
 import { TimePicker } from "./time-picker";
+import CustomDatePicker from "./common/CustomDatePicker";
+
 import {
   AdminOnlyEdit,
   FieldsToAddInOptions,
@@ -356,38 +358,25 @@ export function DynamicForm({
           break;
         case "date":
           fieldSchema = z
-            .preprocess((val) => {
-              if (val instanceof Date) {
-                return Math.floor(val.getTime() / 1000);
-              }
-              // if (typeof val === "number") {
-              //   return formatDate(new Date(val));
-              // }
-              if (typeof val === "string" && !isNaN(Date.parse(val))) {
-                const date = new Date(val);
-                return Math.floor(date.getTime() / 1000);
-              }
-              console.log(val);
-              return val ? val : null;
-            }, z.number().nullish())
-            .superRefine((val, ctx) => {
-              if (field.required && (val === undefined || val === null)) {
-                ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
-                  message: `${field.label} is required`,
-                });
-              }
-              if (val !== undefined && val !== null) {
-                const isInvalid = isNaN(val);
-                if (isInvalid) {
-                  ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: `Invalid ${field.label}`,
-                  });
-                }
-              }
-            });
-          break;
+          .preprocess((val) => {
+            if (val instanceof Date) {
+              return Math.floor(val.getTime() / 1000);
+            }
+            if (typeof val === "string" && !isNaN(Date.parse(val))) {
+              return Math.floor(new Date(val).getTime() / 1000);
+            }
+            return val ? val : null;
+          }, z.number().nullish())
+          .superRefine((val, ctx) => {
+            if (field.required && (val === undefined || val === null)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `${field.label} is required`,
+              });
+            }
+          });
+        break;
+
         case "select":
           fieldSchema = z
             .preprocess((val) => {
@@ -552,6 +541,27 @@ export function DynamicForm({
               }
             });
           break;
+        case "custom-date":
+          fieldSchema = z
+            .preprocess((val) => {
+              if (val instanceof Date) {
+                return Math.floor(val.getTime() / 1000);
+              }
+              if (typeof val === "string" && !isNaN(Date.parse(val))) {
+                return Math.floor(new Date(val).getTime() / 1000);
+              }
+              return val ? val : null;
+            }, z.number().nullish())
+            .superRefine((val, ctx) => {
+              if (field.required && (val === undefined || val === null)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `${field.label} is required`,
+                });
+              }
+            });
+          break;
+
         default:
           fieldSchema = z.preprocess(
             (val) => {
@@ -623,7 +633,7 @@ export function DynamicForm({
   React.useEffect(() => {
     const { errors } = form.formState;
     if (Object.keys(errors).length) {
-      showToast("error", "Please check all your data", {
+      showToast("error", "Please fill all the details", {
         toastId: "3912f12f-8cb4-45f8-a152-91a2dbb78549",
       });
 
@@ -655,9 +665,14 @@ export function DynamicForm({
     value: any,
     customOptionsOfField: GroupedSelectOption[] = []
   ) => {
+    // Use form.getValues() to get the latest state
+    const currentValues = form.getValues();
+    const newValues = { ...currentValues, [name]: value };
+
     form.setValue(name, value);
-    const newValues = { ...formValues, [name]: value };
+
     let fieldsUpdated = false;
+
     config.fields.forEach((field) => {
       if (field.dependsOn) {
         const fieldName = field.name;
@@ -665,6 +680,7 @@ export function DynamicForm({
         const dependentFields = field.dependsOn.field
           .split(",")
           .map((f) => f.trim());
+
         if (dependentFields.includes(name)) {
           let fieldOptions: GroupedSelectOption[] = [];
           dependentFields.forEach((depField) => {
@@ -689,11 +705,13 @@ export function DynamicForm({
           const fieldSelectOptions: SelectOption[] = fieldOptions
             .flatMap((item) => item.options)
             .filter(Boolean);
+
           const calculatedValue = evaluateFormula(
             field.dependsOn.formula,
             newValues,
             fieldSelectOptions
           );
+
           if (calculatedValue !== undefined) {
             newValues[fieldName] = calculatedValue;
             form.setValue(fieldName, calculatedValue);
@@ -701,6 +719,7 @@ export function DynamicForm({
             newValues[fieldName] = "";
             form.setValue(fieldName, "");
           }
+
           fieldsUpdated = true;
         }
       }
@@ -726,6 +745,7 @@ export function DynamicForm({
       setFormValues(newValues);
     }
   };
+
 
   const sendApiRequest = async (
     data: SelectApiData,
@@ -842,7 +862,7 @@ export function DynamicForm({
     }
   };
 
-  const handleAddCustomOption = (
+  const handleAddCustomOption = async (
     fieldName: string,
     primaryFields: string[],
     primaryValues: string[],
@@ -855,7 +875,8 @@ export function DynamicForm({
       const shouldCombinePrimaryFieldValues =
         config.fields.find((ele) => ele.name === fieldName)
           ?.combinePrimaryFields || false;
-      primaryFields.forEach((field, index) => {
+      for (let index = 0; index < primaryFields.length; index++) {
+        const field = primaryFields[index];
         let currentValue = primaryValues[index];
         if (shouldCombinePrimaryFieldValues) {
           currentValue = primaryValues.join("-");
@@ -918,12 +939,44 @@ export function DynamicForm({
                 return updatedOptions;
               });
               handleFieldChange(field, currentValue, fieldNewOptions);
+              // If adding a new sourceOfInquiry, refresh options from backend instantly
+              if (fieldName === "sourceOfInquiry" && config.id === "inquiry") {
+                try {
+                  const response = await fetch("/api/others/client-source/list", {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  });
+                  if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === "success" && Array.isArray(data.sources)) {
+                      const updatedSourceOptions = [
+                        {
+                          group: "default",
+                          options: data.sources.map((src: any) => ({
+                            label: src.clientSource,
+                            value: src.clientSource,
+                            id: src._id,
+                          })),
+                        },
+                      ];
+                      setCustomOptions((prev) => ({
+                        ...prev,
+                        sourceOfInquiry: updatedSourceOptions,
+                      }));
+                    }
+                  }
+                } catch (err) {
+                  console.error("Failed to refresh sourceOfInquiry options", err);
+                }
+              }
             } else {
               handleFieldChange(field, currentValue);
             }
           }
         }
-      });
+      }
     } catch (error) {
       console.error("Error Adding Custom options:", error);
     }
@@ -1035,6 +1088,25 @@ export function DynamicForm({
                         additionalValuesToFocus
                       )
                     }
+                    onDeleteOption={field.name === "sourceOfInquiry" ? async (optionId: string) => {
+                      try {
+                        const response = await fetch(`/api/others/client-source/delete/${optionId}`, {
+                          method: 'DELETE',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+                        
+                        if (response.ok) {
+                          // Refresh options after deletion
+                          if (config.id === "inquiry") {
+                            // await updateSelectFieldOptions("inquiry", field.name);
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Error deleting option:', error);
+                      }
+                    } : undefined}
                     disabled={field.editable === false}
                     apiData={field.apiConfig ?? null}
                   />
@@ -1071,38 +1143,39 @@ export function DynamicForm({
                     disabled={field.editable === false}
                   />
                 ) : field.type === "date" ? (
-                  <Popover modal={true}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !formField.value && "text-muted-foreground"
-                        )}
-                      >
-                        {formField.value ? (
-                          formatDate(new Date(formField.value * 1000))
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formField.value}
-                        onSelect={(value) => {
-                          if (value) {
-                            const tempVal = Math.floor(value.getTime()) / 1000;
-                            formField.onChange(tempVal);
-                            handleFieldChange(field.name, tempVal);
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                ) : field.type === "time" ? (
+                    <CustomDatePicker
+                      value={
+                        formField.value
+                          ? typeof formField.value === "number"
+                            ? new Date(formField.value * 1000)
+                            : new Date(formField.value)
+                          : null
+                      }
+                      onChange={(date) => {
+                        const tempVal = date ? Math.floor(date.getTime() / 1000) : null;
+                        formField.onChange(tempVal);
+                        handleFieldChange(field.name, tempVal);
+                      }}
+                      placeholder={field.placeholder}
+                    />
+                )
+                : field.type === "custom-date" ? (
+                    <CustomDatePicker
+                      value={
+                        formField.value
+                          ? typeof formField.value === "number"
+                            ? new Date(formField.value * 1000)
+                            : new Date(formField.value)
+                          : null
+                      }
+                      onChange={(date) => {
+                        const tempVal = date ? Math.floor(date.getTime() / 1000) : null;
+                        formField.onChange(tempVal);
+                        handleFieldChange(field.name, tempVal);
+                      }}
+                      placeholder={field.placeholder}
+                    />
+                  ) : field.type === "time" ? (
                   <TimePicker
                     value={formField.value}
                     onChange={(value) => {
@@ -1438,7 +1511,7 @@ export function DynamicForm({
         )}
         <CardContent className="relative p-0 w-full h-full">
           {(initialData === null || isRedirecting) && (
-            <div className="absolute z-50 w-full h-full top-0 left-0 bg-white/60 flex justify-center items-center">
+            <div className="fixed inset-0 z-50 bg-white/60 flex justify-center items-center">
               <SpinnerTick color="#1a0f2b" />
             </div>
           )}

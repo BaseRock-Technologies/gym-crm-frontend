@@ -61,7 +61,7 @@ export default function InquiryHome() {
 
           updateFormConfigOptions(
             InquiryFormConfig,
-            "sourceOfInquiry",
+            "clientSource",
             clientSourceDetails,
             "clientSource"
           );

@@ -47,10 +47,8 @@ const fieldsToRemove: FieldsToRemoveConfig = {
 
 export default function PersonalTrainingBill() {
   const { user } = useAuth();
-  const [initialData, setInitialData] = React.useState<Record<
-    string,
-    any
-  > | null>(null);
+  const [initialData, setInitialData] = React.useState<Record<string, any> | null>(null);
+  const MIN_LOADER_TIME = 1000; 
 
   const apiConfig: SelectApiData = {
     apiPath: "bills/create",
@@ -61,6 +59,7 @@ export default function PersonalTrainingBill() {
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        const start = Date.now();
         const res: StatusResponse = await post(
           { billType: "personal-training" },
           "bills/options",
@@ -93,13 +92,13 @@ export default function PersonalTrainingBill() {
               field: "clientName",
               formula: (values, options) => {
                 return (
-                  options?.find((opt) => opt.value === values.clientName)
-                    ?.memberId ?? data.memberId
+                  options?.find((opt) => opt.value === values.clientName)?.memberId ?? data.memberId
                 );
               },
             };
           }
 
+          // Align and group updateFormConfigOptions calls for clarity
           updateFormConfigOptions(
             formConfig,
             "clientName",
@@ -124,7 +123,12 @@ export default function PersonalTrainingBill() {
             packageDetails,
             "package"
           );
-          updateFormConfigOptions(formConfig, "taxName", taxDetails, "taxName");
+          updateFormConfigOptions(
+            formConfig,
+            "taxName",
+            taxDetails,
+            "taxName"
+          );
           updateFormConfigOptions(
             formConfig,
             "paymentMode",
@@ -137,13 +141,17 @@ export default function PersonalTrainingBill() {
             trainersDetails,
             "trainer"
           );
-          setInitialData(data);
+
+          // Ensure spinner shows for at least MIN_LOADER_TIME
+          const elapsed = Date.now() - start;
+          if (elapsed < MIN_LOADER_TIME) {
+            setTimeout(() => setInitialData(data), MIN_LOADER_TIME - elapsed);
+          } else {
+            setInitialData(data);
+          }
         }
       } catch (error) {
-        console.error(
-          "Error fetching initial data in Gym Packgae Bill:",
-          error
-        );
+        console.error("Error fetching initial data in Gym Packgae Bill:", error);
         showToast("error", "Failed to load data");
       }
     };
@@ -155,8 +163,7 @@ export default function PersonalTrainingBill() {
         );
         if (relatedFormConfigGroup) {
           group.fields.forEach(({ name: fieldName, position }) => {
-            const currentIndex =
-              relatedFormConfigGroup.fields.indexOf(fieldName);
+            const currentIndex = relatedFormConfigGroup.fields.indexOf(fieldName);
             if (currentIndex === -1) {
               // Determine the correct position
               const insertIndex = Math.max(

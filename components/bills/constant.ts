@@ -3,6 +3,11 @@ import { FormConfig } from "@/types/form";
 import { formatTimestamp } from "@/utils/date-utils";
 import { ClientCustomAddOptionForm, ClientSourceCustomAddOptionForm, TaxCustomAddOptionForm, chequeConditionalFields, PaytmMethodCustomAddOptionForm, TrainerCustomAddOptionForm, GymPackageCustomAddOptionForm } from "../custom-form-options-constants";
 
+const generateInvoiceId = () => {
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const randomPart = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+  return `INV-${datePart}-${randomPart}`;
+};
 
 const formConfig: FormConfig = {
     id: "gym-package",
@@ -13,13 +18,14 @@ const formConfig: FormConfig = {
         title: "Personal Information",
         type: "default",
         fields: [
+          "invoiceId",
           "memberId",
           "invoiceDate",
           "clientName",
           "contactNumber",
           "alternateContact",
           "email",
-          "clientSource",
+          "clientSource"
         ],
       },
       {
@@ -49,6 +55,7 @@ const formConfig: FormConfig = {
           "packageName",
           "joiningDate",
           "endDate",
+          "sessions",
           "packagePrice",
           "discount",
           "discountAmount",
@@ -92,18 +99,26 @@ const formConfig: FormConfig = {
       },
     ],
     fields: [
-      {
-        name: "memberId",
-        label: "Member ID",
-        type: "number",
-        validation: {
-          min: 1,
-        }
-      },
+        {
+          name: "invoiceId",
+          label: "Invoice ID",
+          type: "text",
+          placeholder: "Invoice ID",
+          required: true,
+          defaultValue: generateInvoiceId(),
+        },
+        {
+          name: "memberId",
+          label: "Member ID",
+          type: "number",
+          validation: {
+            min: 1,
+          }
+        },
       {
         name: "invoiceDate",
         label: "Invoice Date",
-        type: "date",
+        type: "custom-date",
         placeholder: "Invoice Date",
       },
       {
@@ -152,17 +167,22 @@ const formConfig: FormConfig = {
       {
         name: "contactNumber",
         label: "Contact Number",
-        type: "select",
-        placeholder: "Select Contact Number",
+        type: "text",
+        placeholder: "Contact Number",
         required: true,
-        editable: false,
+        editable: true,
+        validation: {
+          pattern: "^\\d{10}$",
+          minLength: 10,
+          maxLength: 10
+        },
         dependsOn: {
           field: "clientName",
           formula: (values, options) => {
             const contactNumber = options?.find(
               (opt) => opt.value === values.clientName
             )?.contactNumber;
-            return contactNumber || ''
+            return contactNumber ? String(contactNumber) : (values.contactNumber || "");
           },
         }
       },
@@ -175,8 +195,19 @@ const formConfig: FormConfig = {
       {
         name: "email",
         label: "Email",
-        type: "email",
+        type: "select",
         placeholder: "Email",
+        required: true,
+        editable: false,
+        dependsOn: {
+          field: "clientName",
+          formula: (values, options) => {
+            const email = options?.find(
+              (opt) => opt.value === values.clientName
+            )?.email;
+            return email || '';
+          },
+        },
       },
       {
         name: "clientSource",
@@ -210,25 +241,25 @@ const formConfig: FormConfig = {
           },
         ],
         type: "select",
-        placeholder: "Select gender",
+        placeholder: "Select Gender",
       },
       {
         name: "birthday",
-        label: "Birthday",
+        label: "Date of Birth",
         type: "date",
-        placeholder: "birthday date",
+        placeholder: "Birthday Date",
       },
       {
         name: "anniversary",
         label: "Anniversary",
         type: "date",
-        placeholder: "anniversary date",
+        placeholder: "Anniversary Date",
       },
       {
         name: "profession",
         label: "Profession",
         type: "text",
-        placeholder: "profession",
+        placeholder: "Profession",
       },
       {
         name: "taxId",
@@ -240,17 +271,17 @@ const formConfig: FormConfig = {
         name: "workoutHourmorning",
         label: "Workout Hours",
         type: "time-detailed",
-        placeholder: "choose workout hour",
+        placeholder: "Choose Workout Hour",
       },
       {
         name: "workoutHourevening",
         label: "",
         type: "time-detailed",
-        placeholder: "choose workout hour",
+        placeholder: "Choose Workout Hour",
       },
       {
         name: "address",
-        placeholder: "address",
+        placeholder: "Address",
         label: "Area Address",
         type: "textarea",
         validation: {
@@ -275,7 +306,7 @@ const formConfig: FormConfig = {
         name: "joiningDate",
         label: "Joining Date",
         type: "date",
-        placeholder: "joining date",
+        placeholder: "Joining Date",
       },
       {
         name: "packageName",
@@ -306,22 +337,32 @@ const formConfig: FormConfig = {
         name: "endDate",
         label: "End Date",
         type: "date",
-        placeholder: "end date",
+        placeholder: "End Date",
         dependsOn: {
           field: "packageName,joiningDate",
           formula: (values, options) => {
+
+            // Get the selected package from options
             const packageDetails = options?.find(
               (opt) => opt.value === values.packageName
             );
-            const totalDurationOfPackageInDays =
-              packageDetails?.durationInDays || 0;
-            const joiningDate = values.joiningDate
-              ? new Date(values.joiningDate)
-              : new Date();
-  
+            if (!packageDetails) {
+              console.log("⚠️ No package matched");
+            }
+
+            const totalDurationInDays = packageDetails?.durationInDays || 0;
+
+            let joiningDate = new Date();
+            if (values.joiningDate) {
+              const jd = Number(values.joiningDate);
+              joiningDate = jd > 1000000000 ? new Date(jd * 1000) : new Date(jd);
+            }
+
             const endDate = new Date(joiningDate);
-            endDate.setDate(joiningDate.getDate() + totalDurationOfPackageInDays);
-            return formatTimestamp(Math.floor(endDate.getTime() / 1000));
+            endDate.setDate(joiningDate.getDate() + totalDurationInDays);
+        
+            const formattedEndDate = formatTimestamp(Math.floor(endDate.getTime() / 1000));
+            return formattedEndDate;
           },
         },
       },
@@ -329,7 +370,7 @@ const formConfig: FormConfig = {
         name: "packagePrice",
         label: "Price",
         type: "decimal",
-        placeholder: "price",
+        placeholder: "Price",
         editable: false,
         dependsOn: {
           field: "packageName",
@@ -342,57 +383,72 @@ const formConfig: FormConfig = {
         name: "discount",
         label: "Discount(%)",
         type: "decimal",
-        placeholder: "discount",
+        placeholder: "Discount Percentage",
+        editable: true,
         validation: {
           max: 100,
           min: 0,
         },
         dependsOn: {
-          field: "packagePrice,discountAmount,packageName",
+          field: "packageName,packagePrice,discountAmount",
           formula: (values, options) => {
             const packagePrice: number = parseFloat(values.packagePrice) || 0;
-            const userDiscount: number = parseFloat(values.discount) || 0;
+            const discountAmount: number = parseFloat(values.discountAmount);
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
-                ?.maxDiscount || 0;
-  
-            if (packagePrice) {
-              const maxDiscountPercentage = (maxDiscount / packagePrice) * 100;
+                ?.maxDiscount || 999999; // Default high value if no max discount
+
+            // If user is editing discount amount, calculate percentage from amount
+            if (packagePrice > 0 && values.discountAmount !== undefined && values.discountAmount !== null && values.discountAmount !== '') {
+              const calculatedPercentage = Math.round((discountAmount / packagePrice * 100) * 100) / 100;
+              const maxPercentage = maxDiscount < 999999 ? Math.round((maxDiscount / packagePrice * 100) * 100) / 100 : 100;
+              return Math.min(calculatedPercentage, maxPercentage).toFixed(2);
+            }
+
+            // Otherwise, validate the entered percentage
+            const userDiscount: number = parseFloat(values.discount) || 0;
+            if (packagePrice > 0 && maxDiscount < 999999) {
+              const maxDiscountPercentage = Math.round((maxDiscount / packagePrice * 100) * 100) / 100;
               if (userDiscount > maxDiscountPercentage) {
                 showToast(
-                  "info",
-                  `Max discount percentage is ${maxDiscountPercentage}`
+                  "warning",
+                  `Max discount percentage is ${maxDiscountPercentage.toFixed(2)}%`
                 );
-                return maxDiscountPercentage;
+                return maxDiscountPercentage.toFixed(2);
               }
-              return userDiscount;
-            } else {
-              return userDiscount;
             }
+            return userDiscount.toFixed(2);
           },
         },
       },
       {
         name: "discountAmount",
-        label: "Discount",
+        label: "Discount Amount",
         type: "decimal",
-        placeholder: "discount amount",
-        editable: false,
+        placeholder: "Discount Amount",
+        editable: true,
         dependsOn: {
           field: "packagePrice,discount,packageName",
           formula: (values, options) => {
             const packagePrice: number = parseFloat(values.packagePrice) || 0;
-            const discount: number = parseFloat(values.discount) || 0;
+            const discount: number = parseFloat(values.discount);
             const maxDiscount: number =
               options?.find((opt) => opt.value === values.packageName)
-                ?.maxDiscount || 0;
-            if ((packagePrice * discount) / 100 > maxDiscount)
-              showToast("info", `Max Discount is ${maxDiscount}`, {
-                toastId: "019411cb-5477-7a10-869e-cedb19af7489",
-              });
-            return Math.min((packagePrice * discount) / 100, maxDiscount).toFixed(
-              2
-            );
+                ?.maxDiscount || 999999; // Default high value if no max discount
+
+            // Always calculate discount amount from percentage when discount field has a value (including 0)
+            if (packagePrice > 0 && values.discount !== undefined && values.discount !== null && values.discount !== '') {
+              const calculatedAmount = Math.round((packagePrice * discount / 100) * 100) / 100;
+              return Math.min(calculatedAmount, maxDiscount);
+            }
+
+            // Allow manual entry only when no percentage is set
+            const userDiscountAmount: number = parseFloat(values.discountAmount) || 0;
+            if (userDiscountAmount > maxDiscount && maxDiscount < 999999) {
+              showToast("warning", `Max discount amount is ₹${maxDiscount}`);
+              return maxDiscount;
+            }
+            return userDiscountAmount;
           },
         },
       },
@@ -400,14 +456,14 @@ const formConfig: FormConfig = {
         name: "admissionCharges",
         label: "Admission Charges",
         type: "decimal",
-        placeholder: "admission",
+        placeholder: "Admission",
       },
       {
         name: "taxName",
         label: "Tax",
         options: [],
         type: "select",
-        placeholder: "Select tax",
+        placeholder: "Select Tax",
         allowAddCustomOption: true,
         customAddOptionsGroups: ["default"],
         addCustomOptionForm: {
@@ -426,7 +482,7 @@ const formConfig: FormConfig = {
         label: "Amount Payable",
         type: "decimal",
         editable: false,
-        placeholder: "payable",
+        placeholder: "Payable",
         dependsOn: {
           field:
             "packageName, packagePrice,discountAmount,discount,admissionCharges,taxName",
@@ -451,14 +507,14 @@ const formConfig: FormConfig = {
         name: "amountPaid",
         label: "Amount Paid",
         type: "decimal",
-        placeholder: "paid",
+        placeholder: "Paid",
       },
       {
         name: "paymentMode",
         label: "Payment Mode",
         options: [],
         type: "select",
-        placeholder: "Select method",
+        placeholder: "Select Method",
         conditionalFields: {
           Cheque: chequeConditionalFields,
         },
@@ -479,7 +535,7 @@ const formConfig: FormConfig = {
         name: "balanceAmount",
         label: "Balance",
         type: "decimal",
-        placeholder: "paid",
+        placeholder: "Paid",
         editable: false,
         dependsOn: {
           field: "amountPayable, amountPaid",
@@ -500,10 +556,16 @@ const formConfig: FormConfig = {
         },
       },
       {
+        name: "sessions",
+        label: "Session(s)",
+        type: "text",
+        placeholder: "Sessions",
+      },
+      {
         name: "amount",
         label: "Amount",
         type: "decimal",
-        placeholder: "amount",
+        placeholder: "Amount",
         editable: false,
         dependsOn: {
           field: "amountPayable, amountPaid",
@@ -547,7 +609,7 @@ const formConfig: FormConfig = {
         name: "clientRepresentative",
         label: "Client Representative",
         type: "text",
-        placeholder: "rep",
+        placeholder: "Rep",
         editable: false,
       },
       {

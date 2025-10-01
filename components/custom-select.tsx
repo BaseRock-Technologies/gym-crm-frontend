@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,7 @@ interface CustomSelectProps {
   placeholder?: string;
   allowAddCustomOption?: boolean;
   addCustomOptionForm?: Record<string, FormConfig>;
+  onDeleteOption?: (optionId: string) => void;
   onAddCustomOption?: (
     fieldName: string,
     fields: string[],
@@ -66,6 +67,7 @@ export function CustomSelect({
   allowAddCustomOption,
   addCustomOptionForm,
   onAddCustomOption,
+  onDeleteOption,
   error,
   disabled,
   apiData,
@@ -179,16 +181,30 @@ export function CustomSelect({
                             onChange(option.value);
                             setOpen(false);
                           }}
+                          className="flex justify-between items-center"
                         >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              value === option.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {option.label}
+                          <div className="flex items-center">
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                value === option.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {option.label}
+                          </div>
+                          {fieldName === "sourceOfInquiry" && onDeleteOption && option.id && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteOption(option.id as string);
+                              }}
+                              className="ml-2 text-red-500 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
                         </CommandItem>
                       ))}
                   </CommandGroup>

@@ -1,8 +1,8 @@
-import PersonalTrainingBillWithId from "@/components/bills/PersonalTrainingBillWithId";
+import GroupClassBillWithId from "@/components/bills/GroupClassBillWithId";
 import React from "react";
 
 const page = () => {
-  return <PersonalTrainingBillWithId />;
+  return <GroupClassBillWithId />;
 };
 
 export default page;

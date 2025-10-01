@@ -110,7 +110,10 @@ const PersonalTrainingBillWithId = ({}) => {
         );
         if (billDetails.status === "success" && billDetails.data) {
           const { data } = billDetails;
-
+          // Convert contactNumber to string for frontend
+          if (data.contactNumber !== undefined && data.contactNumber !== null) {
+            data.contactNumber = String(data.contactNumber);
+          }
           // const dateFields = formConfig.fields
           //   .filter((field) => field.type === "date")
           //   .map((field) => field.name);

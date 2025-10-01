@@ -103,13 +103,15 @@ export function TableFilters({
         })}
         {components.map((component) => component)}
       </div>
-      <div className="relative flex flex-wrap justify-between items-center gap-4 max-[440px]:w-full">
+      <div className="relative flex flex-wrap justify-start items-center gap-4 max-[440px]:w-full w-full">
         {hasSearchFilter && (
-          <AnimatedSearchInput
-            key={hasSearchFilter.id}
-            searchableColumns={searchableColumns}
-            onSearch={(value) => onFilterChange(hasSearchFilter.id, value)}
-          />
+          <div className="flex-grow">
+            <AnimatedSearchInput
+              key={hasSearchFilter.id}
+              searchableColumns={searchableColumns}
+              onSearch={(value) => onFilterChange(hasSearchFilter.id, value)}
+            />
+          </div>
         )}
         {ctaActions && ctaActions.length > 0 && (
           <div className="relative flex flex-wrap sm:gap-4 gap-2 justify-center items-center ml-auto">

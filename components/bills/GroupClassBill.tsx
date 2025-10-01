@@ -37,6 +37,7 @@ const additionalFormFieldsToAdd: AddtionalFormFieldsConfig = {
       label: "Session(s)",
       type: "text",
     },
+     
   ],
 };
 

@@ -76,27 +76,27 @@ const QuickManage = () => {
             iconColor="text-purple-500"
             bgColor="bg-purple-100"
           />
-          <StatCard
+          {/* <StatCard
             title="Total Expenses"
             value="0"
             icon={DollarSign}
             iconColor="text-pink-500"
             bgColor="bg-pink-100"
-          />
-          <StatCard
+          /> */}
+          {/* <StatCard
             title="Total PT Collection"
             value="0"
             icon={Coins}
             iconColor="text-yellow-500"
             bgColor="bg-yellow-100"
-          />
-          <StatCard
+          /> */}
+          {/* <StatCard
             title="Profit/Loss"
             value="0.00"
             icon={DollarSign}
             iconColor="text-red-500"
             bgColor="bg-red-100"
-          />
+          /> */}
           <StatCard
             title="Pending Inquiry(s)"
             value="0"
@@ -118,13 +118,13 @@ const QuickManage = () => {
             iconColor="text-blue-500"
             bgColor="bg-blue-100"
           />
-          <StatCard
+          {/* <StatCard
             title="Booked PT Sessions"
             value="0"
             icon={Dumbbell}
             iconColor="text-cyan-500"
             bgColor="bg-cyan-100"
-          />
+          /> */}
           <StatCard
             title="Follow-ups"
             value="0"
@@ -132,20 +132,20 @@ const QuickManage = () => {
             iconColor="text-rose-500"
             bgColor="bg-rose-100"
           />
-          <StatCard
+          {/* <StatCard
             title="Today Present Client"
             value="0"
             icon={UserCog}
             iconColor="text-indigo-500"
             bgColor="bg-indigo-100"
-          />
-          <StatCard
+          /> */}
+          {/* <StatCard
             title="Booked Group Class"
             value="0"
             icon={UsersRound}
             iconColor="text-violet-500"
             bgColor="bg-violet-100"
-          />
+          /> */}
         </div>
       </div>
       <div className="flex-1 space-y-6">
@@ -164,6 +164,7 @@ const QuickManage = () => {
             iconColor="text-green-500"
             bgColor="bg-green-100"
             linkTo="/manage-query"
+
           />
           <QuickNavCardWithTrigger
             title="Create Client"
@@ -192,21 +193,21 @@ const QuickManage = () => {
             icon={Users}
             iconColor="text-red-500"
             bgColor="bg-red-100"
-            linkTo="/dashboard"
+            linkTo="/gym-bill"
           />
           <QuickNavCard
             title="Add Training Plan"
             icon={Users}
             iconColor="text-orange-500"
             bgColor="bg-orange-100"
-            linkTo="/dashboard"
+            linkTo="/personal-training-bill"
           />
           <QuickNavCard
             title="Add Diet Plan"
             icon={Users}
             iconColor="text-emerald-500"
             bgColor="bg-emerald-100"
-            linkTo="/dashboard"
+            linkTo="/client-forms"
           />
           {/* <QuickNavCard
             title="Send bulk SMS"
@@ -215,6 +216,7 @@ const QuickManage = () => {
             bgColor="bg-blue-100"
             linkTo="/dashboard"
           /> */}
+
         </div>
       </div>
     </div>

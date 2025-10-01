@@ -28,16 +28,18 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "^3.6.0",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "lucide-react": "^0.462.0",
-    "next": "15.0.3",
-    "react": "19.0.0-rc-66855b96-20241106",
+    "next": "^15.4.5",
+    "react": "^18.3.1",
+    "react-datepicker": "^8.7.0",
     "react-day-picker": "^8.10.1",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.0",
     "react-toastify": "^10.0.6",
+    "sharp": "^0.34.3",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.1"
@@ -51,5 +53,8 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "overrides": {
+    "simple-swizzle": "0.2.2"
   }
 }

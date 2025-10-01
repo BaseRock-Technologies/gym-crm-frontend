@@ -1,40 +1,37 @@
 "use client";
+import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
 import { post, updateFormConfigOptions } from "@/lib/helper/steroid";
 import { showToast } from "@/lib/helper/toast";
 import { SelectApiData } from "@/types/form";
 import { StatusResponse } from "@/types/query";
-import { formatTimestamp } from "@/utils/date-utils";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { DynamicForm } from "../dynamic-form";
+import React from "react";
 import { formConfig } from "./constant";
 
-const GymMembershipBillWithId = () => {
+const GroupClassBillWithId = () => {
   const { id } = useParams();
-  const [initialData, setInitialData] = useState<Record<string, any> | null>(
-    null
-  );
   const { user } = useAuth();
+  const [initialData, setInitialData] = React.useState<Record<string, any> | null>(null);
 
   const apiConfig: SelectApiData = {
-    apiPath: `bills/update`,
+    apiPath: "bills/update",
     method: "PATCH",
-    billType: "gym-membership",
-    postData: {
-      billId: id,
-    },
+    billType: "group-class",
+    postData: { billId: id },
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const billSelectOptions: StatusResponse = await post(
-          { billType: "gym-membership" },
+        // 1. Fetch options
+        const res: StatusResponse = await post(
+          { billType: "group-class" },
           "bills/options",
           "Failed to fetch bill options"
         );
-        if (billSelectOptions.status === "success" && billSelectOptions.data) {
+
+        if (res.status === "success" && res.data) {
           const {
             billId,
             clientDetails,
@@ -43,7 +40,7 @@ const GymMembershipBillWithId = () => {
             taxDetails,
             paymentMethod,
             trainersDetails,
-          } = billSelectOptions.data;
+          } = res.data;
 
           const membeIdField = formConfig.fields.find(
             (field) => field.name === "memberId"
@@ -98,41 +95,38 @@ const GymMembershipBillWithId = () => {
             "trainer"
           );
         }
-        if (billSelectOptions.status === "error") {
-          showToast("error", billSelectOptions.message);
+
+        if (res.status === "error") {
+          showToast("error", res.message);
           return;
         }
+
+        // 2. Fetch bill details
         const billDetails: StatusResponse = await post(
-          { billType: "gym-membership", billId: id },
-          `bills/details`,
+          { billType: "group-class", billId: id },
+          "bills/details",
           "Failed to fetch bill details"
         );
+
         if (billDetails.status === "success" && billDetails.data) {
           const { data } = billDetails;
-          // Convert contactNumber to string for frontend
+
+          // Ensure phone is string
           if (data.contactNumber !== undefined && data.contactNumber !== null) {
             data.contactNumber = String(data.contactNumber);
           }
 
-          // const dateFields = formConfig.fields
-          //   .filter((field) => field.type === "date")
-          //   .map((field) => field.name);
-
-          // dateFields.forEach((field) => {
-          //   if (data[field]) {
-          //     data[field] = formatTimestamp(data[field]);
-          //   }
-          // });
           setInitialData(data);
         }
       } catch (error) {
-        console.error("Error fetching data in Gym Packgae Bill:", error);
+        console.error("Error fetching data in Group Class Bill:", error);
         showToast("error", "Failed to load data");
       }
     };
-    formConfig.title = "Update Gym Membership bill";
+
+    formConfig.title = "Update Group Class Bill";
     fetchInitialData();
-  }, [user]);
+  }, [user, id]);
 
   return (
     <div className="relative p-6 flex flex-col gap-6">
@@ -142,9 +136,10 @@ const GymMembershipBillWithId = () => {
         initialData={initialData}
         apiData={apiConfig}
         resetOnSubmit={false}
+        isAdminOnly={true}
       />
     </div>
   );
 };
 
-export default GymMembershipBillWithId;
+export default GroupClassBillWithId;

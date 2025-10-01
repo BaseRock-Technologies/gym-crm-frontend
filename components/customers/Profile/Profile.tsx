@@ -1,5 +1,8 @@
+
+
 import { useParams } from "next/navigation";
 import React from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { profileFormConfig } from "../constants";
 import { DynamicForm } from "@/components/dynamic-form";
 import { useAuth } from "@/lib/context/authContext";
@@ -33,7 +36,8 @@ const Profile = () => {
           "Failed to fetch profile"
         );
         if (res.status === "success" && res.data) {
-          setInitialData(res.data);
+          // Add 1 second delay for better loader experience
+          setTimeout(() => setInitialData(res.data), 1000);
         }
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -44,6 +48,14 @@ const Profile = () => {
     fetchInitialData();
   }, [user]);
 
+  if (!initialData) {
+    return (
+      <div className="flex flex-col justify-center items-center h-60">
+        <Spinner />
+        <span className="mt-4 text-gray-500 text-lg font-medium animate-pulse">Loading profile...</span>
+      </div>
+    );
+  }
   return (
     <div className="relative p-6 flex flex-col gap-6">
       <DynamicForm
