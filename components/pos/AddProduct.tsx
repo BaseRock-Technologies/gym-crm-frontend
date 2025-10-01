@@ -33,7 +33,7 @@ export function AddProduct({
       ? value
       : [
           {
-            id: crypto.randomUUID(),
+            id: typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
             label: "",
             value: "",
             price: "0",
@@ -57,7 +57,7 @@ export function AddProduct({
 
   const handleAddProduct = () => {
     const newProduct: SelectOption = {
-      id: crypto.randomUUID(),
+      id: typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       label: "",
       value: "",
       price: "0",
