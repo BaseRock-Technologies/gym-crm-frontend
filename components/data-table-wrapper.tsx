@@ -104,7 +104,9 @@ export function DataTableWrapper({
           (item: any) => item.type.toLowerCase() === tableState.filters.type
         );
       }
-
+      filtered = filtered.sort(
+        (a: any, b: any) => (a.clientId ?? 0) - (b.clientId ?? 0)
+      );
       return {
         data: filtered,
         total: data.totalData,
