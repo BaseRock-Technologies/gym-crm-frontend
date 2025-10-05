@@ -42,7 +42,7 @@ export function DataTableWrapper({
   const [tableState, setTableState] = useState<TableState>({
     page: 1,
     pageSize: 10,
-    filters,
+    filters:{},
     sorting: [],
   });
   const [pageData, setPageData] = useState<Record<number, PageData>>({});
@@ -104,7 +104,9 @@ export function DataTableWrapper({
           (item: any) => item.type.toLowerCase() === tableState.filters.type
         );
       }
-
+      filtered = filtered.sort(
+        (a: any, b: any) => (a.clientId ?? 0) - (b.clientId ?? 0)
+      );
       return {
         data: filtered,
         total: data.totalData,
@@ -144,6 +146,14 @@ export function DataTableWrapper({
       previousFiltersRef.current = currentFilters;
       return;
     }
+
+    const handleRefresh = () => {
+      setPageData({});
+      fetchData();
+    };
+
+    window.addEventListener("refreshInquiries", handleRefresh);
+
 
     // Check if data is already cached for current page
     if (pageData[currentPage]) {

@@ -14,16 +14,20 @@ import {
 
 interface DatePickerWithRangeProps {
   onValueChange: (value: DateRange | undefined) => void;
+  initialDate?: DateRange | null;
 }
 
 export function DatePickerWithRange({
   className,
   onValueChange,
+  initialDate,
 }: DatePickerWithRangeProps & React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    to: new Date(),
-  });
+  const [date, setDate] = React.useState<DateRange | undefined>(
+    initialDate && initialDate.from && initialDate.to
+      ? initialDate
+      : undefined
+  );
+
 
   const handleDateChange = (newDate: DateRange | undefined) => {
     setDate(newDate);

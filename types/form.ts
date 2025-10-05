@@ -53,6 +53,7 @@ export interface SelectApiData {
   method: ApiMethod,
   billType?: BillTypes,
   postData?: Record<string, any>
+  onSuccess?: () => void; 
 }
 
 interface FieldsForm {

@@ -33,7 +33,7 @@ export function AddProduct({
       ? value
       : [
           {
-            id: crypto.randomUUID(),
+            id: typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
             label: "",
             value: "",
             price: "0",
@@ -57,7 +57,7 @@ export function AddProduct({
 
   const handleAddProduct = () => {
     const newProduct: SelectOption = {
-      id: crypto.randomUUID(),
+      id: typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       label: "",
       value: "",
       price: "0",
@@ -102,7 +102,7 @@ export function AddProduct({
             const productSalesPrice = selectedProduct.productSalesPrice ?? "0";
             updatedProduct.label = `${
               selectedProduct.label
-            }-${crypto.randomUUID()}`;
+            }-${typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`;
             updatedProduct.value = selectedProduct.value;
             updatedProduct.price = productSalesPrice;
             updatedProduct.quantity = "1";
@@ -124,7 +124,7 @@ export function AddProduct({
       acc[field] = value[index];
       return acc;
     }, {} as Record<string, string>);
-    const id = crypto.randomUUID();
+    const id = typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
     const newProduct: SelectOption = {
       id,
       label: `${fieldsObject.productName}-${id}`,
