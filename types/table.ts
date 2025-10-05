@@ -105,8 +105,8 @@ export interface FilterConfig {
   label: string;
   type: "select" | "search" | "date" | "date-range";
   dateRange?: {
-    from: Date;
-    to: Date;
+    from?: Date;
+    to?: Date;
   };
   options?: GroupedSelectOption[] | [];
 }

@@ -771,6 +771,7 @@ export function DynamicForm({
       let res: StatusResponse;
       if (data.method === "POST" && postData) {
         res = await post(postData, data.apiPath);
+        data.onSuccess?.();
       } else if (data.method === "GET") {
         res = await get(data.apiPath, "Failed to process data");
       } else if (data.method === "PATCH" && postData) {

@@ -100,7 +100,12 @@ export default function InquiryHome() {
           <DynamicForm
             config={InquiryFormConfig}
             submitBtnText="CREATE INQUIRY"
-            apiData={apiConfig}
+            apiData={{
+              ...apiConfig,
+              onSuccess: () => {
+                window.dispatchEvent(new Event("refreshInquiries"));
+              }}
+            }
             resetOnSubmit={true}
             initialData={inquiryFormInitialData}
           />

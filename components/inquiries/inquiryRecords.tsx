@@ -7,7 +7,8 @@ import React, { SetStateAction } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { SelectApiData, SelectOption } from "@/types/form";
 import { FilterOptions } from "./types";
-
+import { post } from "@/lib/helper/steroid";
+import { showToast } from "@/lib/helper/toast";
 interface InquiryRecordsProps {
   setSelectedRow: React.Dispatch<SetStateAction<Record<string, boolean>>>;
 }
@@ -37,7 +38,30 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({ setSelectedRow }) => {
       {
         id: "delete",
         label: "Delete",
-        onClick: (row) => console.log("Delete", row),
+        onClick:async (row)=> {
+          try {
+            if (!row || !row._id) {
+              throw new Error();
+            }
+
+            const response = await post(
+              {},
+              `inquiry/delete/${row._id}`,
+              "Failed to delete followup"
+            );
+
+            if (response.status === "success") {
+              showToast("success", "Followup deleted successfully");
+              window.dispatchEvent(new Event("refreshInquiries"));
+            } else {
+              showToast("error", "Failed to delete followup");
+            }
+          } catch (err){
+            console.log(err)
+            showToast("error", "Failed to delete followup");
+          }
+        }
+        
       },
     ],
     filters: [
@@ -103,8 +127,8 @@ const InquiryRecords: React.FC<InquiryRecordsProps> = ({ setSelectedRow }) => {
         label: "Pick a date",
         type: "date-range",
         dateRange: {
-          from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          to: new Date(),
+          from: undefined,
+          to: undefined
         },
       },
     ],
