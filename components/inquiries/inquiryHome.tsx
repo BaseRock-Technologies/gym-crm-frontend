@@ -67,7 +67,7 @@ export default function InquiryHome() {
           );
           updateFormConfigOptions(
             InquiryFormConfig,
-            "inquiryFor",
+            "packageName",
             packageDetails,
             "package"
           );

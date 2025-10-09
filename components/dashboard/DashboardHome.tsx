@@ -24,7 +24,7 @@ const DashboardHome = () => {
             <TabsTrigger value="quick-manage">Quick Manage</TabsTrigger>
             <TabsTrigger value="follow-ups">Follow-Ups</TabsTrigger>
             <TabsTrigger value="pending-inquiries">
-              Pending Inquiries
+              Pending Enquiries
             </TabsTrigger>
             <TabsTrigger value="pending-payments">Pending Payments</TabsTrigger>
             <TabsTrigger value="upcoming-renewals">

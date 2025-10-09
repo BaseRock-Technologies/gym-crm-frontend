@@ -109,7 +109,7 @@ export default function PendingInquiries() {
   return (
     <Card className="w-full h-auto mx-auto border-none rounded-md overflow-hidden shadow-none">
       <CardHeader className="bg-primary text-white mb-5 shadow-sm">
-        <CardTitle>Pending Inquiries</CardTitle>
+        <CardTitle>Pending Enquiries</CardTitle>
       </CardHeader>
       <CardContent className="container">
         <DataTableWrapper apiConfig={apiConfig} config={tableConfig} />
