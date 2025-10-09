@@ -98,7 +98,7 @@ const QuickManage = () => {
             bgColor="bg-red-100"
           /> */}
           <StatCard
-            title="Pending Inquiry(s)"
+            title="Pending Enquiry(s)"
             value="0"
             icon={MessageSquare}
             iconColor="text-orange-500"

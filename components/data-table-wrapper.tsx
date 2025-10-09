@@ -50,10 +50,16 @@ export function DataTableWrapper({
   const isFetchingRef = useRef(false);
   const previousFiltersRef = useRef(tableState.filters);
 
-  const getFilteredData = useCallback(async (): Promise<
-    PageData | undefined
-  > => {
+  const getFilteredData = useCallback(async (): Promise<PageData | undefined> => {
     if (isFetchingRef.current) {
+      return;
+    }
+
+    const dateFilter = tableState.filters["date-range"];
+    const hasFrom = dateFilter?.from;
+    const hasTo = dateFilter?.to;
+
+    if ((hasFrom && !hasTo) || (!hasFrom && hasFrom)) {
       return;
     }
 
@@ -70,12 +76,12 @@ export function DataTableWrapper({
             }
           : undefined,
       };
+
       delete payload.filters.search;
+
       const res: StatusResponse = await post(
         merge({}, apiConfig.postData, payload),
-        `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${
-          tableState.pageSize
-        }`
+        `${apiConfig.apiPath}?offset=${tableState.page - 1}&limit=${tableState.pageSize}`
       );
 
       if (res.status === "error") {
@@ -86,13 +92,9 @@ export function DataTableWrapper({
       }
 
       const { data } = res;
-
       let filtered = data.records;
 
-      if (
-        tableState.filters.employee &&
-        tableState.filters.employee !== "all"
-      ) {
+      if (tableState.filters.employee && tableState.filters.employee !== "all") {
         filtered = filtered.filter(
           (item: any) =>
             item.representative.toLowerCase() === tableState.filters.employee
@@ -104,9 +106,11 @@ export function DataTableWrapper({
           (item: any) => item.type.toLowerCase() === tableState.filters.type
         );
       }
+
       filtered = filtered.sort(
         (a: any, b: any) => (a.clientId ?? 0) - (b.clientId ?? 0)
       );
+
       return {
         data: filtered,
         total: data.totalData,

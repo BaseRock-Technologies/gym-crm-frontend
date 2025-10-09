@@ -194,8 +194,8 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           "default": ["clientSource", "_id"]
         },
       },
-      {
-        name: "inquiryFor",
+      {  
+        name: "packageName",
         label: "Inquiry For",
         options: [],
         type: "select",
@@ -209,9 +209,14 @@ import { EmployeeCustomAddOptionForm, ClientSourceCustomAddOptionForm, GroupClas
           "Group Class Package": GroupClassPackageCustomAddOptionForm,
         },
         primaryFieldValues: {
-          "GYM Packages": ["packageName"],
-          "PT Packages": ["packageName"],
-          "Group Class Package": ["packageName"],
+          "GYM Packages": ["packageName", "packagePrice"],
+          "PT Packages": ["packageName", "packagePrice"],
+          "Group Class Package": ["packageName", "packagePrice"]
+        },
+        fieldsToAddInOptions: {
+          durationInDays: ["packageName"],
+          packagePrice: ["packageName"],
+          maxDiscount: ["packageName"],
         },
         apiConfig: {
           apiPath: "package/create",
